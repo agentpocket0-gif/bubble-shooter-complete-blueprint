@@ -50,7 +50,11 @@ dimensions) — measurements, not files. Reason: `docs/LEGAL_AND_SCOPE.md`.
 | `assets/` walk with JSON/XML/plist/spritesheet/audio/font parsing | done |
 | Native `.so` symbols via `strings` / `nm -D` | done |
 | `classes*.dex` string analysis | done (via `strings`, not jadx — jadx needs a JVM heap the runner may not have; add it back if you want source-level output) |
-| Release publishing of the APK + all original assets (`v1.0-assets`) | **not included** — republishing a commercial app's package and assets is infringement; the workflow publishes analysis artifacts instead |
+| Release publishing of the APK + all original assets (`v1.0-assets`) | **replaced** by a private Actions artifact (`reference-extracted-tree`, 7-day retention, repo must be private). Nothing is published; the extracted tree stays inside your own private CI. |
+| Private reference extraction of `assets/` + `res/` | done — `reference-extracted-tree` artifact, see `rea_extract.yml` |
+| `.plist` spritesheet frame rectangles | done — `blueprint/reference/04_COMPLETE_ASSETS_CATALOG.md` §4.7 |
+| `.ogg`/`.wav` audio durations | done — same document, §4.8 |
+| Automated original asset + audio generator | done — `scripts/generate_original_assets.py` + `.github/workflows/generate_clean_assets.yml`, producing `Original_Polished_Game_Assets.zip` |
 | Commit `blueprint/` back to `main` | done, with rebase-and-retry |
 | Self-healing loop on workflow failure | partially: the workflow is idempotent, re-runnable, logs failures with `::error::`, and the scripts fail with explicit messages. Automatic re-trigger from a monitoring agent is not wired up — that needs an Actions token this session does not have |
 | Direct links to repo, all 5 files, release downloads | repo link provided; the 5 reference files appear after you run the workflow once with your package |

@@ -18,6 +18,7 @@ import json
 import re
 import subprocess
 import sys
+import wave
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -211,6 +212,64 @@ def parse_values(path: Path) -> list[tuple[str, str]]:
         if name:
             rows.append((name, val))
     return rows
+
+
+def plist_frames(path: Path) -> dict[str, str]:
+    """Frame name -> frame rectangle, from a TexturePacker/cocos2d XML plist."""
+    frames: dict[str, str] = {}
+    try:
+        root = ET.parse(path).getroot()
+    except Exception:  # noqa: BLE001
+        return frames
+    for node in root.iter("dict"):
+        kids = list(node)
+        for i in range(0, len(kids) - 1, 2):
+            if kids[i].tag != "key" or (kids[i].text or "") != "frames":
+                continue
+            fd = kids[i + 1]
+            if fd.tag != "dict":
+                continue
+            items = list(fd)
+            for j in range(0, len(items) - 1, 2):
+                if items[j].tag != "key":
+                    continue
+                name = items[j].text or ""
+                rect = None
+                info = items[j + 1]
+                if info.tag == "dict":
+                    kv = list(info)
+                    for k in range(0, len(kv) - 1, 2):
+                        if kv[k].tag == "key" and (kv[k].text or "") in ("frame", "textureRect"):
+                            rect = kv[k + 1].text
+                if name:
+                    frames[name] = rect or ""
+    return frames
+
+
+def audio_duration(path: Path) -> float | None:
+    """Best-effort duration in seconds for wav / ogg / opus / mp3."""
+    ext = path.suffix.lower()
+    try:
+        if ext == ".wav":
+            with wave.open(str(path)) as w:
+                return w.getnframes() / float(w.getframerate() or 1)
+        if ext in (".ogg", ".opus"):
+            with open(path, "rb") as fh:
+                fh.seek(max(0, path.stat().st_size - 65536))
+                blob = fh.read()
+            idx = blob.rfind(b"OggS")
+            if idx >= 0 and len(blob) >= idx + 14:
+                granule = int.from_bytes(blob[idx + 6:idx + 14], "little")
+                secs = granule / (48000.0 if ext == ".opus" else 44100.0)
+                # granule positions can be missing or sentinel values; reject nonsense
+                if 0 < secs < 3600:
+                    return secs
+                return None
+        if ext in (".mp3", ".m4a", ".aac"):
+            return path.stat().st_size * 8 / 128000.0   # 128 kbps assumption
+    except Exception:  # noqa: BLE001
+        return None
+    return None
 
 
 def walk(root: Path) -> list[dict]:
@@ -407,6 +466,27 @@ class Build:
                 continue
             grouped[str(Path(a["path"]).parent)].append(a)
         return dict(grouped)
+
+    def atlas_summary(self) -> list[tuple[str, int, list[tuple[str, str]]]]:
+        """(plist path, frame count, first few (frame name, rect)) for every spritesheet."""
+        out = []
+        for a in self.assets:
+            if a["ext"] != ".plist":
+                continue
+            frames = plist_frames(self.raw / "assets" / a["path"])
+            if frames:
+                sample = [(k, v) for k, v in list(frames.items())[:4] if v]
+                out.append((a["path"], len(frames), sample))
+        out.sort(key=lambda t: -t[1])
+        return out
+
+    def audio_table(self) -> list[tuple[str, int, float | None]]:
+        rows = []
+        for a in self.assets:
+            if a["ext"] in AUDIO_EXT:
+                rows.append((a["path"], a["size"],
+                             audio_duration(self.raw / "assets" / a["path"])))
+        return rows
 
     def sku_candidates(self) -> list[str]:
         found = set()
@@ -792,7 +872,32 @@ def doc_04(b: Build) -> str:
                       [[f"`{a['path']}`", human(a["size"])] for a in sheets], cap=150) if sheets
              else "_None found._\n")
 
-    s.append(h2("4.7", "How to use this catalog", "इस कैटलॉग का उपयोग कैसे करें"))
+    s.append(h2("4.7", "Sprite atlas frame rectangles", "स्प्राइट एटलस के फ़्रेम और उनके आयाम"))
+    atlases = b.atlas_summary()
+    if atlases:
+        s.append(f"{len(atlases)} atlas descriptor(s) parsed. Each row below is one `.plist`; the sample "
+                 "column shows the actual frame rectangles, which is how you learn the sprite grid "
+                 "(frame size, spacing, pivot) you need to match in your own atlas.\n")
+        s.append(md_table(
+            ["Atlas", "Frames", "Sample frame -> rectangle"],
+            [[f"`{p}`", n, "; ".join(f"{k}: {v}" for k, v in sample) or "-"]
+             for p, n, sample in atlases], cap=60))
+    else:
+        s.append("_No XML `.plist` atlases with frame data found. JSON atlases are reported in 4.6._\n")
+
+    s.append(h2("4.8", "Audio durations", "ऑडियो फ़ाइलों की असली अवधि"))
+    audio_rows = b.audio_table()
+    if audio_rows:
+        total = sum(r[1] for r in audio_rows)
+        s.append(f"{len(audio_rows)} audio file(s), {human(total)} total. Durations are read from the "
+                 "file headers (WAV exact, OGG from the granule position, MP3/M4A estimated).\n")
+        s.append(md_table(["Path", "Size", "Duration"],
+                          [[f"`{p}`", human(sz), f"{d:.2f} s" if d else "unknown"]
+                           for p, sz, d in audio_rows], cap=200))
+    else:
+        s.append("_No audio files found in `assets/`._\n")
+
+    s.append(h2("4.9", "How to use this catalog", "इस कैटलॉग का उपयोग कैसे करें"))
     s.append("Treat this as an **inventory of what exists**, not as a library you may ship. The art, "
              "audio and fonts belong to the original publisher. What transfers legitimately is the "
              "*knowledge*: target dimensions, density buckets, atlas granularity, audio format choice, "

@@ -102,6 +102,19 @@ string tables, and the ad/billing SDKs it can identify. Anything it cannot prove
 10. `10_APP_FLOW_A_TO_Z.md` — the whole app flow: every screen, every tap, first launch second by second,
     the life of one shot, popup priority, edge cases and flow acceptance tests
 
+## Generated asset pack (no APK needed)
+
+`scripts/generate_original_assets.py` draws and synthesises a complete original asset pack —
+142 sprites and 46 audio files — from the specs in `blueprint/original/`. Nothing is read from any APK.
+
+```bash
+python scripts/generate_original_assets.py --out generated_assets --ogg
+```
+
+Run it locally, or trigger **Generate original asset pack** in Actions, which packages
+`Original_Polished_Game_Assets.zip`, uploads it as an artifact and attaches it to the
+`v1.0-generated-assets` release. Preview: `generated_assets/_contact_sheet.png`.
+
 `docs/REQUIREMENT_COVERAGE.md` maps every item of the original brief to the file that covers it — including
 the items deliberately left out and why.
 

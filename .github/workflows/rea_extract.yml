@@ -130,6 +130,31 @@ jobs:
             work/package_meta.json
           retention-days: 30
 
+      # Private study material. Artifacts are visible only to people with access
+      # to this (private) repository - they are never published, and they expire.
+      - name: Upload extracted reference tree (private artifact)
+        if: steps.fetch.outputs.FOUND != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-extracted-tree
+          path: |
+            work/raw_apk/assets/
+            work/decoded_apk/res/
+            work/decoded_apk/AndroidManifest.xml
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Note on the reference artifact
+        if: steps.fetch.outputs.FOUND != ''
+        run: |
+          {
+            echo "### Reference tree artifact"
+            echo ""
+            echo "\`reference-extracted-tree\` holds the extracted \`assets/\` and \`res/\` from the package you supplied."
+            echo "It is downloadable only by people with access to this private repository and expires in 7 days."
+            echo "It is study material, not a licence: do not ship these files in your own build."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Commit blueprint back
         if: steps.fetch.outputs.FOUND != '' && github.event.inputs.commit_blueprint != 'false'
         run: |

@@ -1,0 +1,107 @@
+name: Generate original asset pack
+
+# Builds a 100% original, procedurally generated asset pack (sprites + audio)
+# from the specs in blueprint/original/. Nothing from any APK is used here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Attach the zip to release v1.0-generated-assets"
+        type: boolean
+        default: true
+  push:
+    paths:
+      - "scripts/generate_original_assets.py"
+      - ".github/workflows/generate_clean_assets.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-assets
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg zip >/dev/null
+          python -c "import PIL, numpy; print('pillow', PIL.__version__, 'numpy', numpy.__version__)"
+
+      - name: Generate assets
+        run: python scripts/generate_original_assets.py --out generated_assets --ogg
+
+      - name: Verify output
+        run: |
+          set -e
+          python - <<'PY'
+          import json, pathlib
+          m = json.loads(pathlib.Path("generated_assets/manifest.json").read_text())
+          c = m["counts"]
+          print(f"sprites={c['sprites']} audio={c['audio']} total={c['total']}")
+          assert c["sprites"] >= 100, "not enough sprites generated"
+          assert c["audio"] >= 40, "not enough audio generated"
+          missing = [f["path"] for f in m["files"]
+                     if not pathlib.Path("generated_assets", f["path"]).exists()]
+          assert not missing, f"manifest lists missing files: {missing[:5]}"
+          print("manifest verified")
+          PY
+
+      - name: Package
+        run: |
+          cd generated_assets && zip -qr ../Original_Polished_Game_Assets.zip . && cd ..
+          ls -la Original_Polished_Game_Assets.zip
+          unzip -l Original_Polished_Game_Assets.zip | tail -3
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Original_Polished_Game_Assets
+          path: |
+            Original_Polished_Game_Assets.zip
+            generated_assets/_contact_sheet.png
+            generated_assets/manifest.json
+          retention-days: 30
+
+      - name: Publish release
+        if: github.event.inputs.publish_release != 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view v1.0-generated-assets >/dev/null 2>&1 || \
+            gh release create v1.0-generated-assets \
+              --title "Original generated asset pack" \
+              --notes "Procedurally generated sprites and audio. 100% original, no third-party or extracted content."
+          gh release upload v1.0-generated-assets Original_Polished_Game_Assets.zip --clobber
+
+      - name: Job summary
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          m = json.loads(pathlib.Path("generated_assets/manifest.json").read_text())
+          c = m["counts"]
+          lines = ["### Original asset pack", "",
+                   f"- sprites: **{c['sprites']}**",
+                   f"- audio files: **{c['audio']}**",
+                   f"- total: **{c['total']}**",
+                   f"- size: **{pathlib.Path('Original_Polished_Game_Assets.zip').stat().st_size/1e6:.1f} MB**",
+                   "", "Preview: `generated_assets/_contact_sheet.png` in the artifacts.", ""]
+          pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a").write("\n".join(lines))
+          print("\n".join(lines))
+          PY
