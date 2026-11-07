@@ -1,0 +1,89 @@
+name: Build APK extractor
+
+# Builds the Android app in android/ and publishes the installable APK.
+# Everything here is our own code: no third-party assets, no extracted content.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android/**"
+      - ".github/workflows/build_apk.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Gradle 8.7
+        run: |
+          curl -sSL -o gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          sudo unzip -q gradle.zip -d /opt/gradle
+          echo "/opt/gradle/gradle-8.7/bin" >> "$GITHUB_PATH"
+          /opt/gradle/gradle-8.7/bin/gradle --version
+
+      - name: Show Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls "$ANDROID_HOME/platforms" 2>/dev/null | tail -5 || true
+
+      - name: Build debug APK
+        working-directory: android
+        run: gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Collect the APK
+        run: |
+          set -e
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/ApkExtractor.apk
+          ls -la out
+          python3 - <<'PY'
+          import pathlib
+          p = pathlib.Path("out/ApkExtractor.apk")
+          size = p.stat().st_size
+          print(f"APK size: {size/1024:.0f} KB")
+          assert size > 20000, "APK looks too small - the build probably did not run"
+          PY
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApkExtractor
+          path: out/ApkExtractor.apk
+          retention-days: 30
+
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view v1.0-apk-extractor >/dev/null 2>&1 || \
+            gh release create v1.0-apk-extractor \
+              --title "APK Extractor app" \
+              --notes "Installs on Android 10+. Pick an APK, tap extract, and every file inside is written to Download/ExtractedFiles/<name>/ as real folders. No network, nothing uploaded."
+          gh release upload v1.0-apk-extractor out/ApkExtractor.apk --clobber
+
+      - name: Job summary
+        run: |
+          {
+            echo "### APK built"
+            echo ""
+            echo "Download: **ApkExtractor.apk** from release \`v1.0-apk-extractor\` or from the artifacts of this run."
+          } >> "$GITHUB_STEP_SUMMARY"
