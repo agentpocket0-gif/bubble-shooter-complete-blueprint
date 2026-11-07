@@ -87,6 +87,10 @@ jobs:
         if: steps.fetch.outputs.FOUND != ''
         run: python scripts/analyze_apk.py --raw work/raw_apk --decoded work/decoded_apk --out blueprint/reference
 
+      - name: Build the measurement study sheet
+        if: steps.fetch.outputs.FOUND != ''
+        run: python scripts/study_sheet.py --raw work/raw_apk --decoded work/decoded_apk --out blueprint/reference
+
       - name: Verify the five documents are populated
         if: steps.fetch.outputs.FOUND != ''
         run: |

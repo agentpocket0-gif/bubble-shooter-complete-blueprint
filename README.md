@@ -66,6 +66,11 @@ prepare_package.py  → single APK or split XAPK/APKS bundle → merged raw tree
 analyze_apk.py      → static analysis → five documents + inventory CSV + JSON report
 ```
 
+`study_sheet.py` then writes `blueprint/reference/STUDY_SHEET.md` plus `sprite_measurements.csv` and
+`audio_measurements.csv` — sizes, alpha coverage, dominant palettes, transparent padding, audio length and
+loudness. Measurements only: no image or audio data is copied into the output, so the sheet is yours to keep
+and share while you draw the replacement art yourself.
+
 `analyze_apk.py` reads the decoded manifest, `res/values/*.xml`, every file under `assets/` (with image
 dimensions read from headers), level-shaped data files with their JSON schema, native library symbols and
 string tables, and the ad/billing SDKs it can identify. Anything it cannot prove is written as
