@@ -30,6 +30,11 @@
     margin-top: 10px; font-size: 15px;
   }
   .saveall:disabled { opacity: .45; }
+  .opt {
+    display: flex; gap: 10px; align-items: flex-start; margin-top: 12px;
+    color: var(--dim); font-size: 13px; line-height: 1.4;
+  }
+  .opt input { width: 22px; height: 22px; flex: 0 0 22px; margin: 0; accent-color: #f2c94c; }
   .bar {
     height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden;
     margin-top: 10px; display: none;
@@ -94,6 +99,7 @@
   <label class="pick" for="file">Choose file</label>
   <input id="file" type="file" multiple accept=".apk,.zip,.xapk,.apks,.obb,application/vnd.android.package-archive">
   <div class="row"><input id="q" type="search" placeholder="Filter by name, e.g. assets/ or .png"></div>
+  <label class="opt"><input type="checkbox" id="onlyassets" checked> Only the files worth studying (images, audio, data, fonts) — much smaller, downloads reliably</label>
   <button class="pick saveall" id="saveall" disabled>Download everything (one .zip file)</button>
   <a class="pick" id="savefinal" style="display:none;margin-top:10px;background:#46c98b"></a>
   <button class="pick" id="saveshare" style="display:none;margin-top:10px;background:#2d9cdb;border:0">Save with Android share sheet</button>
@@ -273,11 +279,19 @@ async function deflateRaw(bytes) {
  * with a lazy Blob slice. Nothing is decompressed, nothing is recompressed,
  * and the whole archive never has to sit in memory.
  */
-async function buildZip(archive, onProgress) {
+const KEEP_EXT = new Set(["png", "jpg", "jpeg", "webp", "gif", "bmp", "ogg", "mp3", "wav",
+  "m4a", "aac", "opus", "json", "xml", "plist", "csv", "txt", "atlas", "fnt", "ttf", "otf",
+  "dat", "lvl", "skel", "tmx", "yml", "yaml", "ini", "cfg", "md", "bin"]);
+const extOf = (n) => {
+  const m = n.match(/\.([a-z0-9]+)$/i);
+  return m ? m[1].toLowerCase() : "";
+};
+
+async function buildZip(archive, onProgress, onlyAssets = true) {
   const parts = [];
   const central = [];
   const enc = new TextEncoder();
-  const files = archive.entries.filter((e) => !e.dir);
+  const files = archive.entries.filter((e) => !e.dir && (!onlyAssets || KEEP_EXT.has(extOf(e.name))));
   const readAt = makeReader(archive.blob);
   let offset = 0;
   let skipped = 0;
@@ -542,8 +556,11 @@ $("saveall").addEventListener("click", async () => {
   const btn = $("saveall");
   const bar = $("bar");
   const fill = $("barfill");
-  const totalBytes = ARCHIVE.entries.reduce((a, e) => a + e.uncompSize, 0);
-  const count = ARCHIVE.entries.filter((e) => !e.dir).length;
+  const onlyAssets = $("onlyassets").checked;
+  const chosen = ARCHIVE.entries.filter((e) => !e.dir &&
+    (!onlyAssets || KEEP_EXT.has(extOf(e.name))));
+  const totalBytes = chosen.reduce((a, e) => a + e.uncompSize, 0);
+  const count = chosen.length;
   btn.disabled = true;
   btn.textContent = "Packing… please wait";
   bar.classList.add("on");
@@ -554,7 +571,7 @@ $("saveall").addEventListener("click", async () => {
       const pct = Math.round((done / all) * 100);
       fill.style.width = pct + "%";
       setStatus(`Copying ${done} / ${all} files — ${pct}%` + (skipped ? ` (${skipped} skipped)` : ""));
-    });
+    }, onlyAssets);
     fill.style.width = "100%";
     const url = URL.createObjectURL(zip);
 
