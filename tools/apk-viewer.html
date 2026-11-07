@@ -101,7 +101,7 @@
   <div class="row"><input id="q" type="search" placeholder="Filter by name, e.g. assets/ or .png"></div>
   <label class="opt"><input type="checkbox" id="onlyassets" checked> Only the files worth studying (images, audio, data, fonts) — much smaller, downloads reliably</label>
   <button class="pick saveall" id="saveall" disabled>Download everything (one .zip file)</button>
-  <a class="pick" id="savefinal" style="display:none;margin-top:10px;background:#46c98b"></a>
+  <div id="savelist" style="display:none"></div>
   <button class="pick" id="saveshare" style="display:none;margin-top:10px;background:#2d9cdb;border:0">Save with Android share sheet</button>
   <div id="status" class="status">No file loaded.</div>
   <div class="bar" id="bar"><i id="barfill"></i></div>
@@ -287,58 +287,7 @@ const extOf = (n) => {
   return m ? m[1].toLowerCase() : "";
 };
 
-async function buildZip(archive, onProgress, onlyAssets = true) {
-  const parts = [];
-  const central = [];
-  const enc = new TextEncoder();
-  const files = archive.entries.filter((e) => !e.dir && (!onlyAssets || KEEP_EXT.has(extOf(e.name))));
-  const readAt = makeReader(archive.blob);
-  let offset = 0;
-  let skipped = 0;
-
-  for (let i = 0; i < files.length; i++) {
-    const e = files[i];
-    let lh;
-    try {
-      lh = await readAt(e.offset, 30);
-    } catch {
-      skipped++;
-      continue;
-    }
-    if (u32(lh, 0) !== 0x04034b50) { skipped++; continue; }
-
-    const nameLen = u16(lh, 26);
-    const extraLen = u16(lh, 28);
-    const dataStart = e.offset + 30 + nameLen + extraLen;
-    const nameBytes = enc.encode(e.name);
-
-    const head = new Uint8Array(30 + nameBytes.length);
-    const dv = new DataView(head.buffer);
-    dv.setUint32(0, 0x04034b50, true);
-    dv.setUint16(4, 20, true);
-    dv.setUint16(6, 0x0800, true);          // UTF-8 names
-    dv.setUint16(8, e.method, true);        // same method as the source
-    dv.setUint16(10, 0, true);
-    dv.setUint16(12, 0x21, true);
-    dv.setUint32(14, e.crc >>> 0, true);
-    dv.setUint32(18, e.compSize, true);
-    dv.setUint32(22, e.uncompSize, true);
-    dv.setUint16(26, nameBytes.length, true);
-    dv.setUint16(28, 0, true);
-    head.set(nameBytes, 30);
-
-    parts.push(head);
-    parts.push(archive.blob.slice(dataStart, dataStart + e.compSize));   // lazy copy
-    central.push({ nameBytes, method: e.method, crc: e.crc >>> 0,
-                   compSize: e.compSize, uncompSize: e.uncompSize, offset });
-    offset += head.length + e.compSize;
-
-    if (onProgress && (i % 25 === 0 || i === files.length - 1)) {
-      onProgress(i + 1, files.length, skipped);
-    }
-    if (i % 250 === 249) await new Promise((r) => setTimeout(r, 0));
-  }
-
+function makePart(parts, central, dataSize) {
   let cdSize = 0;
   const cdParts = [];
   for (const c of central) {
@@ -365,7 +314,6 @@ async function buildZip(archive, onProgress, onlyAssets = true) {
     cdParts.push(b);
     cdSize += b.length;
   }
-
   const eocd = new Uint8Array(22);
   const dv = new DataView(eocd.buffer);
   dv.setUint32(0, 0x06054b50, true);
@@ -374,17 +322,96 @@ async function buildZip(archive, onProgress, onlyAssets = true) {
   dv.setUint16(8, Math.min(central.length, 0xFFFF), true);
   dv.setUint16(10, Math.min(central.length, 0xFFFF), true);
   dv.setUint32(12, cdSize, true);
-  dv.setUint32(16, offset, true);
+  dv.setUint32(16, dataSize, true);
   dv.setUint16(20, 0, true);
-
   return new Blob([...parts, ...cdParts, eocd], { type: "application/zip" });
+}
+
+/**
+ * Split the export into several independent archives, each under maxBytes.
+ * A phone browser often refuses to hand a single huge file to the download
+ * manager; several small files always download. Extract each into the same
+ * folder and the original tree is rebuilt.
+ */
+async function buildZipParts(archive, onProgress, onlyAssets = true,
+                             maxBytes = 45 * 1024 * 1024) {
+  const enc = new TextEncoder();
+  const files = archive.entries.filter(
+    (e) => !e.dir && (!onlyAssets || KEEP_EXT.has(extOf(e.name))));
+  const readAt = makeReader(archive.blob);
+  const out = [];
+  let parts = [];
+  let central = [];
+  let offset = 0;
+  let skipped = 0;
+
+  const flush = () => {
+    if (!central.length) return;
+    out.push(makePart(parts, central, offset));
+    parts = [];
+    central = [];
+    offset = 0;
+  };
+
+  for (let i = 0; i < files.length; i++) {
+    const e = files[i];
+    let lh;
+    try {
+      lh = await readAt(e.offset, 30);
+    } catch {
+      skipped++;
+      continue;
+    }
+    if (u32(lh, 0) !== 0x04034b50) { skipped++; continue; }
+
+    const nameLen = u16(lh, 26);
+    const extraLen = u16(lh, 28);
+    const dataStart = e.offset + 30 + nameLen + extraLen;
+    const nameBytes = enc.encode(e.name);
+
+    const head = new Uint8Array(30 + nameBytes.length);
+    const dv = new DataView(head.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);
+    dv.setUint16(6, 0x0800, true);
+    dv.setUint16(8, e.method, true);
+    dv.setUint16(10, 0, true);
+    dv.setUint16(12, 0x21, true);
+    dv.setUint32(14, e.crc >>> 0, true);
+    dv.setUint32(18, e.compSize, true);
+    dv.setUint32(22, e.uncompSize, true);
+    dv.setUint16(26, nameBytes.length, true);
+    dv.setUint16(28, 0, true);
+    head.set(nameBytes, 30);
+
+    const size = head.length + e.compSize;
+    if (offset > 0 && offset + size > maxBytes) flush();
+
+    parts.push(head);
+    parts.push(archive.blob.slice(dataStart, dataStart + e.compSize));
+    central.push({ nameBytes, method: e.method, crc: e.crc >>> 0,
+                   compSize: e.compSize, uncompSize: e.uncompSize, offset });
+    offset += size;
+
+    if (onProgress && (i % 25 === 0 || i === files.length - 1)) {
+      onProgress(i + 1, files.length, skipped);
+    }
+    if (i % 250 === 249) await new Promise((r) => setTimeout(r, 0));
+  }
+  flush();
+  return out;
+}
+
+async function buildZip(archive, onProgress, onlyAssets = true) {
+  const parts = await buildZipParts(archive, onProgress, onlyAssets, Infinity);
+  return parts[0];
 }
 // ===CORE-END===
 
 // ---------------- UI ----------------
 const $ = (id) => document.getElementById(id);
 let ARCHIVE = null;
-let LAST_ZIP = null;
+let LAST_PARTS = null;
 let SHOWN = 0;
 const PAGE = 300;
 
@@ -537,14 +564,16 @@ $("q").addEventListener("input", () => { if (ARCHIVE) render(true); });
 // Fallback path: hand the file to Android's own save sheet, which writes
 // straight to Files/Drive and does not depend on Chrome's download manager.
 $("saveshare").addEventListener("click", async () => {
-  if (!LAST_ZIP) return;
+  if (!LAST_PARTS || !LAST_PARTS.length) return;
   try {
-    const file = new File([LAST_ZIP], "extracted-files.zip", { type: "application/zip" });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: "Extracted files" });
+    const files = LAST_PARTS.map((b, i) => new File([b],
+      LAST_PARTS.length === 1 ? "extracted-files.zip" : `extracted-part${i + 1}.zip`,
+      { type: "application/zip" }));
+    if (navigator.canShare && navigator.canShare({ files })) {
+      await navigator.share({ files, title: "Extracted files" });
       setStatus("Shared — choose Files or Drive to save it.", "ok");
     } else {
-      setStatus("This browser cannot share files. Use the green button instead.", "err");
+      setStatus("This browser cannot share files. Use the green buttons instead.", "err");
     }
   } catch (err) {
     setStatus("Share cancelled or failed: " + err.message, "err");
@@ -567,26 +596,37 @@ $("saveall").addEventListener("click", async () => {
   fill.style.width = "0%";
   setStatus(`Building one file from ${count} files (${fmt(totalBytes)}). Keep the screen on.`);
   try {
-    const zip = await buildZip(ARCHIVE, (done, all, skipped) => {
+    const parts = await buildZipParts(ARCHIVE, (done, all, skipped) => {
       const pct = Math.round((done / all) * 100);
       fill.style.width = pct + "%";
       setStatus(`Copying ${done} / ${all} files — ${pct}%` + (skipped ? ` (${skipped} skipped)` : ""));
     }, onlyAssets);
     fill.style.width = "100%";
-    const url = URL.createObjectURL(zip);
 
-    // No automatic click. A blocked programmatic download can swallow the
-    // next real tap too, so the user's own tap is the only trigger.
-    LAST_ZIP = zip;
-    const fin = $("savefinal");
-    fin.href = url;
-    fin.download = "extracted-files.zip";
-    fin.textContent = `Tap here to save  ${(zip.size / 1048576).toFixed(1)} MB`;
-    fin.style.display = "block";
+    LAST_PARTS = parts;
+    const box = $("savelist");
+    box.innerHTML = "";
+    parts.forEach((blob, i) => {
+      const a = document.createElement("a");
+      a.className = "pick";
+      a.style.background = "#46c98b";
+      a.style.marginTop = "10px";
+      a.href = URL.createObjectURL(blob);
+      a.download = parts.length === 1
+        ? "extracted-files.zip"
+        : `extracted-part${i + 1}-of-${parts.length}.zip`;
+      a.textContent = parts.length === 1
+        ? `Tap here to save  ${(blob.size / 1048576).toFixed(1)} MB`
+        : `Part ${i + 1} of ${parts.length}  —  ${(blob.size / 1048576).toFixed(1)} MB`;
+      box.appendChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1800000);
+    });
+    box.style.display = "block";
     $("saveshare").style.display = "block";
 
-    setTimeout(() => URL.revokeObjectURL(url), 1800000);
-    setStatus(`Ready — ${(zip.size / 1048576).toFixed(1)} MB. Tap the green button to save it.`, "ok");
+    const totalMB = parts.reduce((a, b) => a + b.size, 0) / 1048576;
+    setStatus(`Ready — ${parts.length} file(s), ${totalMB.toFixed(1)} MB total. ` +
+      `Tap each green button to save.`, "ok");
   } catch (err) {
     setStatus("Could not pack: " + err.message, "err");
   } finally {
