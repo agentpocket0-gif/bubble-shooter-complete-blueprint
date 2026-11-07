@@ -96,6 +96,7 @@
   <div class="row"><input id="q" type="search" placeholder="Filter by name, e.g. assets/ or .png"></div>
   <button class="pick saveall" id="saveall" disabled>Download everything (one .zip file)</button>
   <a class="pick" id="savefinal" style="display:none;margin-top:10px;background:#46c98b"></a>
+  <button class="pick" id="saveshare" style="display:none;margin-top:10px;background:#2d9cdb;border:0">Save with Android share sheet</button>
   <div id="status" class="status">No file loaded.</div>
   <div class="bar" id="bar"><i id="barfill"></i></div>
 </header>
@@ -121,6 +122,30 @@ async function readRange(blob, start, len) {
   if (start < 0 || len < 0) throw new Error("bad range");
   const buf = await blob.slice(start, start + len).arrayBuffer();
   return new Uint8Array(buf);
+}
+
+/**
+ * Windowed reader. Reading 30 bytes at a time from phone storage costs one
+ * storage round-trip per call, which is what made a 3,000-file export crawl.
+ * This caches a multi-megabyte window and serves small reads from memory, so a
+ * whole archive needs only a few dozen real reads.
+ */
+function makeReader(blob, windowSize = 4 * 1024 * 1024) {
+  let start = -1;
+  let buf = null;
+  return async function readAt(pos, len) {
+    if (buf && pos >= start && pos + len <= start + buf.length) {
+      return buf.subarray(pos - start, pos - start + len);
+    }
+    if (len > windowSize) {
+      return readRange(blob, pos, len);
+    }
+    const end = Math.min(blob.size, pos + windowSize);
+    buf = new Uint8Array(await blob.slice(pos, end).arrayBuffer());
+    start = pos;
+    if (len > buf.length) return readRange(blob, pos, len);
+    return buf.subarray(0, len);
+  };
 }
 
 /** Find and parse the End Of Central Directory record. */
@@ -253,6 +278,7 @@ async function buildZip(archive, onProgress) {
   const central = [];
   const enc = new TextEncoder();
   const files = archive.entries.filter((e) => !e.dir);
+  const readAt = makeReader(archive.blob);
   let offset = 0;
   let skipped = 0;
 
@@ -260,7 +286,7 @@ async function buildZip(archive, onProgress) {
     const e = files[i];
     let lh;
     try {
-      lh = await readRange(archive.blob, e.offset, 30);
+      lh = await readAt(e.offset, 30);
     } catch {
       skipped++;
       continue;
@@ -344,6 +370,7 @@ async function buildZip(archive, onProgress) {
 // ---------------- UI ----------------
 const $ = (id) => document.getElementById(id);
 let ARCHIVE = null;
+let LAST_ZIP = null;
 let SHOWN = 0;
 const PAGE = 300;
 
@@ -493,6 +520,23 @@ $("file").addEventListener("change", async (ev) => {
 
 $("q").addEventListener("input", () => { if (ARCHIVE) render(true); });
 
+// Fallback path: hand the file to Android's own save sheet, which writes
+// straight to Files/Drive and does not depend on Chrome's download manager.
+$("saveshare").addEventListener("click", async () => {
+  if (!LAST_ZIP) return;
+  try {
+    const file = new File([LAST_ZIP], "extracted-files.zip", { type: "application/zip" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "Extracted files" });
+      setStatus("Shared — choose Files or Drive to save it.", "ok");
+    } else {
+      setStatus("This browser cannot share files. Use the green button instead.", "err");
+    }
+  } catch (err) {
+    setStatus("Share cancelled or failed: " + err.message, "err");
+  }
+});
+
 $("saveall").addEventListener("click", async () => {
   if (!ARCHIVE) return;
   const btn = $("saveall");
@@ -514,17 +558,18 @@ $("saveall").addEventListener("click", async () => {
     fill.style.width = "100%";
     const url = URL.createObjectURL(zip);
 
-    // A tap is a real user gesture; a programmatic click after minutes of work
-    // is often ignored by Chrome on Android. Show the button and click it too.
+    // No automatic click. A blocked programmatic download can swallow the
+    // next real tap too, so the user's own tap is the only trigger.
+    LAST_ZIP = zip;
     const fin = $("savefinal");
     fin.href = url;
     fin.download = "extracted-files.zip";
     fin.textContent = `Tap here to save  ${(zip.size / 1048576).toFixed(1)} MB`;
     fin.style.display = "block";
-    try { fin.click(); } catch (e) { /* the visible button is the fallback */ }
+    $("saveshare").style.display = "block";
 
-    setTimeout(() => URL.revokeObjectURL(url), 300000);
-    setStatus(`Ready — ${(zip.size / 1048576).toFixed(1)} MB. If nothing started, tap the green button above.`, "ok");
+    setTimeout(() => URL.revokeObjectURL(url), 1800000);
+    setStatus(`Ready — ${(zip.size / 1048576).toFixed(1)} MB. Tap the green button to save it.`, "ok");
   } catch (err) {
     setStatus("Could not pack: " + err.message, "err");
   } finally {
