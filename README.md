@@ -135,6 +135,11 @@ several `.part00`/`.part01` files at once and they are joined automatically.
 Open it from your phone's Downloads folder with Chrome. Works on Android 15 and any browser with
 `DecompressionStream` (Chrome 80+, Safari 16.4+).
 
+**Save all files as one folder:** tap that button and the page rebuilds every entry into a fresh
+`extracted-files.zip` with the folder structure intact, then saves it to Downloads. Browsers cannot
+create a folder directly, so this is the one-tap route: download the zip, then extract it once with
+the Files app (Google Files has a built-in extractor) and you have the real folder.
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
