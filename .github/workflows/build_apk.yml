@@ -60,7 +60,12 @@ jobs:
           p = pathlib.Path("out/ApkExtractor.apk")
           size = p.stat().st_size
           print(f"APK size: {size/1024:.0f} KB")
-          assert size > 20000, "APK looks too small - the build probably did not run"
+          assert size > 5000, "APK looks too small - the build probably did not run"
+          import zipfile
+          names = zipfile.ZipFile(p).namelist()
+          assert "AndroidManifest.xml" in names, "not a valid APK: no AndroidManifest.xml"
+          assert any(n.endswith(".dex") for n in names), "not a valid APK: no classes.dex"
+          print("valid APK:", len(names), "entries")
           PY
 
       - name: Upload artifact
