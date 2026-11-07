@@ -1,0 +1,21 @@
+# analysis workspace - never commit
+work/
+downloaded_pkg/
+decoded_apk/
+raw_apk/
+xapk_parts/
+*.apk
+*.xapk
+*.apks
+
+# keep the reference drop-box readable but out of git if it holds a package
+!reference/README.md
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# os noise
+.DS_Store
+Thumbs.db

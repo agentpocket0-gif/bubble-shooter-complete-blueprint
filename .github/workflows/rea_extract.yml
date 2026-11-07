@@ -1,0 +1,150 @@
+name: REA extract and blueprint
+
+# Analyses an Android package that YOU supply, and publishes a 5-part technical
+# blueprint. It never downloads from APK mirror sites and never republishes the
+# package or its original assets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_url:
+        description: "Optional direct URL to your .apk / .xapk (leave empty to use the v1.0-apk release asset)"
+        required: false
+        default: ""
+      commit_blueprint:
+        description: "Commit the generated reference docs back to the branch"
+        type: boolean
+        default: true
+  release:
+    types: [released]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rea-extract
+  cancel-in-progress: false
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Guard - this repo must be private
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          vis=$(gh api "repos/${GITHUB_REPOSITORY}" --jq .visibility)
+          echo "repository visibility: ${vis}"
+          if [ "${vis}" != "private" ]; then
+            echo "::error::This repository is PUBLIC. Analysis output derived from a commercial app must not be published. Flip it to private (Settings > General > Danger Zone > Change visibility) and re-run."
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq apktool binutils unzip jq >/dev/null
+          apktool --version
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet pillow
+
+      - name: Locate the supplied package
+        id: fetch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REFERENCE_PACKAGE_URL: ${{ inputs.package_url }}
+          REFERENCE_RELEASE_TAG: v1.0-apk
+        run: python scripts/fetch_package.py
+
+      - name: Nothing to do
+        if: steps.fetch.outputs.FOUND == ''
+        run: |
+          echo "::notice::No package found. Upload your .apk/.xapk as an asset of release 'v1.0-apk' (or commit it under reference/), then re-run this workflow."
+          {
+            echo "### No package found"
+            echo ""
+            echo "Upload your package as an asset of the \`v1.0-apk\` release, or commit it under \`reference/\`, then re-run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Normalise package (single APK or split XAPK/APKS bundle)
+        if: steps.fetch.outputs.FOUND != ''
+        run: python scripts/prepare_package.py "${{ steps.fetch.outputs.FOUND }}" --apktool=apktool
+
+      - name: Run REA-style analysis
+        if: steps.fetch.outputs.FOUND != ''
+        run: python scripts/analyze_apk.py --raw work/raw_apk --decoded work/decoded_apk --out blueprint/reference
+
+      - name: Verify the five documents are populated
+        if: steps.fetch.outputs.FOUND != ''
+        run: |
+          set -e
+          fail=0
+          for f in blueprint/reference/0*.md; do
+            size=$(wc -c < "$f")
+            echo "$f -> ${size} bytes"
+            if [ "$size" -lt 400 ]; then echo "::error::$f is empty"; fail=1; fi
+          done
+          count=$(ls blueprint/reference/0*.md 2>/dev/null | wc -l)
+          echo "documents: ${count}"
+          [ "$count" -eq 5 ] || { echo "::error::expected 5 documents, found ${count}"; fail=1; }
+          [ "$fail" -eq 0 ]
+
+      - name: Job summary
+        if: steps.fetch.outputs.FOUND != ''
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          p = pathlib.Path("blueprint/reference/_extraction_report.json")
+          if not p.exists():
+              raise SystemExit(0)
+          r = json.loads(p.read_text())
+          lines = ["### Extraction report", "",
+                   f"- package: `{r.get('package')}` v{r.get('version')}",
+                   f"- documents: {len(r.get('documents', []))}",
+                   "- counts: " + ", ".join(f"{k}={v}" for k, v in r.get("counts", {}).items()),
+                   "- SDKs: " + (", ".join(r.get("sdks", {})) or "none matched"), ""]
+          pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a").write("\n".join(lines))
+          print("\n".join(lines))
+          PY
+
+      - name: Upload analysis artifacts
+        if: steps.fetch.outputs.FOUND != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: rea-blueprint
+          path: |
+            blueprint/reference/
+            work/package_meta.json
+          retention-days: 30
+
+      - name: Commit blueprint back
+        if: steps.fetch.outputs.FOUND != '' && github.event.inputs.commit_blueprint != 'false'
+        run: |
+          git config user.name  "rea-bot"
+          git config user.email "rea-bot@users.noreply.github.com"
+          git add blueprint/reference
+          if git diff --cached --quiet; then
+            echo "::notice::blueprint unchanged, nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: auto-extracted reference blueprint"
+          for attempt in 1 2 3; do
+            if git push; then echo "pushed on attempt ${attempt}"; exit 0; fi
+            echo "push failed, rebasing and retrying (${attempt}/3)"
+            git pull --rebase --autostash || true
+          done
+          echo "::error::could not push the blueprint after 3 attempts"
+          exit 1
