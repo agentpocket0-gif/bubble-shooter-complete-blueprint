@@ -13,8 +13,13 @@ Written by hand, yours to ship, no APK needed.
 | `03_LEVEL_SCHEMA_AND_BALANCE.md` | level JSON format, validator, difficulty curve, star thresholds, generator, content budget |
 | `04_ECONOMY_AND_AD_MEDIATION.md` | currencies, lives, boosters, SKU table, billing checklist, ad placements, consent, analytics events |
 | `05_MASTER_BUILD_SPEC.md` | the whole thing as one contract, with 10 milestones and acceptance tests |
+| `06_AUDIO_AND_SOUND_DESIGN.md` | 43-entry sound effect catalogue, pop pitch ladder, music stems, mixing buses, haptics, legal audio sourcing |
+| `07_ASSET_PRODUCTION_SPEC.md` | every sprite with counts and pixel sizes, atlas budgets, export settings, store listing assets, credits template |
+| `08_QA_DEVICE_MATRIX_AND_RELEASE.md` | device tiers, 44 functional test cases, automated test layers, profiling targets, Play Console checklist |
+| `09_LIVEOPS_ASO_AND_LAUNCH.md` | ASO rules, soft-launch KPI gates, live ops calendar, remote config, rollback |
 
-Read them in order. `05` is the summary; the other four are the detail.
+Read them in order. `05` is the summary; `01`-`04` are the systems, `06`-`09` are production, testing and
+launch.
 
 ## `reference/` — generated from your own package
 
