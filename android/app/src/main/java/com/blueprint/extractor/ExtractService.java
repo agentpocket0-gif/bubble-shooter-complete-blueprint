@@ -54,6 +54,7 @@ public class ExtractService extends Service {
     public static final String OUT_DONE = "done";
     public static final String OUT_ERROR = "error";
     public static final String OUT_CANCELLED = "cancelled";
+    public static final String OUT_FAILED = "failed";
 
     private static final String CHANNEL_ID = "extract";
     private static final int NOTIFICATION_ID = 1001;
@@ -114,6 +115,7 @@ public class ExtractService extends Service {
         final ContentResolver cr = getContentResolver();
         int files = 0;
         int skipped = 0;
+        int failed = 0;
         long bytes = 0;
 
         Set<String> alreadyThere = skipExisting ? existingFiles(cr) : new HashSet<>();
@@ -127,7 +129,7 @@ public class ExtractService extends Service {
                 byte[] buffer = new byte[1 << 16];
                 while ((entry = zin.getNextEntry()) != null) {
                     if (cancelled) {
-                        finish(files, bytes, skipped, null, true);
+                        finish(files, bytes, skipped, failed, null, true);
                         return;
                     }
                     if (entry.isDirectory()) {
@@ -149,32 +151,41 @@ public class ExtractService extends Service {
                         continue;
                     }
 
-                    ContentValues values = new ContentValues();
-                    values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
-                    values.put(MediaStore.Downloads.MIME_TYPE, mimeOf(fileName));
-                    values.put(MediaStore.Downloads.RELATIVE_PATH, BASE_DIR + dir);
-                    values.put(MediaStore.Downloads.IS_PENDING, 1);
+                    // One unwritable file must never kill the whole run: a single
+                    // rejected name used to abort a multi-thousand file extraction.
+                    try {
+                        ContentValues values = new ContentValues();
+                        values.put(MediaStore.Downloads.DISPLAY_NAME, safeName(fileName));
+                        values.put(MediaStore.Downloads.MIME_TYPE, mimeOf(fileName));
+                        values.put(MediaStore.Downloads.RELATIVE_PATH, BASE_DIR + safeDir(dir));
+                        values.put(MediaStore.Downloads.IS_PENDING, 1);
 
-                    Uri target = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
-                    if (target == null) {
-                        continue;
-                    }
-                    try (OutputStream out = cr.openOutputStream(target)) {
-                        if (out == null) {
+                        Uri target = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                        if (target == null) {
+                            failed++;
                             continue;
                         }
-                        int read;
-                        while ((read = zin.read(buffer)) > 0) {
-                            if (cancelled) {
-                                break;
+                        try (OutputStream out = cr.openOutputStream(target)) {
+                            if (out == null) {
+                                failed++;
+                                continue;
                             }
-                            out.write(buffer, 0, read);
-                            bytes += read;
+                            int read;
+                            while ((read = zin.read(buffer)) > 0) {
+                                if (cancelled) {
+                                    break;
+                                }
+                                out.write(buffer, 0, read);
+                                bytes += read;
+                            }
                         }
+                        values.clear();
+                        values.put(MediaStore.Downloads.IS_PENDING, 0);
+                        cr.update(target, values, null, null);
+                    } catch (Exception perFile) {
+                        failed++;
+                        continue;
                     }
-                    values.clear();
-                    values.put(MediaStore.Downloads.IS_PENDING, 0);
-                    cr.update(target, values, null, null);
 
                     files++;
                     if (files % 15 == 0) {
@@ -182,9 +193,9 @@ public class ExtractService extends Service {
                     }
                 }
             }
-            finish(files, bytes, skipped, null, false);
+            finish(files, bytes, skipped, failed, null, false);
         } catch (Exception e) {
-            finish(files, bytes, skipped, e, false);
+            finish(files, bytes, skipped, failed, e, false);
         }
     }
 
@@ -220,12 +231,13 @@ public class ExtractService extends Service {
         sendBroadcast(i);
     }
 
-    private void finish(int files, long bytes, int skipped, Exception error, boolean wasCancelled) {
+    private void finish(int files, long bytes, int skipped, int failed, Exception error, boolean wasCancelled) {
         Intent i = new Intent(BROADCAST);
         i.setPackage(getPackageName());
         i.putExtra(OUT_FILES, files);
         i.putExtra(OUT_BYTES, bytes);
         i.putExtra(OUT_SKIPPED, skipped);
+        i.putExtra(OUT_FAILED, failed);
         i.putExtra(OUT_DONE, true);
         i.putExtra(OUT_CANCELLED, wasCancelled);
         if (error != null) {
@@ -233,10 +245,11 @@ public class ExtractService extends Service {
         }
         sendBroadcast(i);
 
-        String text = wasCancelled
+        String head = failed > 0 ? failed + " files could not be written. " : "";
+        String text = head + (wasCancelled
                 ? "Cancelled after " + files + " files"
                 : (error != null ? "Failed: " + error.getMessage()
-                : files + " files · " + mb(bytes) + " MB written");
+                : files + " files · " + mb(bytes) + " MB written"));
         notifyUser(text, files, bytes, false);
 
         releaseWakeLock();
@@ -315,6 +328,21 @@ public class ExtractService extends Service {
 
     private static String mb(long bytes) {
         return String.format(Locale.US, "%.1f", bytes / 1048576.0);
+    }
+
+
+    /** MediaStore rejects some characters; keep names it will accept. */
+    private static String safeName(String name) {
+        String n = name.replaceAll("[\\\\/:*?\"<>|\\x00-\\x1F]", "_");
+        if (n.length() > 120) {
+            String ext = extOf(n);
+            n = n.substring(0, Math.max(1, 120 - ext.length() - 1)) + (ext.isEmpty() ? "" : "." + ext);
+        }
+        return n.isEmpty() ? "_unnamed" : n;
+    }
+
+    private static String safeDir(String dir) {
+        return dir.replaceAll("[\\\\:*?\"<>|\\x00-\\x1F]", "_");
     }
 
     private static String clean(String name) {
