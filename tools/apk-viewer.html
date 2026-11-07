@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APK / ZIP Viewer</title>
+<style>
+  :root {
+    --bg: #14161f; --panel: #1d2030; --panel2: #252a3d; --line: #333a52;
+    --text: #eef1f8; --dim: #9aa3bd; --accent: #f2c94c; --ok: #46c98b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  header { padding: 16px 16px 8px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
+  .pick {
+    display: block; background: var(--accent); color: #1a1a22; font-weight: 700;
+    text-align: center; padding: 16px; border-radius: 14px; font-size: 16px;
+    cursor: pointer; user-select: none;
+  }
+  .pick:active { transform: scale(.99); }
+  input[type=file] { display: none; }
+  .row { display: flex; gap: 8px; margin-top: 10px; }
+  .row input[type=search] {
+    flex: 1; background: var(--panel); border: 1px solid var(--line);
+    color: var(--text); padding: 12px 14px; border-radius: 12px; font-size: 15px;
+  }
+  .status { margin: 12px 0 4px; font-size: 13px; color: var(--dim); }
+  .status.err { color: #ff8f8f; }
+  .status.ok { color: var(--ok); }
+  .list { padding: 0 8px 120px; }
+  .item {
+    display: flex; align-items: center; gap: 10px; padding: 12px 10px;
+    border-bottom: 1px solid var(--line); cursor: pointer;
+  }
+  .item:active { background: var(--panel2); }
+  .ico {
+    width: 34px; height: 34px; border-radius: 9px; background: var(--panel2);
+    display: grid; place-items: center; font-size: 11px; font-weight: 700;
+    color: var(--dim); flex: 0 0 34px; text-transform: uppercase;
+  }
+  .name { flex: 1; word-break: break-all; font-size: 14px; }
+  .meta { color: var(--dim); font-size: 11px; }
+  .more {
+    display: block; width: calc(100% - 32px); margin: 16px auto;
+    background: var(--panel); color: var(--text); border: 1px solid var(--line);
+    padding: 14px; border-radius: 12px; font-size: 15px;
+  }
+  #viewer {
+    position: fixed; inset: 0; background: rgba(8, 9, 14, .96); display: none;
+    flex-direction: column; z-index: 50;
+  }
+  #viewer.on { display: flex; }
+  .vhead {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .vhead .name { font-size: 13px; }
+  .close, .dl {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 14px; font-size: 14px; text-decoration: none;
+  }
+  .dl { background: var(--accent); color: #1a1a22; font-weight: 700; border: 0; }
+  .vbody { flex: 1; overflow: auto; padding: 16px; display: grid; place-items: center; }
+  .vbody img { max-width: 100%; height: auto; image-rendering: auto;
+               background: repeating-conic-gradient(#2a2f44 0 25%, #22263a 0 50%) 0 0/24px 24px; }
+  .vbody pre { width: 100%; text-align: left; white-space: pre-wrap; word-break: break-word;
+               font-size: 12px; color: var(--dim); margin: 0; }
+  .vbody audio { width: 100%; }
+  .hint { color: var(--dim); font-size: 12px; padding: 0 16px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>APK / ZIP Viewer</h1>
+  <div class="sub">Opens an .apk, .zip, .xapk or .apks on your phone. Nothing is uploaded — the file never leaves your device.</div>
+  <label class="pick" for="file">Choose file</label>
+  <input id="file" type="file" multiple accept=".apk,.zip,.xapk,.apks,.obb,application/vnd.android.package-archive">
+  <div class="row"><input id="q" type="search" placeholder="Filter by name, e.g. assets/ or .png"></div>
+  <div id="status" class="status">No file loaded.</div>
+</header>
+<div id="list" class="list"></div>
+<div class="hint">If your game came as <b>.part00 / .part01</b> files, select both at once — they are joined automatically.</div>
+
+<div id="viewer">
+  <div class="vhead">
+    <div class="name" id="vname"></div>
+    <a class="dl" id="vdl" download>Save</a>
+    <button class="close" id="vclose">Close</button>
+  </div>
+  <div class="vbody" id="vbody"></div>
+</div>
+
+<script>
+// ===CORE-START===
+const u16 = (b, o) => b[o] | (b[o + 1] << 8);
+const u32 = (b, o) => (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+const u64 = (b, o) => u32(b, o) + u32(b, o + 4) * 4294967296;
+
+async function readRange(blob, start, len) {
+  if (start < 0 || len < 0) throw new Error("bad range");
+  const buf = await blob.slice(start, start + len).arrayBuffer();
+  return new Uint8Array(buf);
+}
+
+/** Find and parse the End Of Central Directory record. */
+async function readEOCD(blob) {
+  const maxTail = Math.min(blob.size, 65557 + 22);
+  const tail = await readRange(blob, blob.size - maxTail, maxTail);
+  let i = tail.length - 22;
+  for (; i >= 0; i--) {
+    if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 0x05 && tail[i + 3] === 0x06) break;
+  }
+  if (i < 0) throw new Error("This file is not a zip/apk archive.");
+  const eocd = {
+    entries: u16(tail, i + 10),
+    cdSize: u32(tail, i + 12),
+    cdOffset: u32(tail, i + 16),
+    eocdOffsetInTail: i,
+    tailStart: blob.size - maxTail,
+  };
+  // ZIP64: sentinel values mean the real numbers live in the ZIP64 record
+  if (eocd.entries === 0xffff || eocd.cdOffset === 0xffffffff) {
+    const locOff = eocd.tailStart + i - 20;
+    if (locOff >= 0) {
+      const loc = await readRange(blob, locOff, 20);
+      if (u32(loc, 0) === 0x07064b50) {
+        const z64off = u64(loc, 8);
+        const z = await readRange(blob, z64off, 56);
+        if (u32(z, 0) === 0x06064b50) {
+          eocd.entries = u64(z, 32);
+          eocd.cdSize = u64(z, 40);
+          eocd.cdOffset = u64(z, 48);
+        }
+      }
+    }
+  }
+  return eocd;
+}
+
+/** Parse the central directory into a flat entry list. */
+function parseCentralDirectory(cd) {
+  const entries = [];
+  let p = 0;
+  while (p + 46 <= cd.length) {
+    if (u32(cd, p) !== 0x02014b50) break;
+    const flags = u16(cd, p + 8);
+    const method = u16(cd, p + 10);
+    const compSize = u32(cd, p + 20);
+    const uncompSize = u32(cd, p + 24);
+    const nameLen = u16(cd, p + 28);
+    const extraLen = u16(cd, p + 30);
+    const commentLen = u16(cd, p + 32);
+    const offset = u32(cd, p + 42);
+    let nameBytes = cd.subarray(p + 46, p + 46 + nameLen);
+    let name;
+    if (flags & 0x800) {
+      name = new TextDecoder("utf-8").decode(nameBytes);
+    } else {
+      try { name = new TextDecoder("utf-8", { fatal: true }).decode(nameBytes); }
+      catch { name = new TextDecoder("windows-1252").decode(nameBytes); }
+    }
+    entries.push({
+      name, method, compSize, uncompSize, offset,
+      dir: name.endsWith("/"),
+    });
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  return entries;
+}
+
+/** Load a Blob (or several, joined in order) into an entry list. */
+async function openArchive(blob) {
+  const eocd = await readEOCD(blob);
+  const cd = await readRange(blob, eocd.cdOffset, eocd.cdSize);
+  const entries = parseCentralDirectory(cd);
+  if (!entries.length) throw new Error("No files found inside this archive.");
+  return { blob, entries, eocd };
+}
+
+/** Pull one entry's bytes out, decompressing deflate. */
+async function extractEntry(archive, entry, inflate) {
+  const lh = await readRange(archive.blob, entry.offset, 30);
+  if (u32(lh, 0) !== 0x04034b50) throw new Error("Corrupt local header for " + entry.name);
+  const nameLen = u16(lh, 26);
+  const extraLen = u16(lh, 28);
+  const dataStart = entry.offset + 30 + nameLen + extraLen;
+  const raw = await readRange(archive.blob, dataStart, entry.compSize);
+  if (entry.method === 0) return raw;
+  if (entry.method === 8) return await inflate(raw);
+  throw new Error("Unsupported compression method " + entry.method);
+}
+
+async function joinFiles(files) {
+  if (files.length === 1) return files[0];
+  const sorted = [...files].sort((a, b) => a.name.localeCompare(b.name));
+  return new Blob(sorted);
+}
+// ===CORE-END===
+
+// ---------------- UI ----------------
+const $ = (id) => document.getElementById(id);
+let ARCHIVE = null;
+let SHOWN = 0;
+const PAGE = 300;
+
+const ext = (n) => {
+  const m = n.match(/\.([a-z0-9]+)$/i);
+  return m ? m[1].toLowerCase() : "";
+};
+const fmt = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + " MB"
+  : n >= 1024 ? (n / 1024).toFixed(1) + " KB" : n + " B";
+
+const IMAGE = ["png", "jpg", "jpeg", "webp", "gif", "bmp"];
+const AUDIO = ["ogg", "mp3", "wav", "m4a", "aac", "opus"];
+const TEXT = ["txt", "json", "xml", "plist", "csv", "atlas", "fnt", "ini", "cfg", "yaml", "yml", "md"];
+
+function setStatus(msg, cls) {
+  const s = $("status");
+  s.textContent = msg;
+  s.className = "status" + (cls ? " " + cls : "");
+}
+
+async function inflateRaw(bytes) {
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error("This browser cannot decompress. Use Chrome, Edge or Safari 16.4+.");
+  }
+  const ds = new DecompressionStream("deflate-raw");
+  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function filtered() {
+  const q = $("q").value.trim().toLowerCase();
+  const all = ARCHIVE ? ARCHIVE.entries : [];
+  if (!q) return all;
+  return all.filter((e) => e.name.toLowerCase().includes(q));
+}
+
+function render(reset) {
+  const list = $("list");
+  const rows = filtered();
+  if (reset) { list.innerHTML = ""; SHOWN = 0; }
+  const slice = rows.slice(SHOWN, SHOWN + PAGE);
+  const frag = document.createDocumentFragment();
+  for (const e of slice) {
+    const div = document.createElement("div");
+    div.className = "item";
+    const e1 = ext(e.name);
+    const ico = document.createElement("div");
+    ico.className = "ico";
+    ico.textContent = e.dir ? "DIR" : (e1 || "?");
+    const mid = document.createElement("div");
+    mid.className = "name";
+    mid.textContent = e.name;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = e.dir ? "folder" : fmt(e.uncompSize);
+    mid.appendChild(meta);
+    div.append(ico, mid);
+    if (!e.dir) div.onclick = () => preview(e);
+    frag.appendChild(div);
+  }
+  list.appendChild(frag);
+  SHOWN += slice.length;
+
+  let more = $("more");
+  if (more) more.remove();
+  if (SHOWN < rows.length) {
+    const b = document.createElement("button");
+    b.id = "more";
+    b.className = "more";
+    b.textContent = `Show more (${rows.length - SHOWN} left)`;
+    b.onclick = () => render(false);
+    list.appendChild(b);
+  }
+}
+
+async function preview(entry) {
+  $("vname").textContent = entry.name.split("/").pop();
+  const body = $("vbody");
+  body.innerHTML = "<div class='hint'>Opening…</div>";
+  $("viewer").classList.add("on");
+  try {
+    const bytes = await extractEntry(ARCHIVE, entry, inflateRaw);
+    const e1 = ext(entry.name);
+    const mime = IMAGE.includes(e1) ? "image/" + (e1 === "jpg" ? "jpeg" : e1)
+      : AUDIO.includes(e1) ? "audio/" + e1
+      : "application/octet-stream";
+    const blob = new Blob([bytes], { type: mime });
+    const url = URL.createObjectURL(blob);
+    $("vdl").href = url;
+    $("vdl").download = entry.name.split("/").pop();
+    body.innerHTML = "";
+    if (IMAGE.includes(e1)) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = entry.name;
+      body.appendChild(img);
+    } else if (AUDIO.includes(e1)) {
+      const au = document.createElement("audio");
+      au.controls = true;
+      au.src = url;
+      body.appendChild(au);
+    } else if (TEXT.includes(e1)) {
+      const pre = document.createElement("pre");
+      pre.textContent = new TextDecoder("utf-8", { fatal: false })
+        .decode(bytes.subarray(0, 20000));
+      body.appendChild(pre);
+    } else {
+      const d = document.createElement("div");
+      d.className = "hint";
+      d.textContent = `${fmt(entry.uncompSize)} — no preview for .${e1 || "file"}. Tap Save to download it.`;
+      body.appendChild(d);
+    }
+  } catch (err) {
+    body.innerHTML = "";
+    const d = document.createElement("div");
+    d.className = "hint";
+    d.textContent = "Could not open this file: " + err.message;
+    body.appendChild(d);
+  }
+}
+
+$("vclose").onclick = () => $("viewer").classList.remove("on");
+
+$("file").addEventListener("change", async (ev) => {
+  const files = [...ev.target.files];
+  if (!files.length) return;
+  setStatus("Reading " + (files.length > 1 ? files.length + " parts…" : files[0].name + "…"));
+  try {
+    const blob = await joinFiles(files);
+    ARCHIVE = await openArchive(blob);
+    const files_ = ARCHIVE.entries.filter((e) => !e.dir).length;
+    const total = ARCHIVE.entries.reduce((a, e) => a + e.uncompSize, 0);
+    setStatus(`Opened: ${files_} files, ${fmt(total)} uncompressed.`, "ok");
+    render(true);
+  } catch (err) {
+    ARCHIVE = null;
+    setStatus(err.message, "err");
+    $("list").innerHTML = "";
+  }
+});
+
+$("q").addEventListener("input", () => { if (ARCHIVE) render(true); });
+</script>
+</body>
+</html>

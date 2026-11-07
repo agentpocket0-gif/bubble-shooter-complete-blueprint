@@ -125,6 +125,16 @@ the items deliberately left out and why.
 
 ---
 
+## Opening an APK on a phone
+
+`tools/apk-viewer.html` is a single self-contained page that opens `.apk`, `.zip`, `.xapk` and `.apks` files
+in the browser — no app to install, and the file never leaves the device. Pick the file, filter by name, tap
+an entry to preview an image, play a sound or read a text file, and use **Save** to keep one file. Select
+several `.part00`/`.part01` files at once and they are joined automatically.
+
+Open it from your phone's Downloads folder with Chrome. Works on Android 15 and any browser with
+`DecompressionStream` (Chrome 80+, Safari 16.4+).
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
