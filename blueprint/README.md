@@ -17,9 +17,10 @@ Written by hand, yours to ship, no APK needed.
 | `07_ASSET_PRODUCTION_SPEC.md` | every sprite with counts and pixel sizes, atlas budgets, export settings, store listing assets, credits template |
 | `08_QA_DEVICE_MATRIX_AND_RELEASE.md` | device tiers, 44 functional test cases, automated test layers, profiling targets, Play Console checklist |
 | `09_LIVEOPS_ASO_AND_LAUNCH.md` | ASO rules, soft-launch KPI gates, live ops calendar, remote config, rollback |
+| `10_APP_FLOW_A_TO_Z.md` | every screen, overlay and tap in order: state machine, first launch second-by-second, tutorial script, the life of one shot, popup priority, edge cases, flow acceptance tests |
 
 Read them in order. `05` is the summary; `01`-`04` are the systems, `06`-`09` are production, testing and
-launch.
+launch, and `10` is the complete screen-by-screen flow.
 
 ## `reference/` — generated from your own package
 

@@ -99,6 +99,8 @@ string tables, and the ad/billing SDKs it can identify. Anything it cannot prove
 7. `07_ASSET_PRODUCTION_SPEC.md` — every sprite with counts and pixel sizes, atlas budgets, export settings, store assets
 8. `08_QA_DEVICE_MATRIX_AND_RELEASE.md` — device tiers, 44 test cases, automated tests, profiling, Play Console checklist
 9. `09_LIVEOPS_ASO_AND_LAUNCH.md` — ASO, soft-launch KPI gates, live ops calendar, remote config, rollback
+10. `10_APP_FLOW_A_TO_Z.md` — the whole app flow: every screen, every tap, first launch second by second,
+    the life of one shot, popup priority, edge cases and flow acceptance tests
 
 `docs/REQUIREMENT_COVERAGE.md` maps every item of the original brief to the file that covers it — including
 the items deliberately left out and why.

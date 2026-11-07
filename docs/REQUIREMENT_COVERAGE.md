@@ -65,6 +65,7 @@ dimensions) — measurements, not files. Reason: `docs/LEGAL_AND_SCOPE.md`.
 | `original/07_ASSET_PRODUCTION_SPEC.md` | you asked for every asset; this is the production list with sizes and counts |
 | `original/08_QA_DEVICE_MATRIX_AND_RELEASE.md` | 44 test cases, device tiers, Play Console checklist — the gap between "spec" and "shipped" |
 | `original/09_LIVEOPS_ASO_AND_LAUNCH.md` | ASO, soft-launch KPI gates, live ops calendar, rollback |
+| `original/10_APP_FLOW_A_TO_Z.md` | you asked for the complete app flow — which screen comes first, what happens after each tap, moment by moment. This is that document: state machine, first launch second by second, tutorial script, the life of one shot, popup priority, edge cases, flow acceptance tests |
 | `docs/LEGAL_AND_SCOPE.md` | what is and is not lawful here, in plain language |
 | `docs/REQUIREMENT_COVERAGE.md` | this file |
 
