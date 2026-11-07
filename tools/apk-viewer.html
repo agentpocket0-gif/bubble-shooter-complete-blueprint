@@ -30,6 +30,12 @@
     margin-top: 10px; font-size: 15px;
   }
   .saveall:disabled { opacity: .45; }
+  .bar {
+    height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden;
+    margin-top: 10px; display: none;
+  }
+  .bar.on { display: block; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s; }
   input[type=file] { display: none; }
   .row { display: flex; gap: 8px; margin-top: 10px; }
   .row input[type=search] {
@@ -88,8 +94,9 @@
   <label class="pick" for="file">Choose file</label>
   <input id="file" type="file" multiple accept=".apk,.zip,.xapk,.apks,.obb,application/vnd.android.package-archive">
   <div class="row"><input id="q" type="search" placeholder="Filter by name, e.g. assets/ or .png"></div>
-  <button class="pick saveall" id="saveall" disabled>Save all files as one folder (.zip)</button>
+  <button class="pick saveall" id="saveall" disabled>Download everything (one .zip file)</button>
   <div id="status" class="status">No file loaded.</div>
+  <div class="bar" id="bar"><i id="barfill"></i></div>
 </header>
 <div id="list" class="list"></div>
 <div class="hint">If your game came as <b>.part00 / .part01</b> files, select both at once — they are joined automatically.</div>
@@ -474,15 +481,22 @@ $("q").addEventListener("input", () => { if (ARCHIVE) render(true); });
 $("saveall").addEventListener("click", async () => {
   if (!ARCHIVE) return;
   const btn = $("saveall");
-  btn.disabled = true;
+  const bar = $("bar");
+  const fill = $("barfill");
   const totalBytes = ARCHIVE.entries.reduce((a, e) => a + e.uncompSize, 0);
-  if (totalBytes > 400 * 1048576) {
-    setStatus("This archive is very large. Keep the screen on — it may take a few minutes.", "err");
-  }
+  const count = ARCHIVE.entries.filter((e) => !e.dir).length;
+  btn.disabled = true;
+  btn.textContent = "Packing… please wait";
+  bar.classList.add("on");
+  fill.style.width = "0%";
+  setStatus(`Building one file from ${count} files (${fmt(totalBytes)}). Keep the screen on.`);
   try {
     const zip = await buildZip(ARCHIVE, inflateRaw, deflateRaw, (done, all) => {
-      setStatus(`Packing ${done} / ${all} files…`);
+      const pct = Math.round((done / all) * 100);
+      fill.style.width = pct + "%";
+      setStatus(`Packing ${done} / ${all} files — ${pct}%`);
     });
+    fill.style.width = "100%";
     const url = URL.createObjectURL(zip);
     const a = document.createElement("a");
     a.href = url;
@@ -490,12 +504,15 @@ $("saveall").addEventListener("click", async () => {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-    setStatus(`Done — ${(zip.size / 1048576).toFixed(1)} MB saved to Downloads.`, "ok");
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+    setStatus(`Done — one file, ${(zip.size / 1048576).toFixed(1)} MB, saved to Downloads.` +
+              " Open Files → Downloads → tap it → Extract.", "ok");
   } catch (err) {
     setStatus("Could not pack: " + err.message, "err");
   } finally {
     btn.disabled = false;
+    btn.textContent = "Download everything (one .zip file)";
+    setTimeout(() => bar.classList.remove("on"), 4000);
   }
 });
 </script>
