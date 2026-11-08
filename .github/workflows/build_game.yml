@@ -101,13 +101,31 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # The runner image already carries a working SDK; android-actions/setup-android
+      # insists on its own cmdline-tools revision and fails here, so use the one
+      # that is already installed.
+      - name: Configure Android SDK
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          [ -d "$SDK" ] || SDK="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          echo "Using Android SDK at $SDK"
+          ls "$SDK"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
 
       - name: Install SDK packages
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          set -euo pipefail
+          yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses > /dev/null 2>&1 || true
+          for attempt in 1 2 3; do
+            sdkmanager --sdk_root="$ANDROID_HOME" \
+              "platform-tools" "platforms;android-34" "build-tools;34.0.0" && break
+            echo "sdkmanager attempt $attempt failed, retrying"; sleep 10
+          done
+          ls "$ANDROID_HOME/build-tools"
 
       - name: Fetch Godot and export templates
         run: |

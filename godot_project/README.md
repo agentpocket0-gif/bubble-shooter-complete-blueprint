@@ -85,8 +85,9 @@ Needs your accounts or hardware:
 - **IAP**: `bs.*` products created in Play Console, plus the native billing bridge
 - **Native ad SDK**: the Godot project talks to a `ClassicBlastAds` singleton when
   one is installed. Without it, ads stay in simulation/off mode - by design.
-- **iOS**: `export_presets.cfg` has no iOS preset yet; exporting iOS needs a macOS
-  runner and an Apple developer team id.
+- **iOS**: `export_presets.cfg` ships an `iOS` preset that exports an Xcode project
+  (`application/export_project_only=true`). Building it needs a macOS runner, Xcode
+  and your Apple team id in `application/app_store_team_id`.
 
 ## Assets
 
