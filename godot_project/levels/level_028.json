@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1309741489
   },
-  "shots": 11,
+  "shots": 10,
   "palette": [
     "red",
     "blue",
@@ -92,8 +92,8 @@
   "ceilingDropEvery": 0,
   "notes": "full silhouette, 5 colours, ice_stone blockers, 58 bubbles",
   "greedy": {
-    "score": 875,
-    "shots_used": 7,
+    "score": 950,
+    "shots_used": 6,
     "shots_left": 4,
     "objective": {
       "type": "rescue",

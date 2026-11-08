@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1190095053
   },
-  "shots": 17,
+  "shots": 26,
   "palette": [
     "red",
     "blue",
@@ -75,8 +75,8 @@
   "ceilingDropEvery": 0,
   "notes": "towers silhouette, 5 colours, ice_stone blockers, 54 bubbles",
   "greedy": {
-    "score": 1275,
-    "shots_used": 13,
+    "score": 1385,
+    "shots_used": 22,
     "shots_left": 4,
     "objective": {
       "type": "clear_color",

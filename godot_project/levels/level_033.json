@@ -75,7 +75,7 @@
   "ceilingDropEvery": 0,
   "notes": "funnel silhouette, 5 colours, ice_stone blockers, 50 bubbles",
   "greedy": {
-    "score": 1255,
+    "score": 895,
     "shots_used": 8,
     "shots_left": 4,
     "objective": {

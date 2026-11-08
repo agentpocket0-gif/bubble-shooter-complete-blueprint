@@ -79,7 +79,7 @@
   "objectives": [
     {
       "type": "score",
-      "target": 1049
+      "target": 1090
     }
   ],
   "stars": {
@@ -94,12 +94,12 @@
   "ceilingDropEvery": 5,
   "notes": "arch silhouette, 6 colours, dense blockers, 46 bubbles",
   "greedy": {
-    "score": 1140,
+    "score": 1130,
     "shots_used": 13,
     "shots_left": 4,
     "objective": {
       "type": "score",
-      "target": 1049
+      "target": 1090
     }
   }
 }

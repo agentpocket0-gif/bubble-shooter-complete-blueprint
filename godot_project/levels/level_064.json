@@ -111,7 +111,7 @@
   "ceilingDropEvery": 6,
   "notes": "full silhouette, 6 colours, mixed blockers, 66 bubbles",
   "greedy": {
-    "score": 705,
+    "score": 625,
     "shots_used": 15,
     "shots_left": 4,
     "objective": {

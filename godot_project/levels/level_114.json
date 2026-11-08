@@ -94,7 +94,7 @@
   "ceilingDropEvery": 5,
   "notes": "funnel silhouette, 6 colours, dense blockers, 47 bubbles",
   "greedy": {
-    "score": 770,
+    "score": 665,
     "shots_used": 7,
     "shots_left": 4,
     "objective": {

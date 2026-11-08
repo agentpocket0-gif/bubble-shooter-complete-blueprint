@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 500297108
   },
-  "shots": 20,
+  "shots": 26,
   "palette": [
     "red",
     "blue",
@@ -99,8 +99,8 @@
   "ceilingDropEvery": 6,
   "notes": "full silhouette, 6 colours, mixed blockers, 66 bubbles",
   "greedy": {
-    "score": 1880,
-    "shots_used": 16,
+    "score": 1970,
+    "shots_used": 22,
     "shots_left": 4,
     "objective": {
       "type": "clear_all"
