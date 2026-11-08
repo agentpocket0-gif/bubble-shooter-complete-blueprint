@@ -283,7 +283,8 @@ func _test_all_levels() -> void:
 	_check("difficulty rises with player progression",
 		ProceduralLevelGenerator.difficulty_for(1) < ProceduralLevelGenerator.difficulty_for(60)
 		and ProceduralLevelGenerator.difficulty_for(60) < ProceduralLevelGenerator.difficulty_for(120)
-		and ProceduralLevelGenerator.difficulty_for(120) < ProceduralLevelGenerator.difficulty_for(240))
+		and ProceduralLevelGenerator.difficulty_for(120) < ProceduralLevelGenerator.difficulty_for(240)
+		and ProceduralLevelGenerator.difficulty_for(240) < ProceduralLevelGenerator.difficulty_for(960))
 
 	var endless_level := LevelLibrary.load_level(2400)
 	_check("level 2400 generates without a bundled file",
