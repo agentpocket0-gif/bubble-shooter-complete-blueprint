@@ -180,8 +180,8 @@ func _build_hud() -> void:
 	hud_root.add_child(score_label)
 
 	booster_row = HBoxContainer.new()
-	booster_row.position = Vector2(60, 1738)
-	booster_row.size = Vector2(960, 140)
+	booster_row.position = Vector2(80, 1800)
+	booster_row.size = Vector2(920, 120)
 	booster_row.add_theme_constant_override("separation", 26)
 	booster_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	hud_root.add_child(booster_row)
@@ -195,13 +195,13 @@ func _rebuild_boosters() -> void:
 		var b := TextureButton.new()
 		b.texture_normal = UI.tex("res://assets/boosters/booster_%s.png" % ("extra_moves" if kind == "extra_moves" else kind))
 		b.ignore_texture_size = true
-		b.custom_minimum_size = Vector2(118, 118)
+		b.custom_minimum_size = Vector2(104, 104)
 		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		var count := GameManager.booster_count(kind)
 		b.modulate = Color(1, 1, 1, 1) if count > 0 else Color(1, 1, 1, 0.35)
 		var badge := UI.label(str(count), 34, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
-		badge.position = Vector2(76, 78)
-		badge.size = Vector2(44, 40)
+		badge.position = Vector2(66, 66)
+		badge.size = Vector2(40, 36)
 		badge.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 		badge.add_theme_constant_override("shadow_offset_y", 3)
 		b.add_child(badge)

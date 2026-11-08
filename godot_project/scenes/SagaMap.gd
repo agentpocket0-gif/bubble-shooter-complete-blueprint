@@ -104,15 +104,7 @@ func _level_row(id: int) -> Control:
 	num.add_theme_constant_override("shadow_offset_y", 3)
 	holder.add_child(num)
 
-	if not unlocked:
-		var lock := TextureRect.new()
-		lock.texture = UI.icon("icon_lock", false)
-		lock.position = Vector2(NODE_SIZE * 0.5 - 24, NODE_SIZE * 0.64)
-		lock.custom_minimum_size = Vector2(48, 48)
-		lock.size = Vector2(48, 48)
-		lock.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		holder.add_child(lock)
-	elif stars > 0:
+	if stars > 0 and unlocked:
 		var srow := UI.star_row(stars, 34)
 		srow.position = Vector2(0, NODE_SIZE * 0.62)
 		srow.size = Vector2(NODE_SIZE, 40)
@@ -259,9 +251,12 @@ func close_overlay() -> void:
 func _modal(fn: Callable) -> void:
 	if _overlay != null and is_instance_valid(_overlay):
 		return
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
 	var holder := Control.new()
 	UI.full_rect(holder)
-	add_child(holder)
+	layer.add_child(holder)
 	_overlay = holder
 	fn.call(holder)
 
