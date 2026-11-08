@@ -133,13 +133,23 @@ jobs:
           grep -q "runtime proof" runtime_proof.log
           ! grep -q "^FAIL" runtime_proof.log
 
-      - name: Check the screenshots are not blank
+      - name: Collect the proof
         run: |
           mkdir -p qa_proof
           cp "$PROJECT_DIR"/qa_proof/*.png qa_proof/ 2>/dev/null || true
           cp "$PROJECT_DIR"/qa_proof/proof_log.txt qa_proof/ 2>/dev/null || true
           ls -la qa_proof
-          python3 tools/visual_qa.py qa_proof
+
+      - name: Upload the proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-qa
+          path: qa_proof/
+          if-no-files-found: warn
+
+      - name: Check the screenshots are not blank
+        run: python3 tools/visual_qa.py qa_proof
 
       - name: Commit the proof back to the branch
         if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
@@ -154,13 +164,6 @@ jobs:
             git commit -m "qa: visual proof from run ${{ github.run_number }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
-
-      - name: Upload the proof
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-qa
-          path: qa_proof/
-          if-no-files-found: error
 
   # -------------------------------------------------------------------------
   # Android: debug APK + signed release AAB.

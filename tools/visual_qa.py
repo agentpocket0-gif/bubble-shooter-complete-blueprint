@@ -30,7 +30,10 @@ EXPECTED = [
 
 MIN_BRIGHTNESS = 20.0
 MIN_STDDEV = 12.0
-MIN_DIFFERENCE = 0.02      # fraction of pixels that must differ
+# Fraction of pixels that must differ. A full screen change is obvious; a
+# single 96 px bubble on a 1080x1920 frame is only ~0.4 %, so that pair gets a
+# threshold sized to what it is actually proving.
+MIN_DIFFERENCE = 0.02
 
 
 def load(path: Path) -> np.ndarray:
@@ -72,19 +75,19 @@ def main() -> int:
 
     pairs = [
         ("03_piggy_bank_open.png", "04_piggy_bank_closed_back_to_map.png",
-         "the Close button must visibly close the popup"),
+         "the Close button must visibly close the popup", MIN_DIFFERENCE),
         ("02_saga_world_map.png", "06_level_1_active_gameplay.png",
-         "tapping Level 1 must visibly open the board"),
+         "tapping Level 1 must visibly open the board", MIN_DIFFERENCE),
         ("06_level_1_active_gameplay.png", "07_after_shot.png",
-         "a shot must visibly change the board"),
+         "a shot must visibly change the board", 0.004),
     ]
     pair_rows: list[str] = []
-    for a_name, b_name, why in pairs:
+    for a_name, b_name, why, threshold in pairs:
         if a_name not in images or b_name not in images:
             continue
         d = difference(images[a_name], images[b_name])
-        pair_rows.append(f"| {a_name} vs {b_name} | {d * 100:.1f}% | {why} |")
-        if d < MIN_DIFFERENCE:
+        pair_rows.append(f"| {a_name} vs {b_name} | {d * 100:.1f}% (min {threshold * 100:.1f}%) | {why} |")
+        if d < threshold:
             problems.append(f"{a_name} and {b_name} are {d * 100:.1f}% different - {why}")
 
     report = ["# Visual QA report", ""]
