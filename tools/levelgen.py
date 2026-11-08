@@ -668,37 +668,44 @@ def _same_colour_component_size(grid: list[list[str]], start: tuple[int, int],
 
 
 def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Random,
-                       desired: int = 4) -> tuple[list[str], list[dict], int]:
-    """Turn bubbles into chain blockers only beside groups that can be matched."""
+                       desired: int = 1) -> tuple[list[str], list[dict], int]:
+    """Place rescue targets beside large, reachable colour groups near the ceiling."""
     grid = [list(line) for line in layout]
-    candidates = [(q, r) for r in range(1, len(grid))
+    candidates = [(q, r) for r in range(1, min(5, len(grid)))
                   for q, ch in enumerate(grid[r]) if ch.isdigit()]
-    rng.shuffle(candidates)
-    added = 0
+    ranked = []
 
     for q, r in candidates:
         original = grid[r][q]
-        colour_index = int(original) - 1
         grid[r][q] = "c"
-        attachable = any(
-            grid[nr][nq] == original
-            and _same_colour_component_size(grid, (nq, nr), original) >= 2
+        sizes = [
+            _same_colour_component_size(grid, (nq, nr), original)
             for nq, nr in _grid_neighbours(grid, q, r)
-        )
-        if not attachable:
-            grid[r][q] = original
-            continue
+            if grid[nr][nq] == original
+        ]
+        grid[r][q] = original
+        largest_group = max(sizes, default=0)
+        if largest_group >= 3:
+            # Large groups and shallow rows are easier for the same solver and
+            # player to reach. Randomness only breaks ties deterministically.
+            ranked.append((largest_group, -r, rng.random(), q, r, original))
 
+    ranked.sort(reverse=True)
+    added = 0
+    for _size, _shallow, _tie, q, r, original in ranked:
+        if grid[r][q] != original:
+            continue
+        grid[r][q] = "c"
         blockers.append({
             "row": r, "col": q, "type": "chain",
-            "color": colour_index, "hp": 0,
+            "color": int(original) - 1, "hp": 0,
         })
         added += 1
         if added >= desired:
             break
 
     if added == 0:
-        raise ValueError("could not place a chained bubble beside a matchable group")
+        raise ValueError("no chained-bubble position beside a matchable 3+ group")
     return ["".join(row) for row in grid], blockers, added
 
 
@@ -744,7 +751,7 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
     elif mission_slot == 2:
         objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
     elif mission_slot == 3:
-        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=4)
+        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=1)
         objectives = [{"type": "rescue", "count": 1}]
     elif mission_slot == 4:
         objectives = [{"type": "score", "target": 1}]
