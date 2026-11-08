@@ -127,6 +127,10 @@ jobs:
           done
           ls "$ANDROID_HOME/build-tools"
 
+      # Godot's Android exporter probes adb before it will export
+      - name: Start adb server
+        run: adb start-server || true
+
       - name: Fetch Godot and export templates
         run: |
           set -euo pipefail
