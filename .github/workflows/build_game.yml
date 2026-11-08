@@ -21,6 +21,7 @@ on:
         default: false
   push:
     branches: [main]
+    tags: ["v*"]
     paths:
       - "godot_project/**"
       - "config/**"
@@ -29,8 +30,6 @@ on:
   pull_request:
     paths:
       - "godot_project/**"
-  tags:
-    - "v*"
 
 permissions:
   contents: write
