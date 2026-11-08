@@ -5,11 +5,11 @@ extends Node2D
 ## is drawn with OFFSET_Y added, so the maths is identical to the Python level
 ## generator and to the headless tests.
 
-const OFFSET_Y := 230.0
-const CANNON_POS := Vector2(540.0, 1450.0)
+const OFFSET_Y := 294.0
+const CANNON_POS := Vector2(540.0, 1386.0)
 const SPEED := 2600.0
 const COLOUR_NAMES := ["red", "blue", "green", "yellow", "purple", "orange"]
-const FLOOR_Y := 1520.0   # board space: where a dropped bubble bounces
+const FLOOR_Y := 1456.0   # board space: where a dropped bubble bounces
 
 enum Phase { AIM, FLYING, RESOLVING, DONE }
 
@@ -344,8 +344,13 @@ func _aim_at(screen_pos: Vector2) -> void:
 	_update_preview()
 
 
+func _trace_shot(angle: float):
+	# Keep the same board-space origin for aiming, previews and real shots.
+	return ShotSimulator.trace(board, angle, CANNON_POS)
+
+
 func _update_preview() -> void:
-	var tr := ShotSimulator.trace(board, aim_angle)
+	var tr := _trace_shot(aim_angle)
 	aim.points = tr.points
 	aim.queue_redraw()
 	if tr.valid:
@@ -364,7 +369,7 @@ func _update_preview() -> void:
 func _shoot() -> void:
 	if phase != Phase.AIM:
 		return
-	var tr := ShotSimulator.trace(board, aim_angle)
+	var tr := _trace_shot(aim_angle)
 	if not tr.valid:
 		_shake_hud()
 		return
@@ -648,7 +653,7 @@ func _board_jammed() -> bool:
 	# no angle produces a legal landing cell
 	for i in 15:
 		var angle := lerpf(-deg_to_rad(75.0), deg_to_rad(75.0), float(i) / 14.0)
-		if ShotSimulator.trace(board, angle).valid:
+		if _trace_shot(angle).valid:
 			return false
 	return true
 
