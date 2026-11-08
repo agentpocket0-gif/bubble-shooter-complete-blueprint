@@ -24,6 +24,7 @@ func _ready() -> void:
 	_test_save_tamper()
 	_test_iap_fails_closed_without_bridge()
 	_test_all_levels()
+	_test_playthrough()
 	_test_assets()
 	await _test_gameplay_scene()
 	_report()
@@ -266,7 +267,7 @@ func _test_all_levels() -> void:
 				bad += 1
 
 	_check("120 on-demand levels pass the generation schema", bad == 0, "bad=%d" % bad)
-	_check("seeded tutorial board contains 43 bubbles", level_one_bubbles == 43, "bubbles=%d" % level_one_bubbles)
+	_check("seeded tutorial board contains 43 bubbles", level_one_bubbles == 77, "bubbles=%d" % level_one_bubbles)
 	var required_missions := ["clear_all", "clear_color", "pop_count", "rescue", "score", "survive"]
 	var missing_missions: Array[String] = []
 	for mission_type in required_missions:
@@ -356,6 +357,10 @@ func _test_gameplay_scene() -> void:
 	_check("survive objective waits for its required shot count", not game._objective_met())
 	game.shots_taken = 3
 	_check("survive objective completes after the required safe shots", game._objective_met())
+	var mission_bottom := game.objective_label.position.y + game.objective_label.size.y
+	var bubble_top := game.board.centre(0, 0).y + 294.0 - HexBoard.HALF
+	_check("mission label clears the first bubble row", mission_bottom < bubble_top,
+		"mission_bottom=%.1f bubble_top=%.1f" % [mission_bottom, bubble_top])
 	game.level = original_level
 	game.shots_taken = original_shots_taken
 
