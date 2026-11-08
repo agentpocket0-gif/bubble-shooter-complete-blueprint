@@ -1,0 +1,79 @@
+name: Generate six-mission campaign
+
+on:
+  push:
+    branches: [upgrade/godot-4.7.2]
+    paths:
+      - "tools/levelgen.py"
+      - ".github/workflows/generate_levels.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-campaign-upgrade-godot-4-7-2
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: upgrade/godot-4.7.2
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate all 120 deterministic levels
+        run: python3 tools/levelgen.py --out godot_project/levels --count 120 --seed 20261108
+
+      - name: Validate every level and all six mission types
+        run: |
+          set -euo pipefail
+          python3 tools/validate_levels.py godot_project/levels
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("godot_project/levels")
+          index = json.loads((root / "index.json").read_text())
+          assert index["count"] == 120, f"expected 120 levels, got {index['count']}"
+
+          expected = {"clear_all", "clear_color", "pop_count", "rescue", "score", "survive"}
+          seen = set()
+          unbalanced = []
+          counts = {mission: 0 for mission in expected}
+          for row in index["levels"]:
+              level = json.loads((root / row["file"]).read_text())
+              if not level.get("greedy"):
+                  unbalanced.append(level["id"])
+              for objective in level.get("objectives", []):
+                  mission = objective.get("type")
+                  seen.add(mission)
+                  if mission in counts:
+                      counts[mission] += 1
+          assert not unbalanced, f"levels without solver proof: {unbalanced[:10]}"
+          assert seen == expected, f"mission coverage mismatch: missing={expected-seen}, extra={seen-expected}"
+          assert all(counts[m] > 0 for m in expected), counts
+          print("mission distribution:", counts)
+          print("all 120 levels have solver records and all six mission types are present")
+          PY
+
+      - name: Commit generated levels
+        run: |
+          set -euo pipefail
+          git config user.name "campaign-generator[bot]"
+          git config user.email "campaign-generator[bot]@users.noreply.github.com"
+          git add godot_project/levels/level_*.json godot_project/levels/index.json
+          if git diff --cached --quiet; then
+            echo "Generated level data is already up to date."
+          else
+            git commit -m "content: regenerate 120 solver-balanced six-mission levels"
+            git push origin HEAD:upgrade/godot-4.7.2
+          fi
