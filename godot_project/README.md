@@ -1,6 +1,6 @@
 # Bubble Shooter: Classic Blast
 
-A complete 120-level hex-grid bubble shooter for Android, built in Godot 4.4 from
+A 120-level hex-grid bubble-shooter build candidate for Android, migrated to Godot 4.7.2 from
 `blueprint/original/01..10.md`. Portrait 1080x1920, 60 fps, offline-first, ads
 shipped **off** behind a one-line remote switch.
 
@@ -45,7 +45,7 @@ xvfb-run -a -s "-screen 0 1080x1920x24" \
 python3 tools/visual_qa.py godot_project/qa_proof
 
 # regenerate every level from scratch (about 20 seconds)
-python3 tools/levelgen.py --out godot_project/levels --count 100
+python3 tools/levelgen.py --out godot_project/levels --count 120
 python3 tools/validate_levels.py godot_project/levels
 ```
 
@@ -92,22 +92,22 @@ Nothing ships unverified. Two gates run on every push:
 The Android build depends on both jobs, so a broken button cannot reach a
 release. `qa_proof/` holds the frames and the report from the last run.
 
-## What is real and what still needs you
+## Verified implementation and remaining production work
 
-Real, tested, in this repo:
+Implemented and CI-tested in this repository:
 
 - grid geometry, substepped collision, wall reflection, snapping, matching,
   floating-cluster removal, ice/stone/chained blockers, five boosters
 - 120 levels, each played by a greedy solver and kept only if it clears with
   2-6 shots to spare; star thresholds derived from that run
 - save integrity, lives regen, economy, daily spin, piggy bank, store UI
-- 24 headless tests including a real gameplay-scene shot pipeline
+- 27 headless tests including a real gameplay-scene shot pipeline
 
 Needs your accounts or hardware:
 
 - **Google Play / App Store**: signing keystore, listing assets, content rating
 - **Ad units**: real AdMob/MAX ids in the config (15-day switch)
-- **IAP**: `bs.*` products created in Play Console, plus the native billing bridge
+- **IAP**: `bs.*` products still need to be created in Play Console and a native billing bridge must be integrated and purchase-tested.
 - **Native ad SDK**: the Godot project talks to a `ClassicBlastAds` singleton when
   one is installed. Without it, ads stay in simulation/off mode - by design.
 - **iOS**: `export_presets.cfg` ships an `iOS` preset that exports an Xcode project
