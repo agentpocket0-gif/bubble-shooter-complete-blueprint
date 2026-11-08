@@ -1,0 +1,21 @@
+PASS  splash renders the real title logo texture
+FAIL  captured 01_splash_screen.png  [headless: no framebuffer, run under xvfb]
+PASS  saga map builds 120 level buttons  [found=120]
+PASS  level 1 button exists and is unlocked
+PASS  level 1 button has a connected pressed signal
+FAIL  captured 02_saga_world_map.png  [headless: no framebuffer, run under xvfb]
+PASS  piggy bank rail button opens the popup
+FAIL  captured 03_piggy_bank_open.png  [headless: no framebuffer, run under xvfb]
+PASS  piggy bank Close button actually closes the popup
+FAIL  captured 04_piggy_bank_closed_back_to_map.png  [headless: no framebuffer, run under xvfb]
+PASS  store rail button opens the shop
+FAIL  captured 05_store_and_spin_wheel.png  [headless: no framebuffer, run under xvfb]
+PASS  tapping level 1 starts that level  [state=3 level=1]
+PASS  level 1 populates the hex grid from level_001.json  [bubbles=43]
+PASS  the board is drawn with real bubble sprites, not drawn circles  [sprites=43 bubbles=43]
+PASS  every bubble sprite has a real texture
+FAIL  captured 06_level_1_active_gameplay.png  [headless: no framebuffer, run under xvfb]
+PASS  firing a bubble resolves and costs one move  [13 -> 12]
+PASS  the score HUD updates after the shot  [hud=50 score=50]
+FAIL  captured 07_after_shot.png  [headless: no framebuffer, run under xvfb]
+20 checks, 7 failed

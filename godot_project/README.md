@@ -1,6 +1,6 @@
 # Bubble Shooter: Classic Blast
 
-A complete 100-level hex-grid bubble shooter for Android, built in Godot 4.4 from
+A complete 120-level hex-grid bubble shooter for Android, built in Godot 4.4 from
 `blueprint/original/01..10.md`. Portrait 1080x1920, 60 fps, offline-first, ads
 shipped **off** behind a one-line remote switch.
 
@@ -20,9 +20,9 @@ godot_project/
     SaveSystem.gd          atomic JSON + HMAC tamper evidence
     UI.gd / Overlays.gd    widget factory, modals
   scenes/                  Boot, Splash, SagaMap, Gameplay, Result
-  levels/                  100 solver-balanced level files + index.json
+  levels/                  120 solver-balanced level files + index.json
   config/                  bundled monetisation config
-  tests/                   headless test suite (24 checks)
+  tests/                   headless test suite + visual QA harness
 tools/
   levelgen.py              generator + greedy solver + star thresholds
   validate_levels.py       CI gate
@@ -35,8 +35,14 @@ tools/
 # editor
 godot --path godot_project
 
-# headless test suite (24 checks, exits non-zero on failure)
+# headless test suite (27 checks, exits non-zero on failure)
 godot --headless --audio-driver Dummy --path godot_project res://tests/TestRunner.tscn
+
+# runtime proof + screenshots (needs a display; CI uses xvfb)
+xvfb-run -a -s "-screen 0 1080x1920x24" \
+  godot --path godot_project --rendering-driver opengl3 --rendering-method gl_compatibility \
+  --audio-driver Dummy res://tests/VisualQA.tscn
+python3 tools/visual_qa.py godot_project/qa_proof
 
 # regenerate every level from scratch (about 20 seconds)
 python3 tools/levelgen.py --out godot_project/levels --count 100
@@ -73,7 +79,7 @@ Real, tested, in this repo:
 
 - grid geometry, substepped collision, wall reflection, snapping, matching,
   floating-cluster removal, ice/stone/chained blockers, five boosters
-- 100 levels, each played by a greedy solver and kept only if it clears with
+- 120 levels, each played by a greedy solver and kept only if it clears with
   2-6 shots to spare; star thresholds derived from that run
 - save integrity, lives regen, economy, daily spin, piggy bank, store UI
 - 24 headless tests including a real gameplay-scene shot pipeline

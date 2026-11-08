@@ -755,6 +755,11 @@ func _show_laser_marker() -> void:
 # --------------------------------------------------------------------------- #
 # pause
 # --------------------------------------------------------------------------- #
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and pause_overlay == null:
+		_toggle_pause()
+
+
 func _toggle_pause() -> void:
 	if pause_overlay != null:
 		pause_overlay.queue_free()

@@ -1,0 +1,83 @@
+{
+  "id": 103,
+  "world": 6,
+  "name": "Diamond 103",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 676440282
+  },
+  "shots": 18,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "1111155552.",
+    "..........",
+    ".....4.....",
+    "....665...",
+    "...43i6x...",
+    "..i336221.",
+    ".644332i11.",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 2,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 6,
+      "col": 7,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 24
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "diamond silhouette, 6 colours, dense blockers, 31 bubbles",
+  "greedy": {
+    "score": 790,
+    "shots_used": 14,
+    "shots_left": 4
+  }
+}

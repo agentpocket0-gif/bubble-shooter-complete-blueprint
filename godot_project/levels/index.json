@@ -599,7 +599,127 @@
       "world": 5,
       "file": "level_100.json",
       "name": "Full 100"
+    },
+    {
+      "id": 101,
+      "world": 6,
+      "file": "level_101.json",
+      "name": "Arch 101"
+    },
+    {
+      "id": 102,
+      "world": 6,
+      "file": "level_102.json",
+      "name": "Checker 102"
+    },
+    {
+      "id": 103,
+      "world": 6,
+      "file": "level_103.json",
+      "name": "Diamond 103"
+    },
+    {
+      "id": 104,
+      "world": 6,
+      "file": "level_104.json",
+      "name": "Towers 104"
+    },
+    {
+      "id": 105,
+      "world": 6,
+      "file": "level_105.json",
+      "name": "Funnel 105"
+    },
+    {
+      "id": 106,
+      "world": 6,
+      "file": "level_106.json",
+      "name": "Zigzag 106"
+    },
+    {
+      "id": 107,
+      "world": 6,
+      "file": "level_107.json",
+      "name": "Cross 107"
+    },
+    {
+      "id": 108,
+      "world": 6,
+      "file": "level_108.json",
+      "name": "Heart 108"
+    },
+    {
+      "id": 109,
+      "world": 6,
+      "file": "level_109.json",
+      "name": "Full 109"
+    },
+    {
+      "id": 110,
+      "world": 6,
+      "file": "level_110.json",
+      "name": "Arch 110"
+    },
+    {
+      "id": 111,
+      "world": 6,
+      "file": "level_111.json",
+      "name": "Checker 111"
+    },
+    {
+      "id": 112,
+      "world": 6,
+      "file": "level_112.json",
+      "name": "Diamond 112"
+    },
+    {
+      "id": 113,
+      "world": 6,
+      "file": "level_113.json",
+      "name": "Towers 113"
+    },
+    {
+      "id": 114,
+      "world": 6,
+      "file": "level_114.json",
+      "name": "Funnel 114"
+    },
+    {
+      "id": 115,
+      "world": 6,
+      "file": "level_115.json",
+      "name": "Zigzag 115"
+    },
+    {
+      "id": 116,
+      "world": 6,
+      "file": "level_116.json",
+      "name": "Cross 116"
+    },
+    {
+      "id": 117,
+      "world": 6,
+      "file": "level_117.json",
+      "name": "Heart 117"
+    },
+    {
+      "id": 118,
+      "world": 6,
+      "file": "level_118.json",
+      "name": "Full 118"
+    },
+    {
+      "id": 119,
+      "world": 6,
+      "file": "level_119.json",
+      "name": "Arch 119"
+    },
+    {
+      "id": 120,
+      "world": 6,
+      "file": "level_120.json",
+      "name": "Checker 120"
     }
   ],
-  "count": 100
+  "count": 120
 }

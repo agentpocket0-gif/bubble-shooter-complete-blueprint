@@ -23,6 +23,7 @@ func _ready() -> void:
 	_test_save_tamper()
 	_test_all_levels()
 	_test_playthrough()
+	_test_assets()
 	await _test_gameplay_scene()
 	_report()
 
@@ -180,10 +181,10 @@ func _test_save_tamper() -> void:
 
 func _test_all_levels() -> void:
 	var idx := LevelLibrary.index()
-	_check("level index has 100 entries", idx.size() == 100, "size=%d" % idx.size())
+	_check("level index has 120 entries", idx.size() == 120, "size=%d" % idx.size())
 	var bad := 0
 	var unbalanced := 0
-	for i in range(1, 101):
+	for i in range(1, 121):
 		var lv := LevelLibrary.load_level(i)
 		if lv.is_empty():
 			bad += 1
@@ -279,3 +280,53 @@ func _test_gameplay_scene() -> void:
 		"%d -> %d" % [board_before, game.board.occupied_count()])
 	game.queue_free()
 	await get_tree().process_frame
+
+
+# --------------------------------------------------------------------------- #
+# Assets: nothing in the code may point at a file that is not there.
+# --------------------------------------------------------------------------- #
+func _walk(dir_path: String, suffix: String) -> Array[String]:
+	var out: Array[String] = []
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return out
+	dir.list_dir_begin()
+	var name := dir.get_next()
+	while name != "":
+		if name.begins_with("."):
+			name = dir.get_next()
+			continue
+		var full := dir_path.path_join(name)
+		if dir.current_is_dir():
+			out.append_array(_walk(full, suffix))
+		elif name.ends_with(suffix):
+			out.append(full)
+		name = dir.get_next()
+	dir.list_dir_end()
+	return out
+
+
+func _test_assets() -> void:
+	var rx := RegEx.new()
+	rx.compile("res://assets/[A-Za-z0-9_/\\-%.]+\\.(png|wav|ogg)")
+	var missing: Array[String] = []
+	var scanned := 0
+	for file in _walk("res://", ".gd"):
+		var text := FileAccess.get_file_as_string(file)
+		for m in rx.search_all(text):
+			var path := m.get_string()
+			if path.contains("%"):
+				continue
+			scanned += 1
+			if not ResourceLoader.exists(path):
+				missing.append(path + "  (in " + file + ")")
+	_check("every asset path used in code exists", missing.is_empty(),
+		"%d checked, missing: %s" % [scanned, str(missing.slice(0, 4))])
+
+	var bad: Array[String] = []
+	for path in AssetRegistry.all_paths():
+		if not ResourceLoader.exists(path):
+			bad.append(path)
+	_check("every file in AssetRegistry resolves", bad.is_empty(), str(bad.slice(0, 4)))
+	_check("AssetRegistry catalogues the full pack", AssetRegistry.TEXTURES.size() >= 140,
+		"%d textures" % AssetRegistry.TEXTURES.size())

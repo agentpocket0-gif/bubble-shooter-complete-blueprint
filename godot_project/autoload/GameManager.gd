@@ -10,7 +10,7 @@ enum State { BOOT, SPLASH, SAGA_MAP, LEVEL_PLAY, RESULT_WIN, RESULT_LOSE }
 const SAVE_PATH := "user://save_data.json"
 const MAX_LIVES := 5
 const LIFE_SECONDS := 30 * 60
-const LEVEL_COUNT := 100
+const LEVEL_COUNT := 120
 
 signal state_changed(new_state: int)
 signal wallet_changed()
@@ -22,6 +22,9 @@ var current_level_id: int = 1
 var last_result: Dictionary = {}
 var attempt_index: int = 0
 var pending_level_id: int = 1
+## Set by the QA harness so a button press can be exercised without the scene
+## tree being torn down underneath the test.
+var suppress_scene_changes := false
 
 var _lives_tick := 0.0
 
@@ -91,7 +94,7 @@ func save() -> void:
 func go_to(new_state: int, scene_path: String = "") -> void:
 	state = new_state
 	state_changed.emit(state)
-	if scene_path != "":
+	if scene_path != "" and not suppress_scene_changes:
 		# deferred: a state change is often requested from _ready(), and the
 		# scene tree is busy adding children at that moment
 		get_tree().call_deferred("change_scene_to_file", scene_path)

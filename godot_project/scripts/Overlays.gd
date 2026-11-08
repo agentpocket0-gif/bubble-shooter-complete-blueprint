@@ -11,8 +11,15 @@ static func _modal(parent: Control, title_text: String) -> Dictionary:
 	var root := Control.new()
 	UI.full_rect(root)
 	root.process_mode = Node.PROCESS_MODE_ALWAYS
+	root.name = "Overlay"
 	parent.add_child(root)
-	root.add_child(UI.scrim())
+	var scrim := UI.scrim()
+	root.add_child(scrim)
+	# tapping the dimmer closes the popup, like every other mobile game
+	scrim.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+			AudioManager.play("sfx_popup_close")
+			root.queue_free())
 
 	var panel := UI.popup(W)
 	panel.position = Vector2((1080.0 - W) / 2.0, 420)

@@ -24,11 +24,13 @@ func _build() -> void:
 	bg.stretch_mode = TextureRect.STRETCH_TILE
 	UI.full_rect(bg)
 	bg.modulate = Color(0.85, 0.85, 0.95, 1)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
 	var shade := ColorRect.new()
 	shade.color = Color(0.05, 0.05, 0.09, 0.55)
 	UI.full_rect(shade)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
 
 	scroll = ScrollContainer.new()
@@ -119,6 +121,8 @@ func _level_row(id: int) -> Control:
 	var btn := Button.new()
 	btn.flat = true
 	btn.size = Vector2(NODE_SIZE, NODE_SIZE)
+	btn.set_meta("level_id", id)
+	btn.set_meta("unlocked", unlocked)
 	btn.pressed.connect(_on_level_pressed.bind(id))
 	holder.add_child(btn)
 
@@ -160,13 +164,38 @@ func _build_hud() -> void:
 	rail.size = Vector2(120, 620)
 	rail.add_theme_constant_override("separation", 26)
 	root.add_child(rail)
-	rail.add_child(UI.icon_button("icon_spin", 110, func() -> void: _modal(Overlays.show_spin)))
-	rail.add_child(UI.icon_button("icon_piggy", 110, func() -> void: _modal(Overlays.show_piggy)))
-	rail.add_child(UI.icon_button("icon_shop", 110, func() -> void: _modal(Overlays.show_store)))
-	rail.add_child(UI.icon_button("icon_gift", 110, func() -> void: _modal(Overlays.show_store)))
+	_add_rail_button(rail, "icon_spin", "spin", func() -> void: _modal(Overlays.show_spin))
+	_add_rail_button(rail, "icon_piggy", "piggy", func() -> void: _modal(Overlays.show_piggy))
+	_add_rail_button(rail, "icon_shop", "store", func() -> void: _modal(Overlays.show_store))
+	_add_rail_button(rail, "icon_gift", "gift", func() -> void: _modal(Overlays.show_store))
 
 	GameManager.lives_changed.connect(_refresh_hud)
 	GameManager.wallet_changed.connect(_refresh_hud)
+
+
+func _add_rail_button(rail: VBoxContainer, icon_name: String, action: String, cb: Callable) -> void:
+	var b := UI.icon_button(icon_name, 110, cb)
+	b.set_meta("action", action)
+	rail.add_child(b)
+
+
+## Used by the QA harness: presses the real rail button, not the handler behind it.
+func press_rail_button(action: String) -> bool:
+	for b in find_children("*", "TextureButton", true, false):
+		if b.has_meta("action") and str(b.get_meta("action")) == action:
+			(b as TextureButton).emit_signal("pressed")
+			return true
+	return false
+
+
+func press_overlay_button(label: String) -> bool:
+	if not has_overlay():
+		return false
+	for b in _overlay.find_children("*", "Button", true, false):
+		if (b as Button).text == label:
+			(b as Button).emit_signal("pressed")
+			return true
+	return false
 
 
 func _process(_delta: float) -> void:
@@ -208,6 +237,25 @@ func _on_level_pressed(id: int) -> void:
 	GameManager.start_level(id)
 
 
+## Used by the QA harness and by the level buttons' own signal.
+func press_level_button(level_id: int) -> bool:
+	for b in find_children("*", "Button", true, false):
+		if b.has_meta("level_id") and int(b.get_meta("level_id")) == level_id:
+			(b as Button).emit_signal("pressed")
+			return true
+	return false
+
+
+func has_overlay() -> bool:
+	return _overlay != null and is_instance_valid(_overlay) and _overlay.get_child_count() > 0
+
+
+func close_overlay() -> void:
+	if has_overlay():
+		_overlay.queue_free()
+		_overlay = null
+
+
 func _modal(fn: Callable) -> void:
 	if _overlay != null and is_instance_valid(_overlay):
 		return
@@ -223,5 +271,11 @@ func _open_settings() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
-		get_tree().quit()
+	if what != NOTIFICATION_WM_GO_BACK_REQUEST:
+		return
+	# back pops an overlay before it changes state
+	if _overlay != null and is_instance_valid(_overlay):
+		_overlay.queue_free()
+		_overlay = null
+		return
+	get_tree().quit()
