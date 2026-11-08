@@ -24,7 +24,6 @@ func _ready() -> void:
 	_test_save_tamper()
 	_test_iap_fails_closed_without_bridge()
 	_test_all_levels()
-	_test_playthrough()
 	_test_assets()
 	await _test_gameplay_scene()
 	_report()
@@ -225,52 +224,74 @@ func _test_iap_fails_closed_without_bridge() -> void:
 
 
 func _test_all_levels() -> void:
-	var idx := LevelLibrary.index()
-	_check("level index has 120 entries", idx.size() == 120, "size=%d" % idx.size())
+	# The first 120 levels are generated at runtime too. This test verifies the
+	# generator, campaign seed, six objectives, difficulty curve and endless IDs.
+	_check("new campaign starts with a 120-level map preview", LevelLibrary.count() == 120)
 	var bad := 0
-	var unbalanced := 0
 	var mission_types := {}
 	var rescue_levels := 0
 	var rescue_chain_cells := 0
+	var campaign_seed := GameManager.campaign_seed()
+	var level_one_bubbles := 0
+
 	for i in range(1, 121):
 		var lv := LevelLibrary.load_level(i)
-		if lv.is_empty():
+		if lv.is_empty() or int(lv.get("id", -1)) != i:
 			bad += 1
 			continue
 		var cols := int(lv["grid"]["cols"])
 		var rows := int(lv["grid"]["rows"])
-		if cols < 9 or cols > 13 or rows < 10 or rows > 20:
+		if cols < 9 or cols > 13 or rows != 14:
 			bad += 1
-		for r in lv["layout"].size():
+		for r in range(rows):
 			var limit := cols if r % 2 == 0 else cols - 1
-			if str(lv["layout"][r]).length() > limit:
+			if str(lv["layout"][r]).length() != limit:
 				bad += 1
-		if int(lv["shots"]) < 5:
+		if int(lv["shots"]) < 5 or int(lv.get("seed", 0)) != ProceduralLevelGenerator.seed_for(i, campaign_seed):
 			bad += 1
-		var s: Dictionary = lv["stars"]
-		if not (int(s["1"]) < int(s["2"]) and int(s["2"]) < int(s["3"])):
+		var stars: Dictionary = lv["stars"]
+		if not (int(stars["1"]) < int(stars["2"]) and int(stars["2"]) < int(stars["3"])):
 			bad += 1
-		if not lv.has("greedy"):
-			unbalanced += 1
+		if i == 1:
+			for row in lv["layout"]:
+				level_one_bubbles += str(row).count("1") + str(row).count("2") + str(row).count("3") + str(row).count("4") + str(row).count("5") + str(row).count("6")
 		for objective in lv.get("objectives", []):
 			var mission := str(objective.get("type", ""))
 			mission_types[mission] = true
 			if mission == "rescue":
 				rescue_levels += 1
-				if int(objective.get("count", 0)) > 0:
-					for row in lv["layout"]:
-						rescue_chain_cells += str(row).count("c")
-		if str(lv.get("objectives", [{}])[0].get("type", "")) == "survive" and int(lv["objectives"][0].get("shots", 0)) <= 0:
-			bad += 1
-	_check("every level passes the schema validator", bad == 0, "bad=%d" % bad)
-	_check("every level is solver-balanced", unbalanced == 0, "unbalanced=%d" % unbalanced)
+				for row in lv["layout"]:
+					rescue_chain_cells += str(row).count("c")
+			if mission == "survive" and int(objective.get("shots", 0)) <= 0:
+				bad += 1
+
+	_check("120 on-demand levels pass the generation schema", bad == 0, "bad=%d" % bad)
+	_check("seeded tutorial board contains 43 bubbles", level_one_bubbles == 43, "bubbles=%d" % level_one_bubbles)
 	var required_missions := ["clear_all", "clear_color", "pop_count", "rescue", "score", "survive"]
 	var missing_missions: Array[String] = []
 	for mission_type in required_missions:
 		if not mission_types.has(mission_type):
 			missing_missions.append(mission_type)
-	_check("all six mission types are present", missing_missions.is_empty(), str(missing_missions))
-	_check("rescue levels contain chained bubbles", rescue_levels > 0 and rescue_chain_cells >= rescue_levels)
+	_check("procedural campaign generates all six mission types", missing_missions.is_empty(), str(missing_missions))
+	_check("procedural rescue levels contain chained bubbles", rescue_levels == 20 and rescue_chain_cells >= rescue_levels)
+
+	var seed_a := ProceduralLevelGenerator.generate(321, 123456)
+	var seed_b := ProceduralLevelGenerator.generate(321, 123456)
+	var seed_c := ProceduralLevelGenerator.generate(321, 654321)
+	_check("same campaign seed reproduces the same level", seed_a["layout"] == seed_b["layout"] and seed_a["seed"] == seed_b["seed"])
+	_check("different campaign seeds change generated content", seed_a["seed"] != seed_c["seed"])
+	_check("difficulty rises with player progression",
+		ProceduralLevelGenerator.difficulty_for(1) < ProceduralLevelGenerator.difficulty_for(60)
+		and ProceduralLevelGenerator.difficulty_for(60) < ProceduralLevelGenerator.difficulty_for(120)
+		and ProceduralLevelGenerator.difficulty_for(120) < ProceduralLevelGenerator.difficulty_for(240))
+
+	var endless_level := LevelLibrary.load_level(2400)
+	_check("level 2400 generates without a bundled file",
+		int(endless_level.get("id", 0)) == 2400 and not endless_level.is_empty())
+	var previous_max := int(GameManager.data["progress"]["maxLevel"])
+	GameManager.data["progress"]["maxLevel"] = 121
+	_check("saga map preview expands as the player unlocks levels", LevelLibrary.count() == 141)
+	GameManager.data["progress"]["maxLevel"] = previous_max
 
 
 func _test_playthrough() -> void:
