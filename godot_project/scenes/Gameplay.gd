@@ -344,7 +344,7 @@ func _aim_at(screen_pos: Vector2) -> void:
 	_update_preview()
 
 
-func _trace_shot(angle: float):
+func _trace_shot(angle: float) -> Variant:
 	# Keep the same board-space origin for aiming, previews and real shots.
 	return ShotSimulator.trace(board, angle, CANNON_POS)
 
