@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>fairy_idle_00.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{524,1},{258,187}}</string>
+				<key>offset</key>
+				<string>{-6,-27}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_01.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{524,190},{237,168}}</string>
+				<key>offset</key>
+				<string>{11,-29}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{763,243},{211,159}}</string>
+				<key>offset</key>
+				<string>{23,-42}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{472,360},{177,154}}</string>
+				<key>offset</key>
+				<string>{31,-39}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_04.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{254,362},{125,128}}</string>
+				<key>offset</key>
+				<string>{38,-44}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_05.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{651,360},{138,110}}</string>
+				<key>offset</key>
+				<string>{-62,51}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_06.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{254,221},{216,139}}</string>
+				<key>offset</key>
+				<string>{-19,48}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_07.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{784,1},{240,180}}</string>
+				<key>offset</key>
+				<string>{-13,17}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_08.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,1},{265,216}}</string>
+				<key>offset</key>
+				<string>{1,10}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_09.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{268,1},{254,218}}</string>
+				<key>offset</key>
+				<string>{4,-1}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+			<key>fairy_idle_10.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,219},{251,195}}</string>
+				<key>offset</key>
+				<string>{6,-19}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{270,243}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>fairy_idle.png</string>
+			<key>realTextureFileName</key>
+			<string>fairy_idle.png</string>
+			<key>size</key>
+			<string>{975,515}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>975</integer>
+			<key>height</key>
+			<integer>515</integer>
+		</dict>
+	</dict>
+</plist>

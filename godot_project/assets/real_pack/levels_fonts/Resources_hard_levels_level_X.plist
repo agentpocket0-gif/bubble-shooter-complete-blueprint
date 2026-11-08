@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>hard_level_X.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{103,102}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{103,102}</string>
+			</dict>
+			<key>extra_hard_level_X.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{103,0},{103,102}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{103,102}</string>
+			</dict>
+			<key>super_hard_level_X.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{206,0},{103,102}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{103,102}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>hard_levels_level_X.png</string>
+			<key>realTextureFileName</key>
+			<string>hard_levels_level_X.png</string>
+			<key>size</key>
+			<string>{309,102}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>309</integer>
+			<key>height</key>
+			<integer>102</integer>
+		</dict>
+	</dict>
+</plist>

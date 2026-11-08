@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>fairy_color_exp_00.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{222,985},{27,27}}</string>
+				<key>offset</key>
+				<string>{-7,5}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_01.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{222,985},{27,27}}</string>
+				<key>offset</key>
+				<string>{-7,5}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{267,760},{72,73}}</string>
+				<key>offset</key>
+				<string>{-6,5}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{222,890},{92,93}}</string>
+				<key>offset</key>
+				<string>{-6,5}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_04.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{112,907},{108,111}}</string>
+				<key>offset</key>
+				<string>{-6,3}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_05.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,907},{109,112}}</string>
+				<key>offset</key>
+				<string>{-7,3}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_06.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{139,760},{126,128}}</string>
+				<key>offset</key>
+				<string>{-3,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_07.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,768},{137,136}}</string>
+				<key>offset</key>
+				<string>{-3,1}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_08.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{138,621},{137,136}}</string>
+				<key>offset</key>
+				<string>{-3,1}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_09.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{147,1},{145,142}}</string>
+				<key>offset</key>
+				<string>{1,1}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_10.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,473},{146,146}}</string>
+				<key>offset</key>
+				<string>{2,-1}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_11.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,160},{144,154}}</string>
+				<key>offset</key>
+				<string>{2,-2}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_12.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,1},{144,157}}</string>
+				<key>offset</key>
+				<string>{2,-3}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_13.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,316},{142,155}}</string>
+				<key>offset</key>
+				<string>{3,-1}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_14.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{145,316},{137,151}}</string>
+				<key>offset</key>
+				<string>{1,2}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_15.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{147,148},{135,149}}</string>
+				<key>offset</key>
+				<string>{0,4}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+			<key>fairy_color_exp_16.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1,621},{135,145}}</string>
+				<key>offset</key>
+				<string>{0,2}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{189,187}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>fairy_color_exp.png</string>
+			<key>realTextureFileName</key>
+			<string>fairy_color_exp.png</string>
+			<key>size</key>
+			<string>{340,1020}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>340</integer>
+			<key>height</key>
+			<integer>1020</integer>
+		</dict>
+	</dict>
+</plist>
