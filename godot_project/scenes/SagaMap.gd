@@ -61,19 +61,53 @@ func _build() -> void:
 
 func _world_header(world: int) -> Control:
 	var box := Control.new()
-	box.custom_minimum_size = Vector2(1080, 120)
+	box.custom_minimum_size = Vector2(1080, 140)
 	var l := UI.title("WORLD %d" % world, 56)
-	l.size = Vector2(1080, 100)
+	l.position = Vector2(0, 0)
+	l.size = Vector2(1080, 72)
+	l.add_theme_color_override("font_color", Color("#F5D77B"))
 	box.add_child(l)
+	var subtitle := UI.label("LEVEL %03d  -  %03d" % [(world - 1) * 20 + 1, world * 20], 24, UI.MUTED, HORIZONTAL_ALIGNMENT_CENTER)
+	subtitle.position = Vector2(0, 76)
+	subtitle.size = Vector2(1080, 34)
+	box.add_child(subtitle)
+	var rule := ColorRect.new()
+	rule.color = Color("#80643A")
+	rule.position = Vector2(280, 126)
+	rule.size = Vector2(520, 4)
+	box.add_child(rule)
 	return box
+
+
+func _node_offset_for(id: int) -> float:
+	return 200.0 if id % 4 < 2 else 1080.0 - 200.0 - NODE_SIZE
 
 
 func _level_row(id: int) -> Control:
 	var row := Control.new()
 	row.custom_minimum_size = Vector2(1080, ROW_HEIGHT)
 
-	# winding path: alternate the node left and right so the map reads as a trail
-	var offset := 200.0 if id % 4 < 2 else 1080.0 - 200.0 - NODE_SIZE
+	# Join adjacent level nodes with a visible trail, but stop at world breaks.
+	var offset := _node_offset_for(id)
+	if id < LevelLibrary.count() and LevelLibrary.world_of(id) == LevelLibrary.world_of(id + 1):
+		var next_offset := _node_offset_for(id + 1)
+		var trail := Line2D.new()
+		trail.width = 24.0
+		trail.default_color = Color("#344154")
+		trail.begin_cap_mode = Line2D.LINE_CAP_ROUND
+		trail.end_cap_mode = Line2D.LINE_CAP_ROUND
+		trail.add_point(Vector2(offset + NODE_SIZE / 2.0, ROW_HEIGHT / 2.0))
+		trail.add_point(Vector2(next_offset + NODE_SIZE / 2.0, ROW_HEIGHT + 40.0 + ROW_HEIGHT / 2.0))
+		row.add_child(trail)
+		var highlight := Line2D.new()
+		highlight.width = 7.0
+		highlight.default_color = Color("#B58A45") if GameManager.is_unlocked(id + 1) else Color("#667085")
+		highlight.begin_cap_mode = Line2D.LINE_CAP_ROUND
+		highlight.end_cap_mode = Line2D.LINE_CAP_ROUND
+		highlight.add_point(Vector2(offset + NODE_SIZE / 2.0, ROW_HEIGHT / 2.0))
+		highlight.add_point(Vector2(next_offset + NODE_SIZE / 2.0, ROW_HEIGHT + 40.0 + ROW_HEIGHT / 2.0))
+		row.add_child(highlight)
+
 	var holder := Control.new()
 	holder.position = Vector2(offset, (ROW_HEIGHT - NODE_SIZE) / 2.0)
 	holder.size = Vector2(NODE_SIZE, NODE_SIZE)
@@ -211,7 +245,7 @@ func _scroll_to_current() -> void:
 		var w := LevelLibrary.world_of(id)
 		if w != world:
 			world = w
-			y += 120.0 + 40.0
+			y += 140.0 + 40.0
 		if id == target:
 			break
 		y += ROW_HEIGHT + 40.0
