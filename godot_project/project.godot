@@ -7,10 +7,11 @@ config_version=5
 [application]
 
 config/name="Bubble Shooter: Classic Blast"
-config/description="A 100-level hex-grid bubble shooter."
+config/description="A 120-level hex-grid bubble shooter."
 config/version="3.0.0"
 run/main_scene="res://scenes/Boot.tscn"
-config/features=PackedStringArray("4.4", "Mobile")
+run/max_fps=60
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://assets/icon.png"
 boot_splash/bg_color=Color(0.078, 0.078, 0.102, 1)
 boot_splash/show_image=false
