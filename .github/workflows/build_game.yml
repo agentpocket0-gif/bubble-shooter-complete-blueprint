@@ -171,8 +171,18 @@ jobs:
           echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=${KEY_ALIAS:-bubbleshooter}" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=${KEY_PASSWORD:-${KEYSTORE_PASSWORD:-ci-throwaway}}" >> "$GITHUB_ENV"
 
+      # --install-android-build-template is meant to run alongside an export and
+      # blocks when called on its own, so unpack the template the same way the
+      # editor does.
       - name: Install Android build template
-        run: ./godot --headless --path "$PROJECT_DIR" --install-android-build-template
+        run: |
+          set -euo pipefail
+          TPL="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}"
+          test -f "$TPL/android_source.zip"
+          rm -rf "$PROJECT_DIR/android/build"
+          mkdir -p "$PROJECT_DIR/android/build"
+          unzip -q "$TPL/android_source.zip" -d "$PROJECT_DIR/android/build"
+          ls "$PROJECT_DIR/android/build"
 
       - name: Import project
         run: ./godot --headless --path "$PROJECT_DIR" --import
