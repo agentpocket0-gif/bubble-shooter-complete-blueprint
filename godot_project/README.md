@@ -92,6 +92,21 @@ Nothing ships unverified. Two gates run on every push:
 The Android build depends on both jobs, so a broken button cannot reach a
 release. `qa_proof/` holds the frames and the report from the last run.
 
+## Campaign mission reference
+
+The 120-level campaign rotates through six primary mission types (20 levels each):
+
+| Mission | How the player wins |
+|---|---|
+| Clear all | Clear the board down to the final single-bubble allowance. |
+| Clear colour | Remove every bubble of the named colour. |
+| Pop count | Pop at least the required number of bubbles. |
+| Rescue | Free the required chained bubbles. Rescue levels also include a secondary pop-count goal. |
+| Score | Reach the level's score target. |
+| Survive | Complete the required number of safe shots without the board reaching the danger row. |
+
+The Python solver checks every objective on each level before it records a level as balanced. The level validator also rejects a campaign that lacks any of the six mission types.
+
 ## Verified implementation and remaining production work
 
 Implemented and CI-tested in this repository:
