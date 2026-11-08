@@ -70,7 +70,25 @@ func _step_map() -> void:
 	for b in _map.find_children("*", "Button", true, false):
 		if b.has_meta("level_id"):
 			nodes += 1
-	_check("saga map builds 120 level buttons", nodes == 120, "found=%d" % nodes)
+	_check("saga map builds the current 120-level preview", nodes == 120, "found=%d" % nodes)
+
+	var scroll_nodes := _map.find_children("*", "ScrollContainer", true, false)
+	var can_scroll := false
+	if not scroll_nodes.is_empty():
+		var map_scroll := scroll_nodes[0] as ScrollContainer
+		var vertical_bar := map_scroll.get_v_scroll_bar()
+		can_scroll = vertical_bar.max_value > vertical_bar.page
+	_check("procedural campaign map has a working vertical scroll range", can_scroll)
+	var trail_segments := _map.find_children("*", "Line2D", true, false)
+	_check("map connects level nodes with a visible route", trail_segments.size() >= 2, "segments=%d" % trail_segments.size())
+
+	var rail_actions := {}
+	for rail_button in _map.find_children("*", "TextureButton", true, false):
+		if rail_button.has_meta("action"):
+			rail_actions[str(rail_button.get_meta("action"))] = true
+	_check("map side rail has spin, piggy bank and store actions",
+		rail_actions.size() == 3 and rail_actions.has("spin")
+		and rail_actions.has("piggy") and rail_actions.has("store"))
 
 	var level_one: Button = null
 	for b in _map.find_children("*", "Button", true, false):
@@ -106,6 +124,30 @@ func _step_store() -> void:
 	_map.call("close_overlay")
 	await get_tree().create_timer(0.3).timeout
 
+	var spin_pressed: bool = _map.call("press_rail_button", "spin")
+	await get_tree().create_timer(0.45).timeout
+	_check("spin rail button opens the daily wheel",
+		spin_pressed and bool(_map.call("has_overlay")))
+
+	var spin_button: Button = null
+	for candidate in _map.find_children("*", "Button", true, false):
+		if (candidate as Button).text == "SPIN":
+			spin_button = candidate as Button
+			break
+
+	var coins_before := GameManager.coins()
+	_check("daily wheel offers a free spin when ready",
+		spin_button != null and not spin_button.disabled and StoreAndEconomy.spin_ready())
+	var spin_claimed: bool = _map.call("press_overlay_button", "SPIN")
+	await get_tree().create_timer(1.0).timeout
+	_check("free daily spin grants a virtual prize without spending coins",
+		spin_claimed and spin_button != null and spin_button.disabled
+		and GameManager.coins() >= coins_before)
+	_check("daily spin starts its 24-hour cooldown",
+		not StoreAndEconomy.spin_ready() and StoreAndEconomy.spin_wait_seconds() > 0)
+	_map.call("close_overlay")
+	await get_tree().create_timer(0.3).timeout
+
 
 # --------------------------------------------------------------------------- #
 # 5. level 1: real button press -> gameplay -> shot
@@ -130,7 +172,10 @@ func _step_gameplay() -> void:
 		for q in game.board.row_len(r):
 			if game.board.filled(q, r):
 				filled += 1
-	_check("level 1 populates the hex grid from level_001.json", filled > 20, "bubbles=%d" % filled)
+	_check("level 1 opens with a full 9-row bubble board", filled == 77, "bubbles=%d" % filled)
+	var mission_bottom: float = game.objective_label.position.y + game.objective_label.size.y
+	var bubble_top: float = game.board.centre(0, 0).y + 294.0 - HexBoard.HALF
+	_check("mission text stays clear of the first bubble row", mission_bottom < bubble_top)
 
 	var sprites: int = game.board_layer.get_child_count()
 	_check("the board is drawn with real bubble sprites, not drawn circles",

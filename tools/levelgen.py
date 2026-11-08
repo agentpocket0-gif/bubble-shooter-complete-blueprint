@@ -7,7 +7,7 @@ and `godot_project/scripts/ShotSimulator.gd`: staggered grid, row pitch d*sqrt(3
 odd rows inset by d/2, collision radius 0.92*d, substeps of d/2, xorshift32 colour
 queue seeded by (level id, attempt index).
 
-    python3 tools/levelgen.py --out godot_project/levels --count 100
+    python3 tools/levelgen.py --out godot_project/levels --count 120
 
 Every generated level is played by the greedy solver and only kept when the
 solver wins with 2-6 shots to spare. Star thresholds are derived from the
@@ -35,6 +35,7 @@ ORIGIN_X = LEFT_WALL + HALF   # centre of column 0 on an even row
 CANNON_X = 540.0
 CANNON_Y = 1450.0             # below the deepest legal board row
 MAX_ANGLE = math.radians(75.0)
+MAX_BOUNCES = 3
 STEP = D / 2.0                # substep length; < hit radius so no tunnelling
 MAX_ROWS = 14
 
@@ -178,15 +179,22 @@ def trace(board: Board, angle: float) -> tuple[int, int, bool] | None:
     """Fly a bubble from the cannon and return the cell it lands in."""
     x, y = CANNON_X, CANNON_Y
     dx, dy = math.sin(angle), -math.cos(angle)
+    bounces = 0
     for _ in range(400):
         x += dx * STEP
         y += dy * STEP
         if x - HALF < LEFT_WALL:
+            if bounces >= MAX_BOUNCES:
+                return None
             x = LEFT_WALL + HALF + (LEFT_WALL - (x - HALF))
             dx = -dx
+            bounces += 1
         elif x + HALF > RIGHT_WALL:
+            if bounces >= MAX_BOUNCES:
+                return None
             x = RIGHT_WALL - HALF - ((x + HALF) - RIGHT_WALL)
             dx = -dx
+            bounces += 1
         if y <= 0.0:
             return _snap_ceiling(board, x)
         hit = _first_hit(board, x, y)
@@ -210,14 +218,47 @@ def _first_hit(board: Board, x: float, y: float) -> tuple[int, int] | None:
     return best
 
 
-def _snap_ceiling(board: Board, x: float) -> tuple[int, int, bool] | None:
-    q = int(round((x - ORIGIN_X) / D))
-    q = max(0, min(board.row_len(0) - 1, q))
-    while q < board.row_len(0) and board.filled(q, 0):
-        q += 1
-    if q >= board.row_len(0):
+def _nearest_empty_within(
+    board: Board, start: tuple[int, int], x: float, y: float
+) -> tuple[int, int] | None:
+    """Breadth-first search up to two hex steps, bounded by a 2d radius."""
+    if not board.in_bounds(*start):
         return None
-    return (q, 0, True)
+    queue: list[tuple[tuple[int, int], int]] = [(start, 0)]
+    seen = {start}
+    cursor = 0
+    best: tuple[int, int] | None = None
+    best_d = (2.0 * D) ** 2
+    while cursor < len(queue):
+        (q, r), depth = queue[cursor]
+        cursor += 1
+        cx, cy = board.centre(q, r)
+        dist = (cx - x) ** 2 + (cy - y) ** 2
+        if not board.filled(q, r) and dist <= (2.0 * D) ** 2 and dist < best_d:
+            best, best_d = (q, r), dist
+        if depth >= 2:
+            continue
+        for cell in board.neighbours(q, r):
+            if cell not in seen:
+                seen.add(cell)
+                queue.append((cell, depth + 1))
+    return best
+
+
+def _snap_ceiling(board: Board, x: float) -> tuple[int, int, bool] | None:
+    q = max(0, min(board.row_len(0) - 1, int(round((x - ORIGIN_X) / D))))
+    best, best_d = None, float("inf")
+    for candidate in range(board.row_len(0)):
+        if board.filled(candidate, 0):
+            continue
+        cx, _ = board.centre(candidate, 0)
+        dist = abs(cx - x)
+        if dist < best_d:
+            best, best_d = (candidate, 0), dist
+    if best is not None:
+        return (best[0], best[1], True)
+    fallback = _nearest_empty_within(board, (q, 0), x, 0.0)
+    return (fallback[0], fallback[1], True) if fallback is not None else None
 
 
 def _snap(board: Board, hit: tuple[int, int], x: float, y: float) -> tuple[int, int, bool] | None:
@@ -230,6 +271,8 @@ def _snap(board: Board, hit: tuple[int, int], x: float, y: float) -> tuple[int, 
         dist = (cx - x) ** 2 + (cy - y) ** 2
         if dist < best_d:
             best, best_d = (nq, nr), dist
+    if best is None:
+        best = _nearest_empty_within(board, hit, x, y)
     if best is None:
         return None
     return (best[0], best[1], False)
@@ -263,6 +306,9 @@ def place_and_resolve(board: Board, cell: tuple[int, int, bool], colour: int) ->
 
     floating = board.find_floating()
     for fq, fr in floating:
+        # A chained bubble that loses its support and falls is also rescued.
+        if board.blocker[fr][fq] == B_CHAIN:
+            freed += 1
         board.colour[fr][fq] = EMPTY
         board.hp[fr][fq] = 0
         board.blocker[fr][fq] = B_NONE
@@ -318,7 +364,15 @@ def greedy_play(level: dict, angles: int = 18, verbose: bool = False) -> dict:
             for nq, nr in probe.neighbours(cell[0], cell[1]):
                 if probe.colour[nr][nq] == colour and probe.blocker[nr][nq] != B_CHAIN:
                     same += 1
-            rank = (res["cluster"], res["score"], same, -cell[1])
+            rescue_mission = any(
+                obj.get("type") == "rescue" for obj in level.get("objectives", [])
+            )
+            if rescue_mission:
+                # Prefer moves that free a chained bubble before optimising the
+                # usual pop size and score. This makes rescue levels deliberate.
+                rank = (res["freed"], res["cluster"], res["score"], same, -cell[1])
+            else:
+                rank = (res["cluster"], res["score"], same, -cell[1])
             if best is None or rank > best[0]:
                 best = (rank, angle, probe, res, cell)
         if best is None:
@@ -337,10 +391,12 @@ def greedy_play(level: dict, angles: int = 18, verbose: bool = False) -> dict:
         for cq, cr in res["popped"]:
             colours_cleared[board.palette[colour]] += 1
         shots_used += 1
-        if _objective_met(level, board, score, popped_total, freed_total):
+        if _survive_failed(level, board):
+            break
+        if _objective_met(level, board, score, popped_total, freed_total, shots_used):
             break
 
-    met = _objective_met(level, board, score, popped_total, freed_total)
+    met = _objective_met(level, board, score, popped_total, freed_total, shots_used)
     return {
         "won": met,
         "score": score,
@@ -352,26 +408,34 @@ def greedy_play(level: dict, angles: int = 18, verbose: bool = False) -> dict:
     }
 
 
-def _objective_met(level: dict, board: Board, score: int, popped: int, freed: int) -> bool:
+def _objective_met(level: dict, board: Board, score: int, popped: int,
+                   freed: int, shots_used: int = 0) -> bool:
     for obj in level["objectives"]:
         t = obj["type"]
-        # Blueprint 02 §7: a single unmatched bubble left on the board still
-        # counts as cleared, otherwise the last bubble can be unshootable.
+        # A single unmatched bubble still counts as cleared. Other mission
+        # types must meet their own target; clearing the board is not a shortcut.
         if t == "clear_all" and board.coloured_count() > 1:
             return False
         if t == "clear_color":
             idx = level["palette"].index(obj["color"])
             if any(board.colour[r][q] == idx for r in range(board.rows) for q in range(board.row_len(r))):
                 return False
-        if t == "pop_count" and popped < obj["count"]:
+        if t == "pop_count" and popped < int(obj["count"]):
             return False
-        if t == "rescue" and freed < obj["count"]:
+        if t == "rescue" and freed < int(obj["count"]):
             return False
-        if t == "score" and score < obj["target"]:
+        if t == "score" and score < int(obj["target"]):
             return False
-        if t == "survive" and board.max_row_used() >= board.rows - 1:
-            return False
+        if t == "survive":
+            required_shots = int(obj.get("shots", 0))
+            if shots_used < required_shots or board.max_row_used() >= board.rows - 1:
+                return False
     return True
+
+
+def _survive_failed(level: dict, board: Board) -> bool:
+    has_survive = any(obj.get("type") == "survive" for obj in level.get("objectives", []))
+    return has_survive and board.max_row_used() >= board.rows - 1
 
 
 def _load_layout(board: Board, level: dict) -> None:
@@ -430,9 +494,49 @@ def validate(level: dict) -> list[str]:
         errs.append(f"id {lid}: fewer than 5 shots is not a level")
     if not level["layout"] or all(ch == "." for ch in level["layout"][0]):
         errs.append(f"id {lid}: top row is empty - the board floats")
-    for obj in level["objectives"]:
-        if obj["type"] == "clear_color" and obj["color"] not in level["palette"]:
+    objective_types = {
+        "clear_all", "clear_color", "pop_count", "rescue", "score", "survive"
+    }
+    objectives = level.get("objectives", [])
+    if not isinstance(objectives, list) or not objectives:
+        errs.append(f"id {lid}: at least one objective is required")
+        objectives = []
+    if len(objectives) > 2:
+        errs.append(f"id {lid}: no more than two objectives are allowed")
+
+    chain_cells = {
+        (r, q)
+        for r, line in enumerate(level["layout"])
+        for q, ch in enumerate(line)
+        if ch == "c"
+    }
+    chain_records = {
+        (int(b.get("row", -1)), int(b.get("col", -1)))
+        for b in level.get("blockers", [])
+        if b.get("type") == "chain"
+    }
+    if chain_cells != chain_records:
+        errs.append(f"id {lid}: chained layout cells and blocker records do not match")
+
+    for obj in objectives:
+        t = str(obj.get("type", ""))
+        if t not in objective_types:
+            errs.append(f"id {lid}: unknown objective type {t!r}")
+        elif t == "clear_color" and obj.get("color") not in level["palette"]:
             errs.append(f"id {lid}: clear_color target not in palette")
+        elif t == "pop_count" and int(obj.get("count", 0)) <= 0:
+            errs.append(f"id {lid}: pop_count target must be positive")
+        elif t == "rescue":
+            if int(obj.get("count", 0)) <= 0:
+                errs.append(f"id {lid}: rescue target must be positive")
+            if not chain_cells:
+                errs.append(f"id {lid}: rescue objective has no chained bubbles")
+            if int(obj.get("count", 0)) > len(chain_cells):
+                errs.append(f"id {lid}: rescue target exceeds chained bubbles")
+        elif t == "score" and int(obj.get("target", 0)) <= 0:
+            errs.append(f"id {lid}: score target must be positive")
+        elif t == "survive" and int(obj.get("shots", 0)) <= 0:
+            errs.append(f"id {lid}: survive shot target must be positive")
     return errs
 
 
@@ -447,7 +551,7 @@ SCHEDULE = [
     (26, 40, 5, 1.5, "ice_stone", 0),
     (41, 60, 5, 1.4, "mixed", 8),
     (61, 85, 6, 1.25, "mixed", 6),
-    (86, 100, 6, 1.15, "dense", 5),
+    (86, 120, 6, 1.15, "dense", 5),
 ]
 
 SILHOUETTES = ["full", "arch", "checker", "diamond", "towers", "funnel", "zigzag", "cross", "heart"]
@@ -582,6 +686,68 @@ def build_layout(level_id: int, rng: random.Random, colours: int, cols: int, row
     return layout, blockers, palette
 
 
+def _grid_neighbours(grid: list[list[str]], q: int, r: int) -> list[tuple[int, int]]:
+    if r % 2 == 0:
+        candidates = [(q - 1, r), (q + 1, r), (q - 1, r - 1), (q, r - 1),
+                      (q - 1, r + 1), (q, r + 1)]
+    else:
+        candidates = [(q - 1, r), (q + 1, r), (q, r - 1), (q + 1, r - 1),
+                      (q, r + 1), (q + 1, r + 1)]
+    return [(nq, nr) for nq, nr in candidates
+            if 0 <= nr < len(grid) and 0 <= nq < len(grid[nr])]
+
+
+def _same_colour_component_size(grid: list[list[str]], start: tuple[int, int],
+                                colour_char: str) -> int:
+    seen = {start}
+    stack = [start]
+    while stack:
+        q, r = stack.pop()
+        for cell in _grid_neighbours(grid, q, r):
+            if cell in seen:
+                continue
+            nq, nr = cell
+            if grid[nr][nq] == colour_char:
+                seen.add(cell)
+                stack.append(cell)
+    return len(seen)
+
+
+def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Random,
+                       desired: int = 1) -> tuple[list[str], list[dict], int]:
+    """Place a rescue target beside a matchable colour group."""
+    grid = [list(line) for line in layout]
+    candidates = [(q, r) for r in range(1, len(grid))
+                  for q, ch in enumerate(grid[r]) if ch.isdigit()]
+    rng.shuffle(candidates)
+    added = 0
+
+    for q, r in candidates:
+        original = grid[r][q]
+        grid[r][q] = "c"
+        attachable = any(
+            grid[nr][nq] == original
+            and _same_colour_component_size(grid, (nq, nr), original) >= 2
+            for nq, nr in _grid_neighbours(grid, q, r)
+        )
+        if not attachable:
+            grid[r][q] = original
+            continue
+
+        blockers.append({
+            "row": r, "col": q, "type": "chain",
+            "color": int(original) - 1, "hp": 0,
+        })
+        added += 1
+        if added >= desired:
+            break
+
+    if added == 0:
+        raise ValueError("could not place a chained bubble beside a matchable group")
+    return ["".join(row) for row in grid], blockers, added
+
+
+
 def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
     colours, ratio, blocker_mode, drop = schedule_for(level_id)
     cols = 9 if level_id <= 5 else 10 if level_id <= 20 else 11
@@ -614,14 +780,26 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
                                                  blocker_mode, kind, max(fill_rows, 7))
         coloured = sum(1 for line in layout for ch in line if ch.isdigit())
 
-    objectives: list[dict] = []
-    roll = level_id % 7
-    if roll == 3 and len(palette) >= 3:
-        objectives = [{"type": "clear_color", "color": palette[0]}]
-    elif roll == 5:
-        objectives = [{"type": "pop_count", "count": max(20, int(coloured * 0.8))}]
-    else:
+    # Rotate evenly through all six mission types. Rescue levels receive
+    # actual chained bubble cells; score targets are calibrated later by tune().
+    mission_slot = (level_id - 1) % 6
+    if mission_slot == 0:
         objectives = [{"type": "clear_all"}]
+    elif mission_slot == 1:
+        objectives = [{"type": "clear_color", "color": palette[(level_id // 6) % len(palette)]}]
+    elif mission_slot == 2:
+        objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
+    elif mission_slot == 3:
+        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=1)
+        objectives = [
+            {"type": "rescue", "count": 1},
+            {"type": "pop_count", "count": max(20, int(coloured * 0.55))},
+        ]
+    elif mission_slot == 4:
+        objectives = [{"type": "score", "target": 1}]
+    else:
+        survive_shots = max(7, min(12, int(coloured / 7)))
+        objectives = [{"type": "survive", "shots": survive_shots}]
 
     shots = max(12, int(math.ceil(coloured / 3.2)) + 4)
     return {
@@ -642,22 +820,56 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
 
 
 def tune(level: dict, spare: int = 4) -> dict | None:
-    """Play the level once with a generous shot budget, then set the real budget
-    from what the greedy solver actually needed. Star thresholds come from the
-    same run, so they can never drift from the scoring formula."""
+    """Solve the mission with a generous budget and derive a tested move budget."""
     probe = dict(level)
     probe["grid"] = dict(level["grid"])
     probe["grid"]["seed"] = seed_for(level["id"], 0)
     probe["shots"] = 140
+
+    objectives = [dict(obj) for obj in level.get("objectives", [])]
+    if not 1 <= len(objectives) <= 2:
+        return None
+
+    # Calibrate score missions against a clear-all run using this same board
+    # and deterministic seed, then require 72% of that achievable score.
+    if objectives[0].get("type") == "score":
+        baseline = dict(probe)
+        baseline["objectives"] = [{"type": "clear_all"}]
+        baseline_result = greedy_play(baseline, angles=18)
+        if not baseline_result["won"] or baseline_result["score"] <= 0:
+            print(
+                f"DEBUG score baseline failed: level={level['id']} "
+                f"won={baseline_result['won']} score={baseline_result['score']} "
+                f"popped={baseline_result['popped']} shots={baseline_result['shots_used']}",
+                flush=True,
+            )
+            return None
+        target = max(200, int(baseline_result["score"] * 0.82))
+        probe["objectives"] = [{"type": "score", "target": target}]
+
     result = greedy_play(probe, angles=18)
     if not result["won"]:
+        print(
+            f"DEBUG objective failed: level={level['id']} type={probe['objectives'][0]['type']} "
+            f"score={result['score']} popped={result['popped']} freed={result['freed']} "
+            f"shots={result['shots_used']} target={probe['objectives'][0]}",
+            flush=True,
+        )
         return None
     used = result["shots_used"]
-    if used < 5:
+    mission_type = probe["objectives"][0].get("type")
+    minimum_shots = {"score": 3, "rescue": 2, "survive": 7}.get(mission_type, 5)
+    if used < minimum_shots:
+        print(
+            f"DEBUG level too easy for balance gate: id={level['id']} "
+            f"type={probe['objectives'][0]['type']} used={used} minimum={minimum_shots}",
+            flush=True,
+        )
         return None
     coloured = sum(1 for line in probe["layout"] for ch in line if ch.isdigit())
     if used > coloured / 2.0 + 8:
         return None
+
     probe["shots"] = used + spare
     s_val = max(result["score"], 1500)
     probe["stars"] = {
@@ -667,14 +879,17 @@ def tune(level: dict, spare: int = 4) -> dict | None:
     }
     if not (probe["stars"]["1"] < probe["stars"]["2"] < probe["stars"]["3"]):
         probe["stars"] = {"1": 1000, "2": 2000, "3": 3000}
-    probe["greedy"] = {"score": result["score"], "shots_used": used, "shots_left": spare}
+    probe["greedy"] = {
+        "score": result["score"], "shots_used": used, "shots_left": spare,
+        "objective": probe["objectives"][0],
+    }
     return probe
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="godot_project/levels")
-    ap.add_argument("--count", type=int, default=100)
+    ap.add_argument("--count", type=int, default=120)
     ap.add_argument("--first", type=int, default=1)
     ap.add_argument("--last", type=int, default=0)
     ap.add_argument("--seed", type=int, default=20261108)
@@ -700,8 +915,8 @@ def main() -> None:
                 break
         if made is None:
             failures += 1
-            print(f"level {lid}: could not balance, keeping base layout")
-            made = level
+            print(f"ERROR level {lid}: could not generate a solver-balanced level", flush=True)
+            raise SystemExit(1)
         (out / f"level_{lid:03d}.json").write_text(json.dumps(made, indent=2) + "\n")
         index.append({"id": lid, "world": made["world"], "file": f"level_{lid:03d}.json",
                       "name": made["name"]})

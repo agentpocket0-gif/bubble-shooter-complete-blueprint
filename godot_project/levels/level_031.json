@@ -1,28 +1,27 @@
 {
   "id": 31,
   "world": 2,
-  "name": "Diamond 031",
+  "name": "Full 031",
   "grid": {
     "cols": 11,
     "rows": 14,
     "seed": 683139714
   },
-  "shots": 9,
+  "shots": 16,
   "palette": [
     "red",
     "blue",
     "green",
-    "yellow",
-    "purple"
+    "yellow"
   ],
   "layout": [
-    "1111112221.",
-    "..........",
-    ".....5.....",
-    "....44x...",
-    "...44433...",
-    "..2x33355.",
-    ".322235555.",
+    "22334411141",
+    "2244241144",
+    "32442113443",
+    "3442113323",
+    "43431111323",
+    "4433312222",
+    "44131122223",
     "..........",
     "...........",
     "..........",
@@ -31,40 +30,29 @@
     "...........",
     ".........."
   ],
-  "blockers": [
-    {
-      "row": 5,
-      "col": 3,
-      "type": "stone",
-      "hp": 0
-    },
-    {
-      "row": 3,
-      "col": 6,
-      "type": "stone",
-      "hp": 0
-    }
-  ],
+  "blockers": [],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "clear_all"
     }
   ],
   "stars": {
-    "1": 1000,
+    "1": 1500,
     "2": 2000,
-    "3": 3000
+    "3": 2500
   },
   "rewards": {
     "coins": 40,
     "firstClearBonus": 100
   },
   "ceilingDropEvery": 0,
-  "notes": "diamond silhouette, 5 colours, ice_stone blockers, 33 bubbles",
+  "notes": "full silhouette, 4 colours, none blockers, 74 bubbles",
   "greedy": {
-    "score": 740,
-    "shots_used": 5,
-    "shots_left": 4
+    "score": 2480,
+    "shots_used": 12,
+    "shots_left": 4,
+    "objective": {
+      "type": "clear_all"
+    }
   }
 }

@@ -5,11 +5,11 @@ extends Node2D
 ## is drawn with OFFSET_Y added, so the maths is identical to the Python level
 ## generator and to the headless tests.
 
-const OFFSET_Y := 230.0
-const CANNON_POS := Vector2(540.0, 1450.0)
+const OFFSET_Y := 294.0
+const CANNON_POS := Vector2(540.0, 1386.0)
 const SPEED := 2600.0
 const COLOUR_NAMES := ["red", "blue", "green", "yellow", "purple", "orange"]
-const FLOOR_Y := 1520.0   # board space: where a dropped bubble bounces
+const FLOOR_Y := 1456.0   # board space: where a dropped bubble bounces
 
 enum Phase { AIM, FLYING, RESOLVING, DONE }
 
@@ -48,6 +48,7 @@ var coins_pill: PanelContainer
 var lives_pill: PanelContainer
 var shots_pill: PanelContainer
 var score_label: Label
+var objective_label: Label
 var booster_row: HBoxContainer
 var pause_overlay: Control
 
@@ -173,7 +174,7 @@ func _build_hud() -> void:
 	shots_pill = UI.pill("icon_play", str(shots_left), 200)
 	top.add_child(shots_pill)
 
-	var badge := UI.label("LEVEL %d" % int(level["id"]), 34, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	var badge := UI.label("LEVEL %d  •  D%.1f" % [int(level["id"]), float(level.get("difficulty", 1.0))], 30, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(badge)
 
@@ -184,6 +185,12 @@ func _build_hud() -> void:
 	score_label.position = Vector2(0, 128)
 	score_label.size = Vector2(1080, 40)
 	hud_root.add_child(score_label)
+
+	objective_label = UI.label(_objective_status_text(), 27, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	objective_label.position = Vector2(70, 168)
+	objective_label.size = Vector2(940, 46)
+	objective_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	hud_root.add_child(objective_label)
 
 	# tap the "next" slot to swap: it has to live on the HUD canvas, not the
 	# 2D scene, so it gets touch input
@@ -337,8 +344,13 @@ func _aim_at(screen_pos: Vector2) -> void:
 	_update_preview()
 
 
+func _trace_shot(angle: float) -> Variant:
+	# Keep the same board-space origin for aiming, previews and real shots.
+	return ShotSimulator.trace(board, angle, CANNON_POS)
+
+
 func _update_preview() -> void:
-	var tr := ShotSimulator.trace(board, aim_angle)
+	var tr: Variant = _trace_shot(aim_angle)
 	aim.points = tr.points
 	aim.queue_redraw()
 	if tr.valid:
@@ -357,7 +369,7 @@ func _update_preview() -> void:
 func _shoot() -> void:
 	if phase != Phase.AIM:
 		return
-	var tr := ShotSimulator.trace(board, aim_angle)
+	var tr: Variant = _trace_shot(aim_angle)
 	if not tr.valid:
 		_shake_hud()
 		return
@@ -464,6 +476,10 @@ func _resolve_shot() -> void:
 
 	var floating := board.find_floating()
 	if not floating.is_empty():
+		# Chains that detach and fall with an unanchored cluster count as rescued.
+		for falling_cell in floating:
+			if board.blocker_at(falling_cell.x, falling_cell.y) == HexBoard.B_CHAIN:
+				freed_total += 1
 		_drop_cells(floating)
 		AudioManager.play("sfx_drop_start")
 
@@ -477,10 +493,10 @@ func _resolve_shot() -> void:
 
 	await get_tree().create_timer(0.28).timeout
 
-	if _objective_met():
-		_win()
+	if _survive_failed():
+		_lose("board reached danger line")
 		return
-	if board.coloured_count() <= 1:
+	if _objective_met():
 		_win()
 		return
 	if shots_left <= 0:
@@ -637,7 +653,7 @@ func _board_jammed() -> bool:
 	# no angle produces a legal landing cell
 	for i in 15:
 		var angle := lerpf(-deg_to_rad(75.0), deg_to_rad(75.0), float(i) / 14.0)
-		if ShotSimulator.trace(board, angle).valid:
+		if _trace_shot(angle).valid:
 			return false
 	return true
 
@@ -669,6 +685,17 @@ func _ceiling_drop() -> void:
 # --------------------------------------------------------------------------- #
 # objectives
 # --------------------------------------------------------------------------- #
+func _has_survive_objective() -> bool:
+	for obj in level.get("objectives", []):
+		if str(obj.get("type", "")) == "survive":
+			return true
+	return false
+
+
+func _survive_failed() -> bool:
+	return _has_survive_objective() and board.max_row_used() >= board.rows - 1
+
+
 func _objective_met() -> bool:
 	for obj in level.get("objectives", []):
 		var t := str(obj.get("type", "clear_all"))
@@ -693,9 +720,34 @@ func _objective_met() -> bool:
 				if score < int(obj.get("target", 0)):
 					return false
 			"survive":
-				if board.max_row_used() >= board.rows - 1:
+				if shots_taken < int(obj.get("shots", 0)) or _survive_failed():
 					return false
 	return true
+
+
+func _objective_status_text() -> String:
+	var objectives: Array = level.get("objectives", [])
+	if objectives.is_empty():
+		return "CLEAR ALL BUBBLES"
+	var obj: Dictionary = objectives[0]
+	match str(obj.get("type", "clear_all")):
+		"clear_all":
+			return "CLEAR ALL BUBBLES"
+		"clear_color":
+			return "CLEAR %s BUBBLES" % str(obj.get("color", "red")).to_upper()
+		"pop_count":
+			return "POP %d / %d BUBBLES" % [popped_total, int(obj.get("count", 0))]
+		"rescue":
+			var text := "FREE %d / %d CHAINS" % [freed_total, int(obj.get("count", 0))]
+			if objectives.size() > 1 and str(objectives[1].get("type", "")) == "pop_count":
+				text += " - POP %d / %d" % [popped_total, int(objectives[1].get("count", 0))]
+			return text
+		"score":
+			return "SCORE %d / %d" % [score, int(obj.get("target", 0))]
+		"survive":
+			var required := int(obj.get("shots", 0))
+			return "SURVIVE %d / %d SHOTS" % [mini(shots_taken, required), required]
+	return "CLEAR ALL BUBBLES"
 
 
 func _compute_stars() -> int:
@@ -758,6 +810,8 @@ func _refresh_hud() -> void:
 		UI.set_pill_text(shots_pill, str(maxi(0, shots_left)))
 	if score_label != null:
 		score_label.text = "%d" % score
+	if objective_label != null:
+		objective_label.text = _objective_status_text()
 
 
 func _shake_hud() -> void:

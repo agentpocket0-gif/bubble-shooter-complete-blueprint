@@ -15,12 +15,12 @@
     "yellow"
   ],
   "layout": [
-    "33334442223",
-    ".3.1.4.2.3",
-    "2.3.1.1.2.3",
-    ".4.1.1.2.4",
-    "1.4.i.1.4.4",
-    ".4.2.1.4.4",
+    "33433311144",
+    ".3.3.3.1.4",
+    "2.2.3.1.1.4",
+    ".2.i.1.1.2",
+    "4.2.4.1.2.2",
+    ".2.4.1.2.2",
     "...........",
     "..........",
     "...........",
@@ -32,15 +32,16 @@
   ],
   "blockers": [
     {
-      "row": 4,
-      "col": 4,
+      "row": 3,
+      "col": 3,
       "type": "ice",
       "hp": 2
     }
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "pop_count",
+      "count": 24
     }
   ],
   "stars": {
@@ -55,8 +56,12 @@
   "ceilingDropEvery": 0,
   "notes": "checker silhouette, 4 colours, ice blockers, 37 bubbles",
   "greedy": {
-    "score": 815,
+    "score": 620,
     "shots_used": 6,
-    "shots_left": 4
+    "shots_left": 4,
+    "objective": {
+      "type": "pop_count",
+      "count": 24
+    }
   }
 }

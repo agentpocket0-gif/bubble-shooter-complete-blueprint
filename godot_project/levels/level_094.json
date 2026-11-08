@@ -1,28 +1,29 @@
 {
   "id": 94,
   "world": 5,
-  "name": "Full 094",
+  "name": "Diamond 094",
   "grid": {
     "cols": 11,
     "rows": 14,
     "seed": 408875027
   },
-  "shots": 15,
+  "shots": 17,
   "palette": [
     "red",
     "blue",
     "green",
     "yellow",
-    "purple"
+    "purple",
+    "orange"
   ],
   "layout": [
-    "22444345544",
-    "2542444554",
-    "42521112534",
-    "5322222233",
-    "53315522134",
-    "5335511113",
-    "33335111111",
+    "4446655555.",
+    "..........",
+    ".....1.....",
+    "....611...",
+    "...1i655...",
+    "..c165i22.",
+    ".3x333442i.",
     "..........",
     "...........",
     "..........",
@@ -31,11 +32,47 @@
     "...........",
     ".........."
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 4,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 6,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 2,
+      "type": "chain",
+      "color": 0,
+      "hp": 0
+    }
+  ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 20
     }
   ],
   "stars": {
@@ -48,10 +85,14 @@
     "firstClearBonus": 100
   },
   "ceilingDropEvery": 5,
-  "notes": "full silhouette, 5 colours, none blockers, 74 bubbles",
+  "notes": "diamond silhouette, 6 colours, dense blockers, 31 bubbles",
   "greedy": {
-    "score": 1680,
-    "shots_used": 11,
-    "shots_left": 4
+    "score": 795,
+    "shots_used": 13,
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 56522607
   },
-  "shots": 19,
+  "shots": 12,
   "palette": [
     "red",
     "blue",
@@ -18,7 +18,7 @@
   "layout": [
     "5554455555.",
     ".4441.x333",
-    "41.5113.333",
+    "41.51c3.333",
     "1x.5144.33",
     "215x.1444.3",
     "1122.xx42.",
@@ -61,11 +61,23 @@
       "col": 3,
       "type": "stone",
       "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "type": "chain",
+      "color": 0,
+      "hp": 0
     }
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 30
     }
   ],
   "stars": {
@@ -80,8 +92,12 @@
   "ceilingDropEvery": 0,
   "notes": "zigzag silhouette, 5 colours, ice_stone blockers, 56 bubbles",
   "greedy": {
-    "score": 1340,
-    "shots_used": 15,
-    "shots_left": 4
+    "score": 640,
+    "shots_used": 8,
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

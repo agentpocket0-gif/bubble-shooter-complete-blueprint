@@ -39,7 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GODOT_VERSION: "4.4.1"
+  GODOT_VERSION: "4.7.2"
   GODOT_CHANNEL: "stable"
   PROJECT_DIR: "godot_project"
 
@@ -215,7 +215,7 @@ jobs:
           yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses > /dev/null 2>&1 || true
           for attempt in 1 2 3; do
             sdkmanager --sdk_root="$ANDROID_HOME" \
-              "platform-tools" "platforms;android-34" "build-tools;34.0.0" && break
+              "platform-tools" "platforms;android-36" "build-tools;36.0.0" && break
             echo "sdkmanager attempt $attempt failed, retrying"; sleep 10
           done
           ls "$ANDROID_HOME/build-tools"

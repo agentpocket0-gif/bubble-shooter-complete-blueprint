@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 2084327083
   },
-  "shots": 12,
+  "shots": 16,
   "palette": [
     "red",
     "blue",
@@ -60,7 +60,7 @@
   "objectives": [
     {
       "type": "clear_color",
-      "color": "red"
+      "color": "blue"
     }
   ],
   "stars": {
@@ -75,8 +75,12 @@
   "ceilingDropEvery": 0,
   "notes": "arch silhouette, 5 colours, ice_stone blockers, 49 bubbles",
   "greedy": {
-    "score": 495,
-    "shots_used": 8,
-    "shots_left": 4
+    "score": 815,
+    "shots_used": 12,
+    "shots_left": 4,
+    "objective": {
+      "type": "clear_color",
+      "color": "blue"
+    }
   }
 }

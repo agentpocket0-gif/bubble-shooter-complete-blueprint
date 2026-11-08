@@ -1,6 +1,6 @@
 # Bubble Shooter: Classic Blast
 
-A complete 120-level hex-grid bubble shooter for Android, built in Godot 4.4 from
+An endless, seed-driven hex-grid bubble shooter for Android, built with Godot 4.7.2 from
 `blueprint/original/01..10.md`. Portrait 1080x1920, 60 fps, offline-first, ads
 shipped **off** behind a one-line remote switch.
 
@@ -16,15 +16,16 @@ godot_project/
     HexBoard.gd            staggered grid, clusters, floating detection
     ShotSimulator.gd       the one integrator (aim preview == real shot)
     Rng32.gd               xorshift32 colour queue, matches the Python generator
-    LevelLibrary.gd        level index + lazy loading
+    LevelLibrary.gd        on-demand procedural levels
     SaveSystem.gd          atomic JSON + HMAC tamper evidence
     UI.gd / Overlays.gd    widget factory, modals
   scenes/                  Boot, Splash, SagaMap, Gameplay, Result
-  levels/                  120 solver-balanced level files + index.json
+  levels/                  120 legacy reference layouts (not used for live progression)
   config/                  bundled monetisation config
   tests/                   headless test suite + visual QA harness
 tools/
-  levelgen.py              generator + greedy solver + star thresholds
+  ProceduralLevelGenerator.gd seed-based runtime generation + difficulty curve
+  levelgen.py              offline reference generator + greedy solver
   validate_levels.py       CI gate
   verify_apk.py            artifact smoke test
 ```
@@ -35,7 +36,7 @@ tools/
 # editor
 godot --path godot_project
 
-# headless test suite (27 checks, exits non-zero on failure)
+# headless test suite (seed, difficulty, endless progression and gameplay checks)
 godot --headless --audio-driver Dummy --path godot_project res://tests/TestRunner.tscn
 
 # runtime proof + screenshots (needs a display; CI uses xvfb)
@@ -44,10 +45,30 @@ xvfb-run -a -s "-screen 0 1080x1920x24" \
   --audio-driver Dummy res://tests/VisualQA.tscn
 python3 tools/visual_qa.py godot_project/qa_proof
 
-# regenerate every level from scratch (about 20 seconds)
-python3 tools/levelgen.py --out godot_project/levels --count 100
-python3 tools/validate_levels.py godot_project/levels
+# preview the on-device procedural generator in the game; no level pack download is needed
 ```
+
+## Endless seeded campaign
+
+Live gameplay levels are generated on the device when the player reaches them.
+The bundled 120 JSON layouts are kept as reference material; `LevelLibrary`
+does not use them to decide which level comes next.
+
+- A new save creates and stores a private campaign seed. The seed and level
+  number deterministically decide the board, colours, shape, blockers and mission.
+- Replaying the same level keeps its layout. A retry can change the bubble queue
+  through the separate attempt seed without changing the board itself.
+- Every six-level cycle rotates through clear-all, clear-colour, pop-count,
+  rescue, score and survive missions. Rescue levels also have a pop-count goal.
+- Difficulty is calculated from the level number. The board grows, the palette
+  expands from three to six colours, blocker density rises, and the shot margin
+  tightens. Later endless stages add more pressure without requiring more JSON.
+- The saga map previews 120 levels at the start, then expands to 20 levels beyond
+  the player's highest unlocked level. There is no final level cap.
+
+Level generation is local and offline. It does not wait for a server or a
+download. The generated layout is checked for valid dimensions, palette,
+objectives and move budget before Gameplay loads it.
 
 ## The ads switch
 
@@ -75,15 +96,15 @@ the reward is still granted through the callback, never by the button.
 
 ## Verification
 
-Nothing ships unverified. Two gates run on every push:
+Nothing ships unverified. The automated gates run on every push:
 
-1. `tests/TestRunner.tscn` — 27 headless checks: grid geometry, wall bounces,
-   cluster and floating detection, save tamper rejection, all 120 level schemas,
+1. `tests/TestRunner.tscn` — headless checks: grid geometry, wall bounces,
+   cluster and floating detection, save tamper rejection, procedural seed reproduction, all six mission types, increasing difficulty, level 2400 generation,
    every `res://assets/...` path in the code resolving, and a real shot through
    the gameplay scene.
 2. `tests/VisualQA.tscn` under Xvfb — drives the real scenes, presses the real
    buttons and captures nine 1080x1920 frames. It asserts the splash logo
-   texture is non-null, the map builds 120 level buttons, the piggy popup opens
+   texture is non-null, the map builds its current preview of 120 level buttons, the piggy popup opens
    and its Close button closes it, tapping Level 1 starts the level, the board
    renders 43 textured sprites rather than drawn circles, and a shot resolves
    with the HUD updating. `tools/visual_qa.py` then rejects blank or flat frames
@@ -92,24 +113,39 @@ Nothing ships unverified. Two gates run on every push:
 The Android build depends on both jobs, so a broken button cannot reach a
 release. `qa_proof/` holds the frames and the report from the last run.
 
-## What is real and what still needs you
+## Campaign mission reference
 
-Real, tested, in this repo:
+The endless campaign rotates through six primary mission types in repeating six-level cycles:
+
+| Mission | How the player wins |
+|---|---|
+| Clear all | Clear the board down to the final single-bubble allowance. |
+| Clear colour | Remove every bubble of the named colour. |
+| Pop count | Pop at least the required number of bubbles. |
+| Rescue | Free the required chained bubbles. Rescue levels also include a secondary pop-count goal. |
+| Score | Reach the level's score target. |
+| Survive | Complete the required number of safe shots without the board reaching the danger row. |
+
+Each mission type has a live win condition in the gameplay scene and an on-screen progress label.
+
+## Verified implementation and remaining production work
+
+Implemented and CI-tested in this repository:
 
 - grid geometry, substepped collision, wall reflection, snapping, matching,
   floating-cluster removal, ice/stone/chained blockers, five boosters
-- 120 levels, each played by a greedy solver and kept only if it clears with
-  2-6 shots to spare; star thresholds derived from that run
+- deterministic on-device levels from the saved campaign seed, across all six mission types:
+  clear-all, clear-colour, pop-count, rescue, score and survive. The pattern
+  repeats every six levels; rescue levels include a secondary pop-count goal.
 - save integrity, lives regen, economy, daily spin, piggy bank, store UI
-- 24 headless tests including a real gameplay-scene shot pipeline
+- headless checks for same-seed reproducibility, different-seed variation, the difficulty curve, all six missions, level 2400, save migration and a real gameplay-scene shot
 
 Needs your accounts or hardware:
 
 - **Google Play / App Store**: signing keystore, listing assets, content rating
 - **Ad units**: real AdMob/MAX ids in the config (15-day switch)
-- **IAP**: `bs.*` products created in Play Console, plus the native billing bridge
-- **Native ad SDK**: the Godot project talks to a `ClassicBlastAds` singleton when
-  one is installed. Without it, ads stay in simulation/off mode - by design.
+- **IAP**: `bs.*` products still need to be created in Play Console. Paid purchases now fail closed unless a native billing bridge and server-side receipt validation are present and tested.
+- **Native ad SDK**: no production ad adapter is bundled. Ads remain disabled until a supported native bridge, valid ad units and the required consent flow are integrated and tested.
 - **iOS**: `export_presets.cfg` ships an `iOS` preset that exports an Xcode project
   (`application/export_project_only=true`). Building it needs a macOS runner, Xcode
   and your Apple team id in `application/app_store_team_id`.

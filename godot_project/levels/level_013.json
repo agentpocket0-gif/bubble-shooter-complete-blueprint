@@ -69,6 +69,9 @@
   "greedy": {
     "score": 1750,
     "shots_used": 22,
-    "shots_left": 4
+    "shots_left": 4,
+    "objective": {
+      "type": "clear_all"
+    }
   }
 }

@@ -23,7 +23,7 @@
     "....1x3...",
     "...2i633...",
     "..5116662.",
-    ".5555i6622.",
+    ".55c5i6622.",
     "..........",
     "...........",
     "..........",
@@ -50,11 +50,23 @@
       "col": 5,
       "type": "stone",
       "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "type": "chain",
+      "color": 4,
+      "hp": 0
     }
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 20
     }
   ],
   "stars": {
@@ -71,6 +83,10 @@
   "greedy": {
     "score": 735,
     "shots_used": 7,
-    "shots_left": 4
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

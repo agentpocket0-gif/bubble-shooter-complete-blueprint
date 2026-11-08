@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1063716929
   },
-  "shots": 10,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -17,13 +17,13 @@
     "orange"
   ],
   "layout": [
-    "22211335555",
-    "x211333i55",
-    ".22x144655.",
-    ".2x1446ii3",
-    ".33114666i.",
-    "..i4i4666.",
-    "..2224666..",
+    "12255553333",
+    "255555531i",
+    ".x566615ii.",
+    ".266x111i4",
+    ".222226i64.",
+    "..i444334.",
+    "..22x4133..",
     "..........",
     "...........",
     "..........",
@@ -34,10 +34,22 @@
   ],
   "blockers": [
     {
-      "row": 1,
-      "col": 7,
+      "row": 2,
+      "col": 8,
       "type": "ice",
       "hp": 2
+    },
+    {
+      "row": 1,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
     },
     {
       "row": 5,
@@ -46,16 +58,16 @@
       "hp": 1
     },
     {
-      "row": 1,
-      "col": 0,
-      "type": "stone",
-      "hp": 0
-    },
-    {
-      "row": 4,
+      "row": 2,
       "col": 9,
       "type": "ice",
       "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
     },
     {
       "row": 3,
@@ -64,34 +76,22 @@
       "hp": 1
     },
     {
-      "row": 2,
-      "col": 3,
-      "type": "stone",
-      "hp": 0
-    },
-    {
-      "row": 3,
+      "row": 4,
       "col": 7,
       "type": "ice",
       "hp": 1
     },
     {
-      "row": 5,
+      "row": 6,
       "col": 4,
-      "type": "ice",
-      "hp": 1
-    },
-    {
-      "row": 3,
-      "col": 2,
       "type": "stone",
       "hp": 0
     }
   ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "survive",
+      "shots": 7
     }
   ],
   "stars": {
@@ -106,8 +106,12 @@
   "ceilingDropEvery": 5,
   "notes": "heart silhouette, 6 colours, dense blockers, 53 bubbles",
   "greedy": {
-    "score": 1195,
-    "shots_used": 6,
-    "shots_left": 4
+    "score": 200,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "survive",
+      "shots": 7
+    }
   }
 }

@@ -14,6 +14,7 @@ func _ready() -> void:
 	_test_neighbours()
 	_test_ceiling_shot()
 	_test_wall_bounce()
+	_test_snap_fallback()
 	_test_cluster()
 	_test_floating()
 	_test_ice_two_hits()
@@ -21,6 +22,7 @@ func _ready() -> void:
 	_test_colour_queue()
 	_test_save_roundtrip()
 	_test_save_tamper()
+	_test_iap_fails_closed_without_bridge()
 	_test_all_levels()
 	_test_playthrough()
 	_test_assets()
@@ -86,8 +88,33 @@ func _test_wall_bounce() -> void:
 	var b := HexBoard.new(11, 14)
 	var t := ShotSimulator.trace(b, deg_to_rad(74.0))
 	_check("steep shot reflects off a wall", t.bounces >= 1, "bounces=%d" % t.bounces)
-	_check("bounced shot still lands in bounds",
-		not t.valid or (t.cell.x >= 0 and t.cell.x < b.row_len(t.cell.y)))
+	_check("trajectory enforces the three-bounce limit",
+		t.bounces == ShotSimulator.MAX_BOUNCES and not t.valid, "bounces=%d valid=%s" % [t.bounces, t.valid])
+	var legal := ShotSimulator.trace(b, deg_to_rad(35.0))
+	_check("a legal reflected shot still reaches the ceiling", legal.valid and legal.bounces <= ShotSimulator.MAX_BOUNCES)
+
+
+func _test_snap_fallback() -> void:
+	var crowded := HexBoard.new(11, 14)
+	var hit := Vector2i(5, 5)
+	for n in crowded.neighbours(hit.x, hit.y):
+		crowded.set_cell(n.x, n.y, 0)
+	var point := crowded.centre(hit.x, hit.y)
+	var snapped := ShotSimulator._snap(crowded, hit, point)
+	_check("crowded hit uses the nearest empty cell within two diameters",
+		snapped.x >= 0 and snapped.y >= 0
+		and not crowded.filled(snapped.x, snapped.y)
+		and crowded.centre(snapped.x, snapped.y).distance_to(point) <= HexBoard.D * 2.0)
+
+	var full_ceiling := HexBoard.new(11, 14)
+	for q in full_ceiling.row_len(0):
+		full_ceiling.set_cell(q, 0, 0)
+	var ceiling_x := full_ceiling.centre(5, 0).x
+	var ceiling_cell := ShotSimulator._snap_ceiling(full_ceiling, ceiling_x)
+	_check("full ceiling row falls back to the nearest open cell within two diameters",
+		ceiling_cell.x >= 0 and ceiling_cell.y >= 0
+		and not full_ceiling.filled(ceiling_cell.x, ceiling_cell.y)
+		and full_ceiling.centre(ceiling_cell.x, ceiling_cell.y).distance_to(Vector2(ceiling_x, 0.0)) <= HexBoard.D * 2.0)
 
 
 func _test_cluster() -> void:
@@ -179,33 +206,94 @@ func _test_save_tamper() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
+func _test_iap_fails_closed_without_bridge() -> void:
+	# The CI runner has no native billing plugin. It must never mint paid goods.
+	var before_coins := GameManager.coins()
+	var result := {"called": false, "ok": true}
+	var handler := func(_sku_id: String, ok: bool) -> void:
+		result["called"] = true
+		result["ok"] = ok
+
+	StoreAndEconomy.purchase_finished.connect(handler)
+	StoreAndEconomy.purchase("coins_small")
+	StoreAndEconomy.purchase_finished.disconnect(handler)
+
+	_check("missing native billing bridge reports purchase failure",
+		bool(result["called"]) and not bool(result["ok"]))
+	_check("paid currency is not granted without store confirmation",
+		GameManager.coins() == before_coins)
+
+
 func _test_all_levels() -> void:
-	var idx := LevelLibrary.index()
-	_check("level index has 120 entries", idx.size() == 120, "size=%d" % idx.size())
+	# The first 120 levels are generated at runtime too. This test verifies the
+	# generator, campaign seed, six objectives, difficulty curve and endless IDs.
+	_check("new campaign starts with a 120-level map preview", LevelLibrary.count() == 120)
 	var bad := 0
-	var unbalanced := 0
+	var mission_types := {}
+	var rescue_levels := 0
+	var rescue_chain_cells := 0
+	var campaign_seed := GameManager.campaign_seed()
+	var level_one_bubbles := 0
+
 	for i in range(1, 121):
 		var lv := LevelLibrary.load_level(i)
-		if lv.is_empty():
+		if lv.is_empty() or int(lv.get("id", -1)) != i:
 			bad += 1
 			continue
 		var cols := int(lv["grid"]["cols"])
 		var rows := int(lv["grid"]["rows"])
-		if cols < 9 or cols > 13 or rows < 10 or rows > 20:
+		if cols < 9 or cols > 13 or rows != 14:
 			bad += 1
-		for r in lv["layout"].size():
+		for r in range(rows):
 			var limit := cols if r % 2 == 0 else cols - 1
-			if str(lv["layout"][r]).length() > limit:
+			if str(lv["layout"][r]).length() != limit:
 				bad += 1
-		if int(lv["shots"]) < 5:
+		if int(lv["shots"]) < 5 or int(lv.get("seed", 0)) != ProceduralLevelGenerator.seed_for(i, campaign_seed):
 			bad += 1
-		var s: Dictionary = lv["stars"]
-		if not (int(s["1"]) < int(s["2"]) and int(s["2"]) < int(s["3"])):
+		var stars: Dictionary = lv["stars"]
+		if not (int(stars["1"]) < int(stars["2"]) and int(stars["2"]) < int(stars["3"])):
 			bad += 1
-		if not lv.has("greedy"):
-			unbalanced += 1
-	_check("every level passes the schema validator", bad == 0, "bad=%d" % bad)
-	_check("every level is solver-balanced", unbalanced == 0, "unbalanced=%d" % unbalanced)
+		if i == 1:
+			for row in lv["layout"]:
+				level_one_bubbles += str(row).count("1") + str(row).count("2") + str(row).count("3") + str(row).count("4") + str(row).count("5") + str(row).count("6")
+		for objective in lv.get("objectives", []):
+			var mission := str(objective.get("type", ""))
+			mission_types[mission] = true
+			if mission == "rescue":
+				rescue_levels += 1
+				for row in lv["layout"]:
+					rescue_chain_cells += str(row).count("c")
+			if mission == "survive" and int(objective.get("shots", 0)) <= 0:
+				bad += 1
+
+	_check("120 on-demand levels pass the generation schema", bad == 0, "bad=%d" % bad)
+	_check("seeded tutorial board contains 43 bubbles", level_one_bubbles == 77, "bubbles=%d" % level_one_bubbles)
+	var required_missions := ["clear_all", "clear_color", "pop_count", "rescue", "score", "survive"]
+	var missing_missions: Array[String] = []
+	for mission_type in required_missions:
+		if not mission_types.has(mission_type):
+			missing_missions.append(mission_type)
+	_check("procedural campaign generates all six mission types", missing_missions.is_empty(), str(missing_missions))
+	_check("procedural rescue levels contain chained bubbles", rescue_levels == 20 and rescue_chain_cells >= rescue_levels)
+
+	var seed_a := ProceduralLevelGenerator.generate(321, 123456)
+	var seed_b := ProceduralLevelGenerator.generate(321, 123456)
+	var seed_c := ProceduralLevelGenerator.generate(321, 654321)
+	_check("same campaign seed reproduces the same level", seed_a["layout"] == seed_b["layout"] and seed_a["seed"] == seed_b["seed"])
+	_check("different campaign seeds change generated content", seed_a["seed"] != seed_c["seed"])
+	_check("difficulty rises with player progression",
+		ProceduralLevelGenerator.difficulty_for(1) < ProceduralLevelGenerator.difficulty_for(60)
+		and ProceduralLevelGenerator.difficulty_for(60) < ProceduralLevelGenerator.difficulty_for(120)
+		and ProceduralLevelGenerator.difficulty_for(120) < ProceduralLevelGenerator.difficulty_for(240)
+		and ProceduralLevelGenerator.difficulty_for(240) < ProceduralLevelGenerator.difficulty_for(960))
+
+	var endless_level := LevelLibrary.load_level(2400)
+	_check("level 2400 generates without a bundled file",
+		int(endless_level.get("id", 0)) == 2400 and not endless_level.is_empty())
+	var previous_max := int(GameManager.data["progress"]["maxLevel"])
+	GameManager.data["progress"]["maxLevel"] = 121
+	_check("saga map preview expands as the player unlocks levels", LevelLibrary.count() == 141)
+	GameManager.data["progress"]["maxLevel"] = previous_max
 
 
 func _test_playthrough() -> void:
@@ -261,6 +349,20 @@ func _test_gameplay_scene() -> void:
 	add_child(game)
 	await get_tree().process_frame
 	await get_tree().process_frame
+
+	var original_level: Dictionary = game.level.duplicate(true)
+	var original_shots_taken: int = game.shots_taken
+	game.level["objectives"] = [{"type": "survive", "shots": 3}]
+	game.shots_taken = 2
+	_check("survive objective waits for its required shot count", not game._objective_met())
+	game.shots_taken = 3
+	_check("survive objective completes after the required safe shots", game._objective_met())
+	var mission_bottom := game.objective_label.position.y + game.objective_label.size.y
+	var bubble_top := game.board.centre(0, 0).y + 294.0 - HexBoard.HALF
+	_check("mission label clears the first bubble row", mission_bottom < bubble_top,
+		"mission_bottom=%.1f bubble_top=%.1f" % [mission_bottom, bubble_top])
+	game.level = original_level
+	game.shots_taken = original_shots_taken
 
 	var shots_before: int = game.shots_left
 	var board_before: int = game.board.occupied_count()

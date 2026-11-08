@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 774544903
   },
-  "shots": 16,
+  "shots": 9,
   "palette": [
     "red",
     "blue",
@@ -18,7 +18,7 @@
     "4444233222",
     "442223411",
     "3332134111",
-    "321111441",
+    "321111c41",
     "3322144333",
     ".........",
     "..........",
@@ -30,11 +30,23 @@
     "..........",
     "........."
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "row": 3,
+      "col": 6,
+      "type": "chain",
+      "color": 3,
+      "hp": 0
+    }
+  ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 26
     }
   ],
   "stars": {
@@ -49,8 +61,12 @@
   "ceilingDropEvery": 0,
   "notes": "full silhouette, 4 colours, none blockers, 48 bubbles",
   "greedy": {
-    "score": 1070,
-    "shots_used": 12,
-    "shots_left": 4
+    "score": 575,
+    "shots_used": 5,
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

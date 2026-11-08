@@ -10,7 +10,6 @@ enum State { BOOT, SPLASH, SAGA_MAP, LEVEL_PLAY, RESULT_WIN, RESULT_LOSE }
 const SAVE_PATH := "user://save_data.json"
 const MAX_LIVES := 5
 const LIFE_SECONDS := 30 * 60
-const LEVEL_COUNT := 120
 
 signal state_changed(new_state: int)
 signal wallet_changed()
@@ -50,9 +49,12 @@ func _process(delta: float) -> void:
 # save data
 # --------------------------------------------------------------------------- #
 func _default_save() -> Dictionary:
+	var seed_rng := RandomNumberGenerator.new()
+	seed_rng.randomize()
+	var new_campaign_seed := int(seed_rng.randi())
 	return {
-		"version": 3,
-		"progress": {"maxLevel": 1, "stars": {}, "best": {}},
+		"version": 4,
+		"progress": {"maxLevel": 1, "stars": {}, "best": {}, "campaignSeed": new_campaign_seed},
 		"wallet": {"coins": 300},
 		"lives": {"count": MAX_LIVES, "lastRefillTs": int(Time.get_unix_time_from_system())},
 		"boosters": {"bomb": 1, "rainbow": 0, "swap": 2, "extra_moves": 3, "laser": 1},
@@ -149,8 +151,7 @@ func finish_level(won: bool, result: Dictionary) -> void:
 		var key := str(current_level_id)
 		if int(stars_map.get(key, 0)) < stars:
 			stars_map[key] = stars
-		data["progress"]["maxLevel"] = max(int(data["progress"]["maxLevel"]),
-			min(current_level_id + 1, LEVEL_COUNT))
+		data["progress"]["maxLevel"] = maxi(int(data["progress"]["maxLevel"]), current_level_id + 1)
 		data["stats"]["levelsWon"] = int(data["stats"]["levelsWon"]) + 1
 	data["stats"]["levelsPlayed"] = int(data["stats"]["levelsPlayed"]) + 1
 	data["stats"]["bubblesPopped"] = int(data["stats"]["bubblesPopped"]) + int(result.get("popped", 0))
@@ -163,6 +164,10 @@ func finish_level(won: bool, result: Dictionary) -> void:
 # --------------------------------------------------------------------------- #
 func max_level() -> int:
 	return int(data["progress"]["maxLevel"])
+
+
+func campaign_seed() -> int:
+	return int(data["progress"].get("campaignSeed", 20261108))
 
 
 func is_unlocked(level_id: int) -> bool:
