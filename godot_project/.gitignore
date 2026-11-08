@@ -1,0 +1,6 @@
+.godot/
+.android/
+build/
+artifacts/
+*.tmp
+*.bak
