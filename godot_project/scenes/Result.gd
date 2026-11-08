@@ -49,7 +49,7 @@ func _build() -> void:
 		col.add_child(dbl)
 
 	var next_id := int(r.get("level", 1)) + 1
-	if won and next_id <= GameManager.LEVEL_COUNT:
+	if won:
 		var next := UI.button("Next level", true)
 		next.pressed.connect(func() -> void:
 			RemoteConfigAndAds.maybe_show_interstitial(int(r.get("level", 1)))
