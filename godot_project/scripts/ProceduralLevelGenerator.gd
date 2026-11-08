@@ -34,7 +34,7 @@ static func generate(level_id: int, campaign_seed: int) -> Dictionary:
 	var cols := 9 if id <= 20 else (10 if id <= 50 else 11)
 	var active_rows := clampi(5 + int(floor(float(id - 1) / 15.0)), 5, 12)
 	var colour_count := clampi(3 + int(floor(float(id - 1) / 30.0)), 3, 6)
-	var shape := "full" if id == 1 else SHAPES[posmod(id - 1 + int(campaign_seed % SHAPES.size()), SHAPES.size())]
+	var shape: String = "full" if id == 1 else str(SHAPES[posmod(id - 1 + int(campaign_seed % SHAPES.size()), SHAPES.size())])
 
 	var cells := _make_cells(cols, active_rows, shape)
 	if cells.size() < MIN_BUBBLES:
@@ -54,7 +54,7 @@ static func generate(level_id: int, campaign_seed: int) -> Dictionary:
 	if mission_slot == 0:
 		objectives = [{"type": "clear_all"}]
 	elif mission_slot == 1:
-		var target_colour := (id / 6) % colour_count
+		var target_colour: int = int(floor(float(id) / 6.0)) % colour_count
 		objectives = [{"type": "clear_color", "color": palette[target_colour]}]
 	elif mission_slot == 2:
 		var count_target := maxi(18, int(round(float(cells.size()) * 0.58)))
@@ -212,7 +212,7 @@ static func _make_colour_grid(
 
 		while blob.size() < target_size and not frontier.is_empty():
 			var next_index := rng.randi_range(0, frontier.size() - 1)
-			var next_cell := frontier.pop_at(next_index)
+			var next_cell: Vector2i = frontier.pop_at(next_index)
 			if not unassigned.has(next_cell):
 				continue
 			unassigned.erase(next_cell)
@@ -244,7 +244,7 @@ static func _add_normal_blockers(
 	for _i in range(amount):
 		if candidates.is_empty():
 			break
-		var cell := candidates.pop_at(rng.randi_range(0, candidates.size() - 1))
+		var cell: Vector2i = candidates.pop_at(rng.randi_range(0, candidates.size() - 1))
 		var original_colour := int(grid[cell.y][cell.x]) - 1
 		if level_id >= 31 and rng.randf() < 0.22:
 			grid[cell.y][cell.x] = "x"
