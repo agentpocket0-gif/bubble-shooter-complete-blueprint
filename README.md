@@ -66,11 +66,6 @@ prepare_package.py  → single APK or split XAPK/APKS bundle → merged raw tree
 analyze_apk.py      → static analysis → five documents + inventory CSV + JSON report
 ```
 
-`study_sheet.py` then writes `blueprint/reference/STUDY_SHEET.md` plus `sprite_measurements.csv` and
-`audio_measurements.csv` — sizes, alpha coverage, dominant palettes, transparent padding, audio length and
-loudness. Measurements only: no image or audio data is copied into the output, so the sheet is yours to keep
-and share while you draw the replacement art yourself.
-
 `analyze_apk.py` reads the decoded manifest, `res/values/*.xml`, every file under `assets/` (with image
 dimensions read from headers), level-shaped data files with their JSON schema, native library symbols and
 string tables, and the ad/billing SDKs it can identify. Anything it cannot prove is written as
@@ -107,38 +102,10 @@ string tables, and the ad/billing SDKs it can identify. Anything it cannot prove
 10. `10_APP_FLOW_A_TO_Z.md` — the whole app flow: every screen, every tap, first launch second by second,
     the life of one shot, popup priority, edge cases and flow acceptance tests
 
-## Generated asset pack (no APK needed)
-
-`scripts/generate_original_assets.py` draws and synthesises a complete original asset pack —
-142 sprites and 46 audio files — from the specs in `blueprint/original/`. Nothing is read from any APK.
-
-```bash
-python scripts/generate_original_assets.py --out generated_assets --ogg
-```
-
-Run it locally, or trigger **Generate original asset pack** in Actions, which packages
-`Original_Polished_Game_Assets.zip`, uploads it as an artifact and attaches it to the
-`v1.0-generated-assets` release. Preview: `generated_assets/_contact_sheet.png`.
-
 `docs/REQUIREMENT_COVERAGE.md` maps every item of the original brief to the file that covers it — including
 the items deliberately left out and why.
 
 ---
-
-## Opening an APK on a phone
-
-`tools/apk-viewer.html` is a single self-contained page that opens `.apk`, `.zip`, `.xapk` and `.apks` files
-in the browser — no app to install, and the file never leaves the device. Pick the file, filter by name, tap
-an entry to preview an image, play a sound or read a text file, and use **Save** to keep one file. Select
-several `.part00`/`.part01` files at once and they are joined automatically.
-
-Open it from your phone's Downloads folder with Chrome. Works on Android 15 and any browser with
-`DecompressionStream` (Chrome 80+, Safari 16.4+).
-
-**Save all files as one folder:** tap that button and the page rebuilds every entry into a fresh
-`extracted-files.zip` with the folder structure intact, then saves it to Downloads. Browsers cannot
-create a folder directly, so this is the one-tap route: download the zip, then extract it once with
-the Files app (Google Files has a built-in extractor) and you have the real folder.
 
 ## Troubleshooting
 
