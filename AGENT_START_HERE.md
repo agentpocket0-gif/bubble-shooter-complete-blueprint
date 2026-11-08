@@ -1,33 +1,20 @@
-# 🎯 AI AGENT START HERE — COMPLETE PROJECT MAP
-**(Everything is ALREADY inside this repository — DO NOT look for external Google Drive links!)**
+# AI AGENT - START HERE
 
-All three required datasets have been verified, cleaned, and committed directly into this repository:
+Read this before touching anything. It reflects what is actually in the repository.
 
-## 1. 📚 Complete Game Research & 10-Part Architecture Blueprint
-- **Path:** `blueprint/original/01_ARCHITECTURE_AND_STACK.md` through `10_APP_FLOW_A_TO_Z.md`
-- **Path:** `blueprint/extra_research/` & `blueprint/reference/`
-- **What it contains:** Full game flow (Boot -> Splash -> Saga World Map -> Level Play -> Win/Lose), staggered HexGrid math, BFS match-3 & floating cluster gravity drop rules, 120-level schema, and 1-Click Deferred Monetization specs.
+## 1. Design specification (the useful part)
+`blueprint/original/01_ARCHITECTURE_AND_STACK.md` through `10_APP_FLOW_A_TO_Z.md`.
 
-## 2. 💻 Original Game Code, Level JSONs & Coordinate Logic (Code Reference Only)
-- **Path:** `reference/original_game_code/`
-  - `decompiled_scripts/`: Original game scripts and mechanism logic (14 files)
-  - `level_configs/`: Original JSON level layouts, mission definitions, and balance tables (0 files)
-  - `layout_and_plist_coords/`: Sprite atlas `.plist` coordinate mappings and UI layouts (44 files)
-  - `manifests_and_xml/`: UI and configuration XMLs (953 files)
-- **How to use:** Study and port these exact mechanics, level structures, and UI coordinates into Godot 4 (`godot_project/`).
+## 2. Reference data
+`reference/original_game_code/layout_and_plist_coords/` - 44 atlas `.plist`, `.fnt` and DragonBones `.ExportJson` files.
 
-## 3. 🎨 Verified Remastered & Metadata-Cleaned Production Assets
-- **Path:** `godot_project/assets/real_pack/` (Indexed in `godot_project/assets/real_pack/REAL_PACK_MANIFEST.json`)
-  - `branding/`: Custom `App_Icon_512x512.png`, `Game_Title_Logo_Banner.png`, and logos
-  - `bubbles/`: All glossy normal bubbles, boosters (Bomb, Fireball, Rainbow, Laser), and blockers (Ice, Stone, Chain)
-  - `ui/`: All 9-slice popup frames, buttons, Top HUD bars, Piggy Bank, Spin Wheel, and Shop icons
-  - `maps_bg/`: World map backgrounds and gameplay stage backgrounds
-  - `animations/` & `sliced_sprites/`: Full spritesheets PLUS 994 pre-sliced individual `.png` frames ready for `Sprite2D` and `AnimatedSprite2D`!
-  - `audio/`: All remastered `.ogg` and `.wav` sound effects and music tracks
-  - `levels_fonts/`: Original fonts (`.ttf`/`.fnt`) and level data
+## 3. What does not exist
+- No game code. The old `decompiled_scripts/` held only advertising SDK JavaScript.
+- No level JSONs. `level_configs/` is empty.
+- No Godot project. `godot_project/` contains only assets.
 
-## 🚀 MANDATORY BUILD RULES FOR ANY AI AGENT
-1. Bind 100% of `godot_project/assets/real_pack/` into `AssetRegistry.gd` and scenes. NEVER use `draw_circle` or synthetic beep audio.
-2. Port the exact mechanics and level progression from `reference/original_game_code/` and `blueprint/original/01..10.md`.
-3. Keep `"ads_enabled": false` in `config/live_monetization_config.json` for 1-click deferred activation later.
-4. Run headless tests + 9-frame Xvfb Visual QA (`qa_proof/01..09.png`) and export signed Android `.apk` and `.aab` to GitHub Releases!
+## 4. Assets
+`godot_project/assets/real_pack/` - 1595 files from another publisher's app. Not publishable. See `REAL_PACK_MANIFEST.json`.
+
+## 5. Your job
+Write an original game in Godot 4 / GDScript following the blueprint. See `MASTER_BUILD_PROMPT.md` and `GAPS.md`.
