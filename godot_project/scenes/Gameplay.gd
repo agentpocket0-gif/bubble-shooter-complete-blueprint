@@ -350,7 +350,7 @@ func _trace_shot(angle: float) -> Variant:
 
 
 func _update_preview() -> void:
-	var tr := _trace_shot(aim_angle)
+	var tr: Variant = _trace_shot(aim_angle)
 	aim.points = tr.points
 	aim.queue_redraw()
 	if tr.valid:
