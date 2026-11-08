@@ -66,7 +66,8 @@
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "clear_color",
+      "color": "blue"
     }
   ],
   "stars": {
@@ -83,6 +84,10 @@
   "greedy": {
     "score": 925,
     "shots_used": 6,
-    "shots_left": 4
+    "shots_left": 4,
+    "objective": {
+      "type": "clear_color",
+      "color": "blue"
+    }
   }
 }

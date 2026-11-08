@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1161854898
   },
-  "shots": 18,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -46,7 +46,8 @@
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "pop_count",
+      "count": 27
     }
   ],
   "stars": {
@@ -61,8 +62,12 @@
   "ceilingDropEvery": 0,
   "notes": "funnel silhouette, 4 colours, ice blockers, 43 bubbles",
   "greedy": {
-    "score": 1000,
-    "shots_used": 14,
-    "shots_left": 4
+    "score": 590,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "pop_count",
+      "count": 27
+    }
   }
 }

@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1964616167
   },
-  "shots": 22,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -16,13 +16,13 @@
     "purple"
   ],
   "layout": [
-    "11554445533",
-    "1552i42253",
-    "4x121111554",
-    "4ii.....44",
-    "432.....222",
-    "433.....i3",
-    "45x.....333",
+    "33355533155",
+    "i13i22235i",
+    "4i1x5224553",
+    "111.....23",
+    "141.....522",
+    "x41.....24",
+    "224.....144",
     "..........",
     "...........",
     "..........",
@@ -34,44 +34,45 @@
   "blockers": [
     {
       "row": 1,
-      "col": 4,
+      "col": 9,
       "type": "ice",
       "hp": 2
     },
     {
-      "row": 5,
-      "col": 8,
+      "row": 1,
+      "col": 0,
       "type": "ice",
       "hp": 1
     },
     {
       "row": 2,
-      "col": 1,
+      "col": 3,
       "type": "stone",
       "hp": 0
     },
     {
-      "row": 3,
-      "col": 2,
-      "type": "ice",
-      "hp": 1
-    },
-    {
-      "row": 3,
+      "row": 2,
       "col": 1,
       "type": "ice",
       "hp": 1
     },
     {
-      "row": 6,
-      "col": 2,
+      "row": 1,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 0,
       "type": "stone",
       "hp": 0
     }
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "survive",
+      "shots": 7
     }
   ],
   "stars": {
@@ -86,8 +87,12 @@
   "ceilingDropEvery": 8,
   "notes": "funnel silhouette, 5 colours, mixed blockers, 48 bubbles",
   "greedy": {
-    "score": 1080,
-    "shots_used": 18,
-    "shots_left": 4
+    "score": 670,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "survive",
+      "shots": 7
+    }
   }
 }

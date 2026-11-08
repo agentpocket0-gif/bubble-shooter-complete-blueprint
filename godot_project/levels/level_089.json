@@ -66,8 +66,8 @@
   ],
   "objectives": [
     {
-      "type": "pop_count",
-      "count": 30
+      "type": "score",
+      "target": 705
     }
   ],
   "stars": {
@@ -84,6 +84,10 @@
   "greedy": {
     "score": 785,
     "shots_used": 9,
-    "shots_left": 4
+    "shots_left": 4,
+    "objective": {
+      "type": "score",
+      "target": 705
+    }
   }
 }

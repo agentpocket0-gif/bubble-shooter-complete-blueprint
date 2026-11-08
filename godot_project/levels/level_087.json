@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1155139018
   },
-  "shots": 12,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -17,13 +17,13 @@
     "orange"
   ],
   "layout": [
-    "55552212444",
-    "55562224i3",
-    "51566663333",
-    "1i1.....33",
-    "612.....xi3",
-    "6i2.....44",
-    "x66.....i14",
+    "13631122214",
+    "3x61122224",
+    "36641122554",
+    "366.....5i",
+    "i44.....35i",
+    "444.....35",
+    "6ix.....i35",
     "..........",
     "...........",
     "..........",
@@ -34,38 +34,38 @@
   ],
   "blockers": [
     {
-      "row": 5,
+      "row": 6,
       "col": 1,
       "type": "ice",
       "hp": 2
     },
     {
       "row": 4,
+      "col": 10,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
       "col": 9,
       "type": "ice",
       "hp": 1
     },
     {
-      "row": 6,
-      "col": 0,
-      "type": "stone",
-      "hp": 0
-    },
-    {
-      "row": 1,
-      "col": 8,
-      "type": "ice",
-      "hp": 1
-    },
-    {
-      "row": 3,
-      "col": 1,
-      "type": "ice",
-      "hp": 1
-    },
-    {
       "row": 4,
-      "col": 8,
+      "col": 0,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 2,
       "type": "stone",
       "hp": 0
     },
@@ -78,8 +78,8 @@
   ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "pop_count",
+      "count": 30
     }
   ],
   "stars": {
@@ -94,8 +94,12 @@
   "ceilingDropEvery": 5,
   "notes": "funnel silhouette, 6 colours, dense blockers, 47 bubbles",
   "greedy": {
-    "score": 1300,
-    "shots_used": 8,
-    "shots_left": 4
+    "score": 705,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "pop_count",
+      "count": 30
+    }
   }
 }

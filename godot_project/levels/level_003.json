@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1520841726
   },
-  "shots": 25,
+  "shots": 15,
   "palette": [
     "red",
     "blue",
@@ -32,8 +32,8 @@
   "blockers": [],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "pop_count",
+      "count": 39
     }
   ],
   "stars": {
@@ -48,8 +48,12 @@
   "ceilingDropEvery": 0,
   "notes": "full silhouette, 3 colours, none blockers, 60 bubbles",
   "greedy": {
-    "score": 1815,
-    "shots_used": 21,
-    "shots_left": 4
+    "score": 1105,
+    "shots_used": 11,
+    "shots_left": 4,
+    "objective": {
+      "type": "pop_count",
+      "count": 39
+    }
   }
 }

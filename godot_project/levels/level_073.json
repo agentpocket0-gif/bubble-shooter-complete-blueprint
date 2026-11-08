@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 500297108
   },
-  "shots": 19,
+  "shots": 20,
   "palette": [
     "red",
     "blue",
@@ -84,14 +84,13 @@
   ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "clear_all"
     }
   ],
   "stars": {
     "1": 1000,
-    "2": 2000,
-    "3": 3000
+    "2": 1500,
+    "3": 2000
   },
   "rewards": {
     "coins": 40,
@@ -100,8 +99,11 @@
   "ceilingDropEvery": 6,
   "notes": "full silhouette, 6 colours, mixed blockers, 66 bubbles",
   "greedy": {
-    "score": 1830,
-    "shots_used": 15,
-    "shots_left": 4
+    "score": 1880,
+    "shots_used": 16,
+    "shots_left": 4,
+    "objective": {
+      "type": "clear_all"
+    }
   }
 }

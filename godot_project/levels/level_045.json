@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1337998064
   },
-  "shots": 36,
+  "shots": 22,
   "palette": [
     "red",
     "blue",
@@ -16,14 +16,14 @@
     "purple"
   ],
   "layout": [
-    "51113341335",
-    "5i5144i433",
-    ".541i1225x.",
-    ".4i11332x1",
-    ".443533321.",
-    "..55i3442.",
-    "..5522244..",
-    "..22i2244.",
+    "11233511144",
+    "1522251134",
+    ".52i235213.",
+    ".i33334i35",
+    ".223334435.",
+    "..5x14435.",
+    "..5i11i2i..",
+    "..x544442.",
     "...........",
     "..........",
     "...........",
@@ -33,58 +33,58 @@
   ],
   "blockers": [
     {
-      "row": 1,
-      "col": 6,
+      "row": 6,
+      "col": 8,
       "type": "ice",
       "hp": 2
     },
     {
-      "row": 2,
-      "col": 4,
-      "type": "ice",
-      "hp": 1
-    },
-    {
       "row": 3,
-      "col": 8,
-      "type": "stone",
-      "hp": 0
-    },
-    {
-      "row": 3,
-      "col": 2,
+      "col": 7,
       "type": "ice",
       "hp": 1
-    },
-    {
-      "row": 1,
-      "col": 1,
-      "type": "ice",
-      "hp": 1
-    },
-    {
-      "row": 2,
-      "col": 9,
-      "type": "stone",
-      "hp": 0
     },
     {
       "row": 5,
-      "col": 4,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 6,
       "type": "ice",
       "hp": 1
     },
     {
       "row": 7,
-      "col": 4,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 1,
       "type": "ice",
       "hp": 1
     }
   ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "pop_count",
+      "count": 39
     }
   ],
   "stars": {
@@ -99,8 +99,12 @@
   "ceilingDropEvery": 8,
   "notes": "heart silhouette, 5 colours, mixed blockers, 61 bubbles",
   "greedy": {
-    "score": 1715,
-    "shots_used": 32,
-    "shots_left": 4
+    "score": 695,
+    "shots_used": 18,
+    "shots_left": 4,
+    "objective": {
+      "type": "pop_count",
+      "count": 39
+    }
   }
 }

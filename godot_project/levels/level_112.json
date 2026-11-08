@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 944071581
   },
-  "shots": 9,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -17,13 +17,13 @@
     "orange"
   ],
   "layout": [
-    "1222444444.",
+    "1111122255.",
     "..........",
     ".....2.....",
-    "....333...",
-    "...62133...",
-    "..6211135.",
-    ".666615555.",
+    "....246...",
+    "...35246...",
+    "..33444c5.",
+    ".3i311ix6i.",
     "..........",
     "...........",
     "..........",
@@ -32,10 +32,47 @@
     "...........",
     ".........."
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 9,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 6,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "type": "chain",
+      "color": 5,
+      "hp": 0
+    }
+  ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 20
     }
   ],
   "stars": {
@@ -48,10 +85,14 @@
     "firstClearBonus": 100
   },
   "ceilingDropEvery": 5,
-  "notes": "diamond silhouette, 6 colours, none blockers, 35 bubbles",
+  "notes": "diamond silhouette, 6 colours, dense blockers, 31 bubbles",
   "greedy": {
-    "score": 725,
-    "shots_used": 5,
-    "shots_left": 4
+    "score": 705,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 887573763
   },
-  "shots": 31,
+  "shots": 11,
   "palette": [
     "red",
     "blue",
@@ -72,7 +72,8 @@
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "survive",
+      "shots": 7
     }
   ],
   "stars": {
@@ -87,8 +88,12 @@
   "ceilingDropEvery": 6,
   "notes": "funnel silhouette, 6 colours, mixed blockers, 48 bubbles",
   "greedy": {
-    "score": 1240,
-    "shots_used": 27,
-    "shots_left": 4
+    "score": 550,
+    "shots_used": 7,
+    "shots_left": 4,
+    "objective": {
+      "type": "survive",
+      "shots": 7
+    }
   }
 }

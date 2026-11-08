@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 1485950199
   },
-  "shots": 9,
+  "shots": 15,
   "palette": [
     "red",
     "blue",
@@ -21,7 +21,7 @@
     ".....1.....",
     "....11i...",
     "...1x334...",
-    "..1124443.",
+    "..112444c.",
     ".45124i233.",
     ".45i222222",
     "...........",
@@ -55,11 +55,23 @@
       "col": 6,
       "type": "ice",
       "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 8,
+      "type": "chain",
+      "color": 2,
+      "hp": 0
     }
   ],
   "objectives": [
     {
-      "type": "clear_all"
+      "type": "rescue",
+      "count": 1
+    },
+    {
+      "type": "pop_count",
+      "count": 22
     }
   ],
   "stars": {
@@ -74,8 +86,12 @@
   "ceilingDropEvery": 8,
   "notes": "diamond silhouette, 5 colours, mixed blockers, 40 bubbles",
   "greedy": {
-    "score": 880,
-    "shots_used": 5,
-    "shots_left": 4
+    "score": 940,
+    "shots_used": 11,
+    "shots_left": 4,
+    "objective": {
+      "type": "rescue",
+      "count": 1
+    }
   }
 }

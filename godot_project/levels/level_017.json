@@ -7,7 +7,7 @@
     "rows": 14,
     "seed": 28265004
   },
-  "shots": 9,
+  "shots": 10,
   "palette": [
     "red",
     "blue",
@@ -15,12 +15,12 @@
     "yellow"
   ],
   "layout": [
-    "444432234.",
-    "...4323..",
-    "...3113...",
-    "...113i..",
-    "...1423...",
-    "222244111",
+    "444433322.",
+    "...4i32..",
+    "...4412...",
+    "...3111..",
+    "...3322...",
+    "233321111",
     "..........",
     ".........",
     "..........",
@@ -32,16 +32,16 @@
   ],
   "blockers": [
     {
-      "row": 3,
-      "col": 6,
+      "row": 1,
+      "col": 4,
       "type": "ice",
       "hp": 2
     }
   ],
   "objectives": [
     {
-      "type": "clear_color",
-      "color": "red"
+      "type": "score",
+      "target": 586
     }
   ],
   "stars": {
@@ -56,8 +56,12 @@
   "ceilingDropEvery": 0,
   "notes": "cross silhouette, 4 colours, ice blockers, 33 bubbles",
   "greedy": {
-    "score": 405,
-    "shots_used": 5,
-    "shots_left": 4
+    "score": 715,
+    "shots_used": 6,
+    "shots_left": 4,
+    "objective": {
+      "type": "score",
+      "target": 586
+    }
   }
 }
