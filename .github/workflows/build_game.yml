@@ -171,6 +171,18 @@ jobs:
               -dname "CN=CI Throwaway, O=Classic Blast, C=IN"
             echo "::warning::No ANDROID_KEYSTORE_BASE64 secret - signed with a throwaway key. Do not upload this AAB to Google Play."
           fi
+          # Godot's debug export wants the standard debug keystore; create one so
+          # the APK is installable without touching the release key.
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -alias androiddebugkey -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US" > /dev/null 2>&1
+          fi
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$RUNNER_TEMP/keys/release.keystore" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=${KEY_ALIAS:-bubbleshooter}" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=${KEY_PASSWORD:-${KEYSTORE_PASSWORD:-ci-throwaway}}" >> "$GITHUB_ENV"
@@ -202,7 +214,7 @@ jobs:
           set -euo pipefail
           mkdir -p out
           for attempt in 1 2; do
-            if ./godot --headless --path "$PROJECT_DIR" --export-debug "Android APK" \
+            if ./godot --headless --verbose --path "$PROJECT_DIR" --export-debug "Android APK" \
                  "$PWD/out/BubbleShooterClassicBlast-debug.apk"; then break; fi
             echo "export attempt $attempt failed; re-importing and retrying"
             ./godot --headless --path "$PROJECT_DIR" --import || true
