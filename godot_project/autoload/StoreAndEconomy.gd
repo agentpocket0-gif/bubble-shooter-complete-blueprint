@@ -138,21 +138,32 @@ func sku_title(id: String) -> String:
 	}.get(id, id.capitalize())
 
 
-## Purchase entry point. On device this calls the native billing bridge
-## (Google Play Billing / StoreKit); the grant only happens after the store
-## confirms. In the editor and in CI it resolves instantly so the flow is
-## testable end to end.
+## Purchase entry point. A paid item is granted only after the native
+## billing bridge reports a verified store transaction. Editor/CI builds have
+## no billing bridge, so they must fail closed instead of faking a purchase.
 func purchase(id: String) -> void:
 	if not RemoteConfigAndAds.iap_enabled():
 		purchase_finished.emit(id, false)
 		return
-	if Engine.has_singleton("ClassicBlastBilling"):
-		var bridge: Object = Engine.get_singleton("ClassicBlastBilling")
-		if bridge.has_method("purchase"):
-			bridge.call("purchase", str(RemoteConfigAndAds.sku(id).get("sku", id)))
-			return
-	_grant_sku(id)
-	purchase_finished.emit(id, true)
+
+	var product := RemoteConfigAndAds.sku(id)
+	var sku_id := str(product.get("sku", ""))
+	if product.is_empty() or sku_id.is_empty():
+		purchase_finished.emit(id, false)
+		return
+
+	if not Engine.has_singleton("ClassicBlastBilling"):
+		purchase_finished.emit(id, false)
+		return
+
+	var bridge: Object = Engine.get_singleton("ClassicBlastBilling")
+	if not bridge.has_method("purchase"):
+		purchase_finished.emit(id, false)
+		return
+
+	# The native bridge must verify the purchase with the store/backend, then
+	# call on_native_purchase(sku_id, true). This call alone grants nothing.
+	bridge.call("purchase", sku_id)
 
 
 func _grant_sku(id: String) -> void:
@@ -173,13 +184,18 @@ func _grant_sku(id: String) -> void:
 	AudioManager.play("sfx_purchase_success")
 
 
-## Called by the native billing bridge after server-side receipt validation.
+## Called only after the native billing bridge has verified the receipt with
+## the store/backend and de-duplicated the transaction.
 func on_native_purchase(sku_id: String, ok: bool) -> void:
 	if not ok:
 		purchase_finished.emit(sku_id, false)
 		return
+
 	for row in skus():
 		if str(row.get("sku", "")) == sku_id:
 			_grant_sku(str(row["id"]))
 			purchase_finished.emit(str(row["id"]), true)
 			return
+
+	push_warning("StoreAndEconomy: rejected an unknown purchase SKU: " + sku_id)
+	purchase_finished.emit(sku_id, false)
