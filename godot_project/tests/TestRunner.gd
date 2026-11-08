@@ -203,6 +203,9 @@ func _test_all_levels() -> void:
 	_check("level index has 120 entries", idx.size() == 120, "size=%d" % idx.size())
 	var bad := 0
 	var unbalanced := 0
+	var mission_types := {}
+	var rescue_levels := 0
+	var rescue_chain_cells := 0
 	for i in range(1, 121):
 		var lv := LevelLibrary.load_level(i)
 		if lv.is_empty():
@@ -223,8 +226,25 @@ func _test_all_levels() -> void:
 			bad += 1
 		if not lv.has("greedy"):
 			unbalanced += 1
+		for objective in lv.get("objectives", []):
+			var mission := str(objective.get("type", ""))
+			mission_types[mission] = true
+			if mission == "rescue":
+				rescue_levels += 1
+				if int(objective.get("count", 0)) > 0:
+					for row in lv["layout"]:
+						rescue_chain_cells += str(row).count("c")
+		if str(lv.get("objectives", [{}])[0].get("type", "")) == "survive" and int(lv["objectives"][0].get("shots", 0)) <= 0:
+			bad += 1
 	_check("every level passes the schema validator", bad == 0, "bad=%d" % bad)
 	_check("every level is solver-balanced", unbalanced == 0, "unbalanced=%d" % unbalanced)
+	var required_missions := ["clear_all", "clear_color", "pop_count", "rescue", "score", "survive"]
+	var missing_missions: Array[String] = []
+	for mission_type in required_missions:
+		if not mission_types.has(mission_type):
+			missing_missions.append(mission_type)
+	_check("all six mission types are present", missing_missions.is_empty(), str(missing_missions))
+	_check("rescue levels contain chained bubbles", rescue_levels > 0 and rescue_chain_cells >= rescue_levels)
 
 
 func _test_playthrough() -> void:
@@ -280,6 +300,16 @@ func _test_gameplay_scene() -> void:
 	add_child(game)
 	await get_tree().process_frame
 	await get_tree().process_frame
+
+	var original_level: Dictionary = game.level.duplicate(true)
+	var original_shots_taken: int = game.shots_taken
+	game.level["objectives"] = [{"type": "survive", "shots": 3}]
+	game.shots_taken = 2
+	_check("survive objective waits for its required shot count", not game._objective_met())
+	game.shots_taken = 3
+	_check("survive objective completes after the required safe shots", game._objective_met())
+	game.level = original_level
+	game.shots_taken = original_shots_taken
 
 	var shots_before: int = game.shots_left
 	var board_before: int = game.board.occupied_count()
