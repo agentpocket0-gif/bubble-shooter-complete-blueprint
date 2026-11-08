@@ -33,8 +33,14 @@ func load_manifest() -> bool:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
 
-	if not parsed is Dictionary or not parsed.get("assets", {}) is Dictionary:
-		push_warning("AssetRegistry: manifest schema is invalid.")
+	if not (parsed is Dictionary):
+		push_warning("AssetRegistry: manifest root must be an object.")
+		asset_manifest_loaded.emit(false)
+		return false
+
+	var registered_assets: Variant = parsed.get("assets", {})
+	if not (registered_assets is Dictionary):
+		push_warning("AssetRegistry: manifest assets field must be an object.")
 		asset_manifest_loaded.emit(false)
 		return false
 
@@ -55,7 +61,7 @@ func get_asset_path(asset_key: StringName) -> String:
 
 	var assets: Dictionary = manifest.get("assets", {})
 	var record: Variant = assets.get(String(asset_key))
-	if not record is Dictionary:
+	if not (record is Dictionary):
 		return ""
 
 	var relative_path := String(record.get("path", ""))

@@ -7,7 +7,7 @@ config/description="An original portrait bubble-shooter game."
 config/version="0.1.0"
 run/main_scene="res://scenes/bootstrap/Splash.tscn"
 run/max_fps=60
-config/features=PackedStringArray("4.0", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 GameManager="*res://scripts/core/game_manager.gd"

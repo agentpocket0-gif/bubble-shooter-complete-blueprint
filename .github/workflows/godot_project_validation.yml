@@ -1,0 +1,47 @@
+name: Validate Godot project foundation
+
+on:
+  push:
+    paths:
+      - "godot_project/**"
+      - "tools/validate_milestone1.py"
+      - ".github/workflows/godot_project_validation.yml"
+  pull_request:
+    paths:
+      - "godot_project/**"
+      - "tools/validate_milestone1.py"
+      - ".github/workflows/godot_project_validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate project settings and asset manifest
+        run: python tools/validate_milestone1.py
+
+      - name: Download Godot 4.7.2 stable
+        run: |
+          curl -fL --retry 3 \
+            -o godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          chmod +x Godot_v4.7.2-stable_linux.x86_64
+          ./Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Import and parse project
+        run: |
+          GODOT=./Godot_v4.7.2-stable_linux.x86_64
+          "$GODOT" --headless --editor --path godot_project --quit
+          "$GODOT" --headless --path godot_project --quit-after 5

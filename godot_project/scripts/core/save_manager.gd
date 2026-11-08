@@ -64,7 +64,7 @@ func load_game() -> bool:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
 
-	if not parsed is Dictionary:
+	if not (parsed is Dictionary):
 		push_warning("SaveManager: save file is invalid; starting with defaults.")
 		data = _default_data()
 		var reset_ok := save_game()

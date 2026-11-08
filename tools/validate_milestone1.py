@@ -12,6 +12,7 @@ PROJECT = ROOT / "godot_project"
 
 REQUIRED_FILES = [
     PROJECT / "project.godot",
+    PROJECT / "GODOT_VERSION",
     PROJECT / "export_presets.cfg",
     PROJECT / "scenes/bootstrap/Splash.tscn",
     PROJECT / "scripts/ui/bootstrap_splash.gd",
@@ -36,7 +37,8 @@ project_text = (PROJECT / "project.godot").read_text(encoding="utf-8")
 required_settings = [
     'config/name="Bubble Shooter: Classic Blast"',
     'run/main_scene="res://scenes/bootstrap/Splash.tscn"',
-    "run/max_fps=60",
+    'run/max_fps=60',
+    'config/features=PackedStringArray("4.7", "GL Compatibility")',
     "window/size/viewport_width=1080",
     "window/size/viewport_height=1920",
     'window/stretch/mode="canvas_items"',
@@ -49,6 +51,10 @@ required_settings = [
 for setting in required_settings:
     if setting not in project_text:
         ERRORS.append(f"Missing project setting: {setting}")
+
+version = (PROJECT / "GODOT_VERSION").read_text(encoding="utf-8").strip()
+if version != "4.7.2-stable":
+    ERRORS.append(f"Unexpected Godot version pin: {version}")
 
 preset_text = (PROJECT / "export_presets.cfg").read_text(encoding="utf-8")
 if 'package/unique_name="com.classicblast.bubbleshooter"' not in preset_text:
@@ -66,6 +72,7 @@ if not isinstance(assets, dict):
     ERRORS.append("Asset manifest 'assets' must be an object.")
     assets = {}
 
+asset_root = (PROJECT / "assets").resolve()
 for key, record in assets.items():
     if not isinstance(record, dict):
         ERRORS.append(f"Asset '{key}' must be an object with a relative path.")
@@ -74,8 +81,8 @@ for key, record in assets.items():
     if not isinstance(relative, str) or not relative or relative.startswith(("/", "\\")):
         ERRORS.append(f"Asset '{key}' has an invalid relative path.")
         continue
-    candidate = (PROJECT / "assets" / relative).resolve()
-    if PROJECT.joinpath("assets").resolve() not in candidate.parents:
+    candidate = (asset_root / relative).resolve()
+    if asset_root not in candidate.parents:
         ERRORS.append(f"Asset '{key}' points outside the assets folder.")
     elif not candidate.is_file():
         ERRORS.append(f"Asset '{key}' is registered but its file is missing.")
@@ -86,9 +93,10 @@ if ERRORS:
     sys.exit(1)
 
 print("Milestone 1 static validation PASSED.")
+print("Engine pin: Godot 4.7.2-stable.")
 print("Project settings: portrait 1080x1920, canvas_items, 60 FPS.")
 print("Android package ID: com.classicblast.bubbleshooter.")
-print(f"Autoload services: 4.")
+print("Autoload services: 4.")
 print(f"Registered production assets: {len(assets)}.")
 if not assets:
     print("NOTICE: no production assets are imported; Drive asset sync remains pending.")
