@@ -14,6 +14,7 @@ func _ready() -> void:
 	_test_neighbours()
 	_test_ceiling_shot()
 	_test_wall_bounce()
+	_test_snap_fallback()
 	_test_cluster()
 	_test_floating()
 	_test_ice_two_hits()
@@ -87,8 +88,33 @@ func _test_wall_bounce() -> void:
 	var b := HexBoard.new(11, 14)
 	var t := ShotSimulator.trace(b, deg_to_rad(74.0))
 	_check("steep shot reflects off a wall", t.bounces >= 1, "bounces=%d" % t.bounces)
-	_check("bounced shot still lands in bounds",
-		not t.valid or (t.cell.x >= 0 and t.cell.x < b.row_len(t.cell.y)))
+	_check("trajectory enforces the three-bounce limit",
+		t.bounces == ShotSimulator.MAX_BOUNCES and not t.valid, "bounces=%d valid=%s" % [t.bounces, t.valid])
+	var legal := ShotSimulator.trace(b, deg_to_rad(35.0))
+	_check("a legal reflected shot still reaches the ceiling", legal.valid and legal.bounces <= ShotSimulator.MAX_BOUNCES)
+
+
+func _test_snap_fallback() -> void:
+	var crowded := HexBoard.new(11, 14)
+	var hit := Vector2i(5, 5)
+	for n in crowded.neighbours(hit.x, hit.y):
+		crowded.set_cell(n.x, n.y, 0)
+	var point := crowded.centre(hit.x, hit.y)
+	var snapped := ShotSimulator._snap(crowded, hit, point)
+	_check("crowded hit uses the nearest empty cell within two diameters",
+		snapped.x >= 0 and snapped.y >= 0
+		and not crowded.filled(snapped.x, snapped.y)
+		and crowded.centre(snapped.x, snapped.y).distance_to(point) <= HexBoard.D * 2.0)
+
+	var full_ceiling := HexBoard.new(11, 14)
+	for q in full_ceiling.row_len(0):
+		full_ceiling.set_cell(q, 0, 0)
+	var ceiling_x := full_ceiling.centre(5, 0).x
+	var ceiling_cell := ShotSimulator._snap_ceiling(full_ceiling, ceiling_x)
+	_check("full ceiling row falls back to the nearest open cell within two diameters",
+		ceiling_cell.x >= 0 and ceiling_cell.y >= 0
+		and not full_ceiling.filled(ceiling_cell.x, ceiling_cell.y)
+		and full_ceiling.centre(ceiling_cell.x, ceiling_cell.y).distance_to(Vector2(ceiling_x, 0.0)) <= HexBoard.D * 2.0)
 
 
 func _test_cluster() -> void:
