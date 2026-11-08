@@ -21,6 +21,7 @@ func _ready() -> void:
 	_test_colour_queue()
 	_test_save_roundtrip()
 	_test_save_tamper()
+	_test_iap_fails_closed_without_bridge()
 	_test_all_levels()
 	_test_playthrough()
 	_test_assets()
@@ -177,6 +178,24 @@ func _test_save_tamper() -> void:
 	var read_back := SaveSystem.read(path)
 	_check("tampered save is rejected", read_back.is_empty(), str(read_back))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
+func _test_iap_fails_closed_without_bridge() -> void:
+	# The CI runner has no native billing plugin. It must never mint paid goods.
+	var before_coins := GameManager.coins()
+	var result := {"called": false, "ok": true}
+	var handler := func(_sku_id: String, ok: bool) -> void:
+		result["called"] = true
+		result["ok"] = ok
+
+	StoreAndEconomy.purchase_finished.connect(handler)
+	StoreAndEconomy.purchase("coins_small")
+	StoreAndEconomy.purchase_finished.disconnect(handler)
+
+	_check("missing native billing bridge reports purchase failure",
+		bool(result["called"]) and not bool(result["ok"]))
+	_check("paid currency is not granted without store confirmation",
+		GameManager.coins() == before_coins)
 
 
 func _test_all_levels() -> void:
