@@ -195,10 +195,15 @@ jobs:
           set -euo pipefail
           TPL="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}"
           test -f "$TPL/android_source.zip"
-          rm -rf "$PROJECT_DIR/android/build"
+          rm -rf "$PROJECT_DIR/android"
           mkdir -p "$PROJECT_DIR/android/build"
           unzip -q "$TPL/android_source.zip" -d "$PROJECT_DIR/android/build"
-          ls "$PROJECT_DIR/android/build"
+          # the editor writes this marker when it installs the template; without it
+          # the exporter refuses to build from the gradle template
+          printf '%s.%s\n' "$GODOT_VERSION" "$GODOT_CHANNEL" > "$PROJECT_DIR/android/.build_version"
+          printf '' > "$PROJECT_DIR/android/build/.gdignore"
+          cat "$PROJECT_DIR/android/.build_version"
+          ls "$PROJECT_DIR/android/build" | head
 
       - name: Import project
         run: ./godot --headless --path "$PROJECT_DIR" --import
