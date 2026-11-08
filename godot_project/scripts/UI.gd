@@ -67,14 +67,20 @@ static func stylebox(name: String) -> StyleBox:
 		return sb
 	var s := StyleBoxTexture.new()
 	s.texture = t
-	s.texture_margin_left = 24
-	s.texture_margin_right = 24
-	s.texture_margin_top = 24
-	s.texture_margin_bottom = 24
-	s.content_margin_left = 32
-	s.content_margin_right = 32
-	s.content_margin_top = 20
-	s.content_margin_bottom = 20
+	# The button art is 240x96 with rounded corners and a coloured "lip" along
+	# the bottom. Stretch only the flat face band, never the corners or the lip,
+	# or the button renders as two stacked rectangles.
+	var h := t.get_height()
+	var lip := clampf(h * 0.46, 12.0, 44.0)
+	var cap := clampf(h * 0.26, 10.0, 26.0)
+	s.texture_margin_left = clampf(t.get_width() * 0.17, 12.0, 44.0)
+	s.texture_margin_right = s.texture_margin_left
+	s.texture_margin_top = cap
+	s.texture_margin_bottom = lip
+	s.content_margin_left = 28
+	s.content_margin_right = 28
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
 	return s
 
 
@@ -83,9 +89,12 @@ static func button(text: String, primary: bool = true, size: int = 44) -> Button
 	b.text = text
 	b.custom_minimum_size = Vector2(0, 128)
 	b.add_theme_font_size_override("font_size", size)
-	b.add_theme_color_override("font_color", Color("#1A1A22") if primary else INK)
-	b.add_theme_color_override("font_hover_color", Color("#1A1A22") if primary else INK)
-	b.add_theme_color_override("font_pressed_color", Color("#1A1A22") if primary else INK)
+	b.add_theme_color_override("font_color", INK)
+	b.add_theme_color_override("font_hover_color", INK)
+	b.add_theme_color_override("font_pressed_color", INK)
+	b.add_theme_color_override("font_disabled_color", MUTED)
+	b.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.55))
+	b.add_theme_constant_override("shadow_offset_y", 2)
 	var prefix := "btn_primary_" if primary else "btn_secondary_"
 	b.add_theme_stylebox_override("normal", stylebox(prefix + "normal.png"))
 	b.add_theme_stylebox_override("hover", stylebox(prefix + "normal.png"))
@@ -135,7 +144,22 @@ static func set_pill_text(p: PanelContainer, text: String) -> void:
 static func popup(width: float = 900.0) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.custom_minimum_size = Vector2(width, 0)
-	p.add_theme_stylebox_override("panel", stylebox("popup_frame.png"))
+	# A solid card first: the frame texture is decorative and mostly transparent
+	# in the middle, so on its own the map shows straight through the popup.
+	var flat := StyleBoxFlat.new()
+	flat.bg_color = Color("#1A1A22")
+	flat.border_color = Color("#3A3A4C")
+	flat.set_border_width_all(3)
+	flat.set_corner_radius_all(36)
+	flat.set_content_margin_all(34)
+	p.add_theme_stylebox_override("panel", flat)
+	var frame := TextureRect.new()
+	frame.texture = ui_tex("popup_frame.png")
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode = TextureRect.STRETCH_SCALE
+	frame.modulate = Color(1, 1, 1, 0.5)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(frame)
 	return p
 
 

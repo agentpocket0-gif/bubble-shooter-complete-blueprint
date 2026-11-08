@@ -142,6 +142,8 @@ func _step_gameplay() -> void:
 			textured = false
 	_check("every bubble sprite has a real texture", textured)
 
+	_check("the bubble in the cannon is visible and textured",
+		game.loaded != null and game.loaded.visible and game.loaded.texture != null)
 	await _capture("06_level_1_active_gameplay.png")
 
 	var shots_before: int = game.shots_left
@@ -158,6 +160,7 @@ func _step_gameplay() -> void:
 	_check("the score HUD updates after the shot",
 		game.score_label.text == str(game.score) and game.score >= score_before,
 		"hud=%s score=%d" % [game.score_label.text, game.score])
+	_check("a new bubble is loaded after the shot", game.loaded.visible)
 	await _capture("07_after_shot.png")
 	game.queue_free()
 	await get_tree().process_frame

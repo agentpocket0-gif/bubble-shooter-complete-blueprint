@@ -98,7 +98,7 @@ func _level_row(id: int) -> Control:
 	holder.add_child(icon)
 
 	var num := UI.label(str(id), 46, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
-	num.position = Vector2(0, NODE_SIZE * 0.28)
+	num.position = Vector2(0, NODE_SIZE * 0.16)
 	num.size = Vector2(NODE_SIZE, 56)
 	num.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
 	num.add_theme_constant_override("shadow_offset_y", 3)
@@ -107,15 +107,15 @@ func _level_row(id: int) -> Control:
 	if not unlocked:
 		var lock := TextureRect.new()
 		lock.texture = UI.icon("icon_lock", false)
-		lock.position = Vector2(NODE_SIZE * 0.5 - 24, NODE_SIZE * 0.72)
+		lock.position = Vector2(NODE_SIZE * 0.5 - 24, NODE_SIZE * 0.64)
 		lock.custom_minimum_size = Vector2(48, 48)
 		lock.size = Vector2(48, 48)
 		lock.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		holder.add_child(lock)
 	elif stars > 0:
-		var srow := UI.star_row(stars, 40)
-		srow.position = Vector2(0, NODE_SIZE - 34)
-		srow.size = Vector2(NODE_SIZE, 44)
+		var srow := UI.star_row(stars, 34)
+		srow.position = Vector2(0, NODE_SIZE * 0.62)
+		srow.size = Vector2(NODE_SIZE, 40)
 		holder.add_child(srow)
 
 	var btn := Button.new()
@@ -160,9 +160,9 @@ func _build_hud() -> void:
 	top.add_child(UI.icon_button("icon_settings", 96, _open_settings))
 
 	var rail := VBoxContainer.new()
-	rail.position = Vector2(940, 460)
-	rail.size = Vector2(120, 620)
-	rail.add_theme_constant_override("separation", 26)
+	rail.position = Vector2(938, 430)
+	rail.size = Vector2(110, 620)
+	rail.add_theme_constant_override("separation", 22)
 	root.add_child(rail)
 	_add_rail_button(rail, "icon_spin", "spin", func() -> void: _modal(Overlays.show_spin))
 	_add_rail_button(rail, "icon_piggy", "piggy", func() -> void: _modal(Overlays.show_piggy))
@@ -174,7 +174,7 @@ func _build_hud() -> void:
 
 
 func _add_rail_button(rail: VBoxContainer, icon_name: String, action: String, cb: Callable) -> void:
-	var b := UI.icon_button(icon_name, 110, cb)
+	var b := UI.icon_button(icon_name, 96, cb)
 	b.set_meta("action", action)
 	rail.add_child(b)
 

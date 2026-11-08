@@ -25,9 +25,16 @@ static func _modal(parent: Control, title_text: String) -> Dictionary:
 	panel.position = Vector2((1080.0 - W) / 2.0, 420)
 	root.add_child(panel)
 
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_top", 24)
+	margin.add_theme_constant_override("margin_bottom", 24)
+	panel.add_child(margin)
+
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 24)
-	panel.add_child(col)
+	margin.add_child(col)
 	col.add_child(UI.title(title_text, 60))
 
 	AudioManager.play("sfx_popup_open")

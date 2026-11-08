@@ -38,6 +38,7 @@ var aim: AimLine
 var ghost: Sprite2D
 var projectile: Sprite2D
 var next_preview: Sprite2D
+var loaded: Sprite2D
 var cannon_base: Sprite2D
 var cannon_barrel: Sprite2D
 var hud: CanvasLayer
@@ -124,9 +125,16 @@ func _build_scene() -> void:
 	projectile.z_index = 6
 	add_child(projectile)
 
+	# the bubble actually sitting in the cannon: without this the player cannot
+	# see what they are about to fire
+	loaded = Sprite2D.new()
+	loaded.position = CANNON_POS + Vector2(0, OFFSET_Y - 34)
+	loaded.z_index = 3
+	add_child(loaded)
+
 	next_preview = Sprite2D.new()
-	next_preview.position = CANNON_POS + Vector2(-170, -10 + OFFSET_Y)
-	next_preview.scale = Vector2(0.55, 0.55)
+	next_preview.position = CANNON_POS + Vector2(-190, -20 + OFFSET_Y)
+	next_preview.scale = Vector2(0.5, 0.5)
 	next_preview.modulate = Color(1, 1, 1, 0.85)
 	add_child(next_preview)
 
@@ -134,7 +142,7 @@ func _build_scene() -> void:
 	next_tag.text = "NEXT"
 	next_tag.add_theme_font_size_override("font_size", 22)
 	next_tag.add_theme_color_override("font_color", UI.MUTED)
-	next_tag.position = CANNON_POS + Vector2(-206, 60 + OFFSET_Y)
+	next_tag.position = CANNON_POS + Vector2(-226, 40 + OFFSET_Y)
 	add_child(next_tag)
 
 	_build_hud()
@@ -172,9 +180,9 @@ func _build_hud() -> void:
 	hud_root.add_child(score_label)
 
 	booster_row = HBoxContainer.new()
-	booster_row.position = Vector2(40, 1772)
-	booster_row.size = Vector2(1000, 140)
-	booster_row.add_theme_constant_override("separation", 22)
+	booster_row.position = Vector2(60, 1738)
+	booster_row.size = Vector2(960, 140)
+	booster_row.add_theme_constant_override("separation", 26)
 	booster_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	hud_root.add_child(booster_row)
 	_rebuild_boosters()
@@ -187,12 +195,12 @@ func _rebuild_boosters() -> void:
 		var b := TextureButton.new()
 		b.texture_normal = UI.tex("res://assets/boosters/booster_%s.png" % ("extra_moves" if kind == "extra_moves" else kind))
 		b.ignore_texture_size = true
-		b.custom_minimum_size = Vector2(132, 132)
+		b.custom_minimum_size = Vector2(118, 118)
 		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		var count := GameManager.booster_count(kind)
 		b.modulate = Color(1, 1, 1, 1) if count > 0 else Color(1, 1, 1, 0.35)
 		var badge := UI.label(str(count), 34, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
-		badge.position = Vector2(88, 92)
+		badge.position = Vector2(76, 78)
 		badge.size = Vector2(44, 40)
 		badge.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 		badge.add_theme_constant_override("shadow_offset_y", 3)
@@ -250,6 +258,9 @@ func _add_cell_sprite(q: int, r: int) -> void:
 
 func _set_cannon_sprite(colour: int) -> void:
 	projectile.texture = _bubble_texture(colour)
+	if loaded != null:
+		loaded.texture = _bubble_texture(colour)
+		loaded.visible = true
 
 
 # --------------------------------------------------------------------------- #
@@ -346,6 +357,8 @@ func _shoot() -> void:
 	_landing_cell = tr.cell
 	projectile.visible = true
 	projectile.texture = _bubble_texture(current_colour)
+	if loaded != null:
+		loaded.visible = false
 	projectile.position = _flight_path[0] + Vector2(0, OFFSET_Y)
 	projectile.scale = Vector2.ONE
 	AudioManager.play("sfx_shot")
