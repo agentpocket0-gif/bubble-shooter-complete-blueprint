@@ -5,7 +5,6 @@ extends RefCounted
 ## but progression is not capped and no fixed level file is required to play.
 
 const PREVIEW_LEVELS := 120
-const PROCEDURAL = preload("res://scripts/ProceduralLevelGenerator.gd")
 const INDEX_PATH := "res://levels/index.json"
 
 static var _index: Array = []
@@ -55,7 +54,7 @@ static func load_level(level_id: int) -> Dictionary:
 		return {}
 	if _cache.has(level_id):
 		return _cache[level_id]
-	var generated: Dictionary = PROCEDURAL.generate(level_id, GameManager.campaign_seed())
+	var generated: Dictionary = ProceduralLevelGenerator.generate(level_id, GameManager.campaign_seed())
 	if generated.is_empty() or not _is_valid_generated_level(generated):
 		push_error("LevelLibrary: procedural generation failed for level %d" % level_id)
 		return {}
