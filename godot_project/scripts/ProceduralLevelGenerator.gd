@@ -19,7 +19,7 @@ static func difficulty_for(level_id: int) -> float:
 	var id := maxi(1, level_id)
 	# The curve rises quickly early, then continues in smaller steps for endless play.
 	var early := minf(5.0, float(id - 1) / 24.0)
-	var endless := minf(2.0, float(maxi(0, id - 120)) / 60.0)
+	var endless := float(maxi(0, id - 120)) / 40.0
 	return 1.0 + early + endless
 
 
@@ -79,12 +79,12 @@ static func generate(level_id: int, campaign_seed: int) -> Dictionary:
 			line += str(grid[r][q]) if r < grid.size() else "."
 		layout.append(line)
 
-	var shot_divisor := maxf(2.65, 3.8 - minf(1.0, difficulty * 0.13))
-	var spare_shots := maxi(2, 7 - int(floor(difficulty)))
+	var shot_divisor := maxf(2.0, 3.8 - minf(1.8, difficulty * 0.12))
+	var spare_shots := maxi(1, 7 - int(floor(difficulty)))
 	var shots := maxi(10, int(ceil(float(cells.size()) / shot_divisor)) + spare_shots)
 	var ceiling_drop := 0
 	if id >= 26:
-		ceiling_drop = clampi(10 - int(floor(difficulty)), 4, 10)
+		ceiling_drop = clampi(10 - int(floor(difficulty)), 2, 10)
 
 	return {
 		"id": id,
@@ -239,14 +239,16 @@ static func _add_normal_blockers(
 	for cell in cells:
 		if cell.y > 0 and str(grid[cell.y][cell.x]).is_valid_int():
 			candidates.append(cell)
-	var density := clampf(0.015 + float(level_id - 1) * 0.00145, 0.0, 0.20)
+	var density := 0.0
+	if level_id >= 10:
+		density = clampf(0.01 + difficulty * 0.025, 0.0, 0.26)
 	var amount := int(floor(float(candidates.size()) * density))
 	for _i in range(amount):
 		if candidates.is_empty():
 			break
 		var cell: Vector2i = candidates.pop_at(rng.randi_range(0, candidates.size() - 1))
 		var original_colour := int(grid[cell.y][cell.x]) - 1
-		if level_id >= 31 and rng.randf() < 0.22:
+		if level_id >= 31 and rng.randf() < clampf(0.08 + difficulty * 0.025, 0.08, 0.45):
 			grid[cell.y][cell.x] = "x"
 			blockers.append({"row": cell.y, "col": cell.x, "type": "stone", "hp": 0})
 		else:
