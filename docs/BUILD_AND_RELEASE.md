@@ -11,8 +11,17 @@ The latest completed campaign-generation run created and committed 120 determini
 
 Mission distribution (primary mission per level): 20 clear-all, 20 clear-colour, 20 pop-count, 20 rescue, 20 score and 20 survive. Rescue levels also carry a secondary pop-count objective, so the objective-record count for pop-count is 40.
 
-The full build workflow on that generated-content commit is currently marked **action_required** by GitHub. It has not completed its final validation, visual QA or Android export for this exact six-mission campaign commit. The previous Godot 4.7.2/API36 build run did complete successfully, with 29 headless checks, 26 visual QA checks, an 82.3 MB debug APK and a 28.7 MB AAB; that earlier run predates the new six-mission campaign:
-https://github.com/agentpocket0-gif/bubble-shooter-complete-blueprint/actions/runs/42452551642
+The full Godot 4.7.2/API36 build for the generated six-mission campaign completed successfully:
+
+- Full CI run: https://github.com/agentpocket0-gif/bubble-shooter-complete-blueprint/actions/runs/42453796207
+- Headless suite: **33 passed, 0 failed**.
+- Visual QA: **26 checks, 0 failed**, with all nine 1080x1920 proof screenshots captured and blank/difference checks passed.
+- Debug APK: **82,269,975 bytes** (about 78.4 MiB).
+- AAB: **28,662,258 bytes** (about 27.3 MiB).
+- APK structural/package verification passed; export arguments set package ID `com.classicblast.bubbleshooter` and target API 36.
+- GitHub Actions artifacts: [android-build](https://github.com/agentpocket0-gif/bubble-shooter-complete-blueprint/actions/runs/42453796207/artifacts/13606324633) and [visual-qa](https://github.com/agentpocket0-gif/bubble-shooter-complete-blueprint/actions/runs/42453796207/artifacts/13606294634).
+
+The release-publishing job was skipped because this was a pull-request validation run, not a release/tag run. The AAB used a newly generated throwaway CI signing key because no permanent upload-key secrets are configured. It is a verified test build, **not** a Play Console upload file.
 
 ## Automated gates
 
@@ -22,7 +31,7 @@ https://github.com/agentpocket0-gif/bubble-shooter-complete-blueprint/actions/ru
 4. **Visual QA**: Godot drives the real scenes under Xvfb, captures nine 1080x1920 screenshots, and rejects missing or blank screens.
 5. **Android**: JDK 17, SDK 36, matching Godot 4.7.2 export templates, then debug APK and release AAB.
 
-The new 33-check suite and the visual QA gate still need a successful run on the exact generated-content commit before this campaign can be called fully verified.
+The exact generated-content commit passed all configured content, asset, headless, visual and Android build gates. Physical-device tests, permanent production signing and live monetisation integration remain separate release requirements.
 
 ## Android target API
 
