@@ -48,6 +48,7 @@ var coins_pill: PanelContainer
 var lives_pill: PanelContainer
 var shots_pill: PanelContainer
 var score_label: Label
+var objective_label: Label
 var booster_row: HBoxContainer
 var pause_overlay: Control
 
@@ -184,6 +185,12 @@ func _build_hud() -> void:
 	score_label.position = Vector2(0, 128)
 	score_label.size = Vector2(1080, 40)
 	hud_root.add_child(score_label)
+
+	objective_label = UI.label(_objective_status_text(), 27, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	objective_label.position = Vector2(70, 168)
+	objective_label.size = Vector2(940, 46)
+	objective_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	hud_root.add_child(objective_label)
 
 	# tap the "next" slot to swap: it has to live on the HUD canvas, not the
 	# 2D scene, so it gets touch input
@@ -477,10 +484,10 @@ func _resolve_shot() -> void:
 
 	await get_tree().create_timer(0.28).timeout
 
-	if _objective_met():
-		_win()
+	if _survive_failed():
+		_lose("board reached danger line")
 		return
-	if board.coloured_count() <= 1:
+	if _objective_met():
 		_win()
 		return
 	if shots_left <= 0:
@@ -669,6 +676,17 @@ func _ceiling_drop() -> void:
 # --------------------------------------------------------------------------- #
 # objectives
 # --------------------------------------------------------------------------- #
+func _has_survive_objective() -> bool:
+	for obj in level.get("objectives", []):
+		if str(obj.get("type", "")) == "survive":
+			return true
+	return false
+
+
+func _survive_failed() -> bool:
+	return _has_survive_objective() and board.max_row_used() >= board.rows - 1
+
+
 func _objective_met() -> bool:
 	for obj in level.get("objectives", []):
 		var t := str(obj.get("type", "clear_all"))
@@ -693,9 +711,31 @@ func _objective_met() -> bool:
 				if score < int(obj.get("target", 0)):
 					return false
 			"survive":
-				if board.max_row_used() >= board.rows - 1:
+				if shots_taken < int(obj.get("shots", 0)) or _survive_failed():
 					return false
 	return true
+
+
+func _objective_status_text() -> String:
+	var objectives: Array = level.get("objectives", [])
+	if objectives.is_empty():
+		return "CLEAR ALL BUBBLES"
+	var obj: Dictionary = objectives[0]
+	match str(obj.get("type", "clear_all")):
+		"clear_all":
+			return "CLEAR ALL BUBBLES"
+		"clear_color":
+			return "CLEAR %s BUBBLES" % str(obj.get("color", "red")).to_upper()
+		"pop_count":
+			return "POP %d / %d BUBBLES" % [popped_total, int(obj.get("count", 0))]
+		"rescue":
+			return "FREE %d / %d CHAINS" % [freed_total, int(obj.get("count", 0))]
+		"score":
+			return "SCORE %d / %d" % [score, int(obj.get("target", 0))]
+		"survive":
+			var required := int(obj.get("shots", 0))
+			return "SURVIVE %d / %d SHOTS" % [mini(shots_taken, required), required]
+	return "CLEAR ALL BUBBLES"
 
 
 func _compute_stars() -> int:
@@ -758,6 +798,8 @@ func _refresh_hud() -> void:
 		UI.set_pill_text(shots_pill, str(maxi(0, shots_left)))
 	if score_label != null:
 		score_label.text = "%d" % score
+	if objective_label != null:
+		objective_label.text = _objective_status_text()
 
 
 func _shake_hud() -> void:
