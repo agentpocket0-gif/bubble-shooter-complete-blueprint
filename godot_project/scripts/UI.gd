@@ -59,6 +59,38 @@ static func title(text: String, size: int = 72) -> Label:
 
 
 static func stylebox(name: String) -> StyleBox:
+	# Buttons use clean, solid states. The previous sliced PNG kept too much of
+	# its bottom highlight and made every button look like two stacked blocks.
+	if name.begins_with("btn_"):
+		var flat := StyleBoxFlat.new()
+		var primary := name.begins_with("btn_primary")
+		var pressed := name.contains("pressed")
+		var disabled := name.contains("disabled")
+		if disabled:
+			flat.bg_color = Color("#45495A")
+			flat.border_color = Color("#5A6072")
+		elif primary and pressed:
+			flat.bg_color = Color("#B86F24")
+			flat.border_color = Color("#8E541E")
+		elif primary:
+			flat.bg_color = Color("#E79A32")
+			flat.border_color = Color("#FFD17A")
+		elif pressed:
+			flat.bg_color = Color("#216C98")
+			flat.border_color = Color("#174E70")
+		else:
+			flat.bg_color = Color("#2D8FC3")
+			flat.border_color = Color("#73C9EF")
+		flat.set_border_width_all(3)
+		flat.set_corner_radius_all(28)
+		flat.shadow_color = Color(0, 0, 0, 0.30)
+		flat.shadow_size = 7
+		flat.shadow_offset = Vector2(0, 7)
+		flat.content_margin_left = 28
+		flat.content_margin_right = 28
+		flat.content_margin_top = 14
+		flat.content_margin_bottom = 14
+		return flat
 	var t := ui_tex(name)
 	if t == null:
 		var sb := StyleBoxFlat.new()
@@ -67,16 +99,10 @@ static func stylebox(name: String) -> StyleBox:
 		return sb
 	var s := StyleBoxTexture.new()
 	s.texture = t
-	# The button art is 240x96 with rounded corners and a coloured "lip" along
-	# the bottom. Stretch only the flat face band, never the corners or the lip,
-	# or the button renders as two stacked rectangles.
-	var h := t.get_height()
-	var lip := clampf(h * 0.46, 12.0, 44.0)
-	var cap := clampf(h * 0.26, 10.0, 26.0)
-	s.texture_margin_left = clampf(t.get_width() * 0.17, 12.0, 44.0)
+	s.texture_margin_left = clampf(t.get_width() * 0.17, 12.0, 34.0)
 	s.texture_margin_right = s.texture_margin_left
-	s.texture_margin_top = cap
-	s.texture_margin_bottom = lip
+	s.texture_margin_top = clampf(t.get_height() * 0.20, 8.0, 20.0)
+	s.texture_margin_bottom = clampf(t.get_height() * 0.20, 8.0, 20.0)
 	s.content_margin_left = 28
 	s.content_margin_right = 28
 	s.content_margin_top = 8
