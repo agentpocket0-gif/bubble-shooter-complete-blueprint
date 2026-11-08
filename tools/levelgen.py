@@ -795,15 +795,33 @@ def tune(level: dict, spare: int = 4) -> dict | None:
         baseline["objectives"] = [{"type": "clear_all"}]
         baseline_result = greedy_play(baseline, angles=18)
         if not baseline_result["won"] or baseline_result["score"] <= 0:
+            print(
+                f"DEBUG score baseline failed: level={level['id']} "
+                f"won={baseline_result['won']} score={baseline_result['score']} "
+                f"popped={baseline_result['popped']} shots={baseline_result['shots_used']}",
+                flush=True,
+            )
             return None
-        target = max(200, int(baseline_result["score"] * 0.72))
+        target = max(200, int(baseline_result["score"] * 0.82))
         probe["objectives"] = [{"type": "score", "target": target}]
 
     result = greedy_play(probe, angles=18)
     if not result["won"]:
+        print(
+            f"DEBUG objective failed: level={level['id']} type={probe['objectives'][0]['type']} "
+            f"score={result['score']} popped={result['popped']} freed={result['freed']} "
+            f"shots={result['shots_used']} target={probe['objectives'][0]}",
+            flush=True,
+        )
         return None
     used = result["shots_used"]
-    if used < 5:
+    minimum_shots = 3 if probe["objectives"][0].get("type") == "score" else 5
+    if used < minimum_shots:
+        print(
+            f"DEBUG level too easy for balance gate: id={level['id']} "
+            f"type={probe['objectives'][0]['type']} used={used} minimum={minimum_shots}",
+            flush=True,
+        )
         return None
     coloured = sum(1 for line in probe["layout"] for ch in line if ch.isdigit())
     if used > coloured / 2.0 + 8:
