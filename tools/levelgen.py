@@ -35,6 +35,7 @@ ORIGIN_X = LEFT_WALL + HALF   # centre of column 0 on an even row
 CANNON_X = 540.0
 CANNON_Y = 1450.0             # below the deepest legal board row
 MAX_ANGLE = math.radians(75.0)
+MAX_BOUNCES = 3
 STEP = D / 2.0                # substep length; < hit radius so no tunnelling
 MAX_ROWS = 14
 
@@ -178,15 +179,22 @@ def trace(board: Board, angle: float) -> tuple[int, int, bool] | None:
     """Fly a bubble from the cannon and return the cell it lands in."""
     x, y = CANNON_X, CANNON_Y
     dx, dy = math.sin(angle), -math.cos(angle)
+    bounces = 0
     for _ in range(400):
         x += dx * STEP
         y += dy * STEP
         if x - HALF < LEFT_WALL:
+            if bounces >= MAX_BOUNCES:
+                return None
             x = LEFT_WALL + HALF + (LEFT_WALL - (x - HALF))
             dx = -dx
+            bounces += 1
         elif x + HALF > RIGHT_WALL:
+            if bounces >= MAX_BOUNCES:
+                return None
             x = RIGHT_WALL - HALF - ((x + HALF) - RIGHT_WALL)
             dx = -dx
+            bounces += 1
         if y <= 0.0:
             return _snap_ceiling(board, x)
         hit = _first_hit(board, x, y)
@@ -210,14 +218,47 @@ def _first_hit(board: Board, x: float, y: float) -> tuple[int, int] | None:
     return best
 
 
-def _snap_ceiling(board: Board, x: float) -> tuple[int, int, bool] | None:
-    q = int(round((x - ORIGIN_X) / D))
-    q = max(0, min(board.row_len(0) - 1, q))
-    while q < board.row_len(0) and board.filled(q, 0):
-        q += 1
-    if q >= board.row_len(0):
+def _nearest_empty_within(
+    board: Board, start: tuple[int, int], x: float, y: float
+) -> tuple[int, int] | None:
+    """Breadth-first search up to two hex steps, bounded by a 2d radius."""
+    if not board.in_bounds(*start):
         return None
-    return (q, 0, True)
+    queue: list[tuple[tuple[int, int], int]] = [(start, 0)]
+    seen = {start}
+    cursor = 0
+    best: tuple[int, int] | None = None
+    best_d = (2.0 * D) ** 2
+    while cursor < len(queue):
+        (q, r), depth = queue[cursor]
+        cursor += 1
+        cx, cy = board.centre(q, r)
+        dist = (cx - x) ** 2 + (cy - y) ** 2
+        if not board.filled(q, r) and dist <= (2.0 * D) ** 2 and dist < best_d:
+            best, best_d = (q, r), dist
+        if depth >= 2:
+            continue
+        for cell in board.neighbours(q, r):
+            if cell not in seen:
+                seen.add(cell)
+                queue.append((cell, depth + 1))
+    return best
+
+
+def _snap_ceiling(board: Board, x: float) -> tuple[int, int, bool] | None:
+    q = max(0, min(board.row_len(0) - 1, int(round((x - ORIGIN_X) / D))))
+    best, best_d = None, float("inf")
+    for candidate in range(board.row_len(0)):
+        if board.filled(candidate, 0):
+            continue
+        cx, _ = board.centre(candidate, 0)
+        dist = abs(cx - x)
+        if dist < best_d:
+            best, best_d = (candidate, 0), dist
+    if best is not None:
+        return (best[0], best[1], True)
+    fallback = _nearest_empty_within(board, (q, 0), x, 0.0)
+    return (fallback[0], fallback[1], True) if fallback is not None else None
 
 
 def _snap(board: Board, hit: tuple[int, int], x: float, y: float) -> tuple[int, int, bool] | None:
@@ -230,6 +271,8 @@ def _snap(board: Board, hit: tuple[int, int], x: float, y: float) -> tuple[int, 
         dist = (cx - x) ** 2 + (cy - y) ** 2
         if dist < best_d:
             best, best_d = (nq, nr), dist
+    if best is None:
+        best = _nearest_empty_within(board, hit, x, y)
     if best is None:
         return None
     return (best[0], best[1], False)
