@@ -174,7 +174,7 @@ func _build_hud() -> void:
 	shots_pill = UI.pill("icon_play", str(shots_left), 200)
 	top.add_child(shots_pill)
 
-	var badge := UI.label("LEVEL %d" % int(level["id"]), 34, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	var badge := UI.label("LEVEL %d  •  D%.1f" % [int(level["id"]), float(level.get("difficulty", 1.0))], 30, UI.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(badge)
 
