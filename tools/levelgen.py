@@ -695,13 +695,21 @@ def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Rand
 
     ranked.sort(reverse=True)
     added = 0
+    used_colours: set[int] = set()
+    selected_positions: list[tuple[int, int]] = []
     for _size, _shallow, _tie, q, r, original in ranked:
         if grid[r][q] != original:
             continue
+        colour_index = int(original) - 1
+        # Rescue missions should require separate colour groups, not one pop
+        # that happens to touch several chained cells in the same blob.
+        if colour_index in used_colours:
+            continue
+        if any(abs(q - sq) + abs(r - sr) < 4 for sq, sr in selected_positions):
+            continue
 
-        # Re-check after each previous chain placement. This prevents several
-        # rescue targets from fragmenting one small colour blob into unmatchable
-        # single bubbles.
+        # Re-check after each previous chain placement so no target is left
+        # beside an unmatchable fragment.
         grid[r][q] = "c"
         still_matchable = any(
             grid[nr][nq] == original
@@ -714,14 +722,16 @@ def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Rand
 
         blockers.append({
             "row": r, "col": q, "type": "chain",
-            "color": int(original) - 1, "hp": 0,
+            "color": colour_index, "hp": 0,
         })
+        used_colours.add(colour_index)
+        selected_positions.append((q, r))
         added += 1
         if added >= desired:
             break
 
     if added < 2:
-        raise ValueError("fewer than two chained bubbles could be placed beside matchable groups")
+        raise ValueError("could not place two separated chain targets of different colours")
     return ["".join(row) for row in grid], blockers, added
 
 
@@ -767,7 +777,7 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
     elif mission_slot == 2:
         objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
     elif mission_slot == 3:
-        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=3)
+        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=2)
         objectives = [{"type": "rescue", "count": 2}]
     elif mission_slot == 4:
         objectives = [{"type": "score", "target": 1}]
