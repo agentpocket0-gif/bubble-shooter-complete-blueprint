@@ -79,6 +79,8 @@ func _step_map() -> void:
 		var vertical_bar := map_scroll.get_v_scroll_bar()
 		can_scroll = vertical_bar.max_value > vertical_bar.page
 	_check("procedural campaign map has a working vertical scroll range", can_scroll)
+	var trail_segments := _map.find_children("*", "Line2D", true, false)
+	_check("map connects level nodes with a visible route", trail_segments.size() >= 2, "segments=%d" % trail_segments.size())
 
 	var rail_actions := {}
 	for rail_button in _map.find_children("*", "TextureButton", true, false):
@@ -170,7 +172,10 @@ func _step_gameplay() -> void:
 		for q in game.board.row_len(r):
 			if game.board.filled(q, r):
 				filled += 1
-	_check("level 1 populates the hex grid from its saved campaign seed", filled > 20, "bubbles=%d" % filled)
+	_check("level 1 opens with a full 9-row bubble board", filled == 77, "bubbles=%d" % filled)
+	var mission_bottom: float = game.objective_label.position.y + game.objective_label.size.y
+	var bubble_top: float = game.board.centre(0, 0).y + 294.0 - HexBoard.HALF
+	_check("mission text stays clear of the first bubble row", mission_bottom < bubble_top)
 
 	var sprites: int = game.board_layer.get_child_count()
 	_check("the board is drawn with real bubble sprites, not drawn circles",
