@@ -1,5 +1,5 @@
 extends Control
-## Scrolling saga map: 100 nodes in 5 worlds, HUD, side rail.
+## Scrolling saga map: 120 campaign levels grouped by world, with progress HUD and side rail.
 
 const NODE_SIZE := 168.0
 const ROW_HEIGHT := 210.0
@@ -159,7 +159,6 @@ func _build_hud() -> void:
 	_add_rail_button(rail, "icon_spin", "spin", func() -> void: _modal(Overlays.show_spin))
 	_add_rail_button(rail, "icon_piggy", "piggy", func() -> void: _modal(Overlays.show_piggy))
 	_add_rail_button(rail, "icon_shop", "store", func() -> void: _modal(Overlays.show_store))
-	_add_rail_button(rail, "icon_gift", "gift", func() -> void: _modal(Overlays.show_store))
 
 	GameManager.lives_changed.connect(_refresh_hud)
 	GameManager.wallet_changed.connect(_refresh_hud)
