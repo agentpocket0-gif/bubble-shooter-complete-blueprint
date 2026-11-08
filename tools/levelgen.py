@@ -695,7 +695,20 @@ def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Rand
     for _size, _shallow, _tie, q, r, original in ranked:
         if grid[r][q] != original:
             continue
+
+        # Re-check after each previous chain placement. This prevents several
+        # rescue targets from fragmenting one small colour blob into unmatchable
+        # single bubbles.
         grid[r][q] = "c"
+        still_matchable = any(
+            grid[nr][nq] == original
+            and _same_colour_component_size(grid, (nq, nr), original) >= 3
+            for nq, nr in _grid_neighbours(grid, q, r)
+        )
+        if not still_matchable:
+            grid[r][q] = original
+            continue
+
         blockers.append({
             "row": r, "col": q, "type": "chain",
             "color": int(original) - 1, "hp": 0,
