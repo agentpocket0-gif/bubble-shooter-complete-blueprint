@@ -369,7 +369,7 @@ func _update_preview() -> void:
 func _shoot() -> void:
 	if phase != Phase.AIM:
 		return
-	var tr := _trace_shot(aim_angle)
+	var tr: Variant = _trace_shot(aim_angle)
 	if not tr.valid:
 		_shake_hud()
 		return
