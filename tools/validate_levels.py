@@ -47,8 +47,26 @@ def main() -> int:
     if sorted(ids) != list(range(1, len(ids) + 1)):
         errors.append("level ids are not a contiguous 1..N range")
 
+    required_missions = {
+        "clear_all", "clear_color", "pop_count", "rescue", "score", "survive"
+    }
+    mission_types: set[str] = set()
+    for entry in entries:
+        path = root / entry["file"]
+        if not path.exists():
+            continue
+        level = json.loads(path.read_text())
+        for objective in level.get("objectives", []):
+            mission_types.add(str(objective.get("type", "")))
+    missing_missions = required_missions - mission_types
+    if missing_missions:
+        errors.append("missing mission types: " + ", ".join(sorted(missing_missions)))
+    if len(entries) != 120:
+        errors.append(f"expected 120 levels, found {len(entries)}")
+
     for err in errors:
         print("ERROR", err)
+    print(f"mission types: {', '.join(sorted(mission_types))}")
     print(f"checked {len(entries)} levels, {len(errors)} problems")
     return 1 if errors else 0
 
