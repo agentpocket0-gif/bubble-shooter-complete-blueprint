@@ -34,7 +34,7 @@ static func generate(level_id: int, campaign_seed: int) -> Dictionary:
 	var cols := 9 if id <= 20 else (10 if id <= 50 else 11)
 	var active_rows := clampi(5 + int(floor(float(id - 1) / 15.0)), 5, 12)
 	var colour_count := clampi(3 + int(floor(float(id - 1) / 30.0)), 3, 6)
-	var shape := SHAPES[posmod(id - 1 + int(campaign_seed % SHAPES.size()), SHAPES.size())]
+	var shape := "full" if id == 1 else SHAPES[posmod(id - 1 + int(campaign_seed % SHAPES.size()), SHAPES.size())]
 
 	var cells := _make_cells(cols, active_rows, shape)
 	if cells.size() < MIN_BUBBLES:
