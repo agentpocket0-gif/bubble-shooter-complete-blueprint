@@ -7,7 +7,7 @@ and `godot_project/scripts/ShotSimulator.gd`: staggered grid, row pitch d*sqrt(3
 odd rows inset by d/2, collision radius 0.92*d, substeps of d/2, xorshift32 colour
 queue seeded by (level id, attempt index).
 
-    python3 tools/levelgen.py --out godot_project/levels --count 100
+    python3 tools/levelgen.py --out godot_project/levels --count 120
 
 Every generated level is played by the greedy solver and only kept when the
 solver wins with 2-6 shots to spare. Star thresholds are derived from the
@@ -318,7 +318,15 @@ def greedy_play(level: dict, angles: int = 18, verbose: bool = False) -> dict:
             for nq, nr in probe.neighbours(cell[0], cell[1]):
                 if probe.colour[nr][nq] == colour and probe.blocker[nr][nq] != B_CHAIN:
                     same += 1
-            rank = (res["cluster"], res["score"], same, -cell[1])
+            rescue_mission = any(
+                obj.get("type") == "rescue" for obj in level.get("objectives", [])
+            )
+            if rescue_mission:
+                # Prefer moves that free a chained bubble before optimising the
+                # usual pop size and score. This makes rescue levels deliberate.
+                rank = (res["freed"], res["cluster"], res["score"], same, -cell[1])
+            else:
+                rank = (res["cluster"], res["score"], same, -cell[1])
             if best is None or rank > best[0]:
                 best = (rank, angle, probe, res, cell)
         if best is None:
@@ -737,7 +745,7 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
         objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
     elif mission_slot == 3:
         layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=4)
-        objectives = [{"type": "rescue", "count": max(1, min(2, chain_count // 2))}]
+        objectives = [{"type": "rescue", "count": 1}]
     elif mission_slot == 4:
         objectives = [{"type": "score", "target": 1}]
     else:
