@@ -1,0 +1,62 @@
+{
+  "id": 21,
+  "world": 2,
+  "name": "Checker 021",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 2056037736
+  },
+  "shots": 10,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "33334442223",
+    ".3.1.4.2.3",
+    "2.3.1.1.2.3",
+    ".4.1.1.2.4",
+    "1.4.i.1.4.4",
+    ".4.2.1.4.4",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 4,
+      "type": "ice",
+      "hp": 2
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "checker silhouette, 4 colours, ice blockers, 37 bubbles",
+  "greedy": {
+    "score": 815,
+    "shots_used": 6,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "id": 94,
+  "world": 5,
+  "name": "Full 094",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 408875027
+  },
+  "shots": 15,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "22444345544",
+    "2542444554",
+    "42521112534",
+    "5322222233",
+    "53315522134",
+    "5335511113",
+    "33335111111",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "red"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "full silhouette, 5 colours, none blockers, 74 bubbles",
+  "greedy": {
+    "score": 1680,
+    "shots_used": 11,
+    "shots_left": 4
+  }
+}

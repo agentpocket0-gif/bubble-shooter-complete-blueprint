@@ -1,0 +1,81 @@
+{
+  "id": 29,
+  "world": 2,
+  "name": "Arch 029",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1816696800
+  },
+  "shots": 16,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "33243333111",
+    ".224x15511",
+    ".2541115x1.",
+    "..x445225.",
+    "..4442552..",
+    "...33224..",
+    "...3x522...",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 8,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "arch silhouette, 5 colours, ice_stone blockers, 49 bubbles",
+  "greedy": {
+    "score": 1115,
+    "shots_used": 12,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "id": 9,
+  "world": 1,
+  "name": "Heart 009",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 267590100
+  },
+  "shots": 14,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "4422224141",
+    "443233441",
+    ".11333341.",
+    ".11332214",
+    ".11322224.",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "heart silhouette, 4 colours, none blockers, 43 bubbles",
+  "greedy": {
+    "score": 1060,
+    "shots_used": 10,
+    "shots_left": 4
+  }
+}

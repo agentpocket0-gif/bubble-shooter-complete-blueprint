@@ -1,0 +1,59 @@
+{
+  "config_version": 3,
+  "remote_config_url": "https://raw.githubusercontent.com/agentpocket0-gif/bubble-shooter-complete-blueprint/main/config/live_monetization_config.json",
+  "ads_enabled": false,
+  "test_ads_simulation": false,
+  "ad_provider": "admob_or_applovin_or_unity",
+  "android_ad_ids": {
+    "app_id": "ca-app-pub-3940256099942544~3347511713",
+    "rewarded_id": "REPLACE_IN_15_DAYS",
+    "interstitial_id": "REPLACE_IN_15_DAYS",
+    "banner_id": "REPLACE_IN_15_DAYS"
+  },
+  "ios_ad_ids": {
+    "app_id": "REPLACE_IN_15_DAYS",
+    "rewarded_id": "REPLACE_IN_15_DAYS",
+    "interstitial_id": "REPLACE_IN_15_DAYS",
+    "banner_id": "REPLACE_IN_15_DAYS"
+  },
+  "ad_rules": {
+    "interstitial_min_level": 6,
+    "interstitial_cooldown_seconds": 120,
+    "rewarded_extra_moves": 5,
+    "rewarded_double_coins_multiplier": 2
+  },
+  "iap_enabled": true,
+  "iap_skus": {
+    "coins_small": {
+      "sku": "bs.coins.small",
+      "coins": 500,
+      "price": "₹29"
+    },
+    "coins_medium": {
+      "sku": "bs.coins.medium",
+      "coins": 1500,
+      "price": "₹79"
+    },
+    "coins_large": {
+      "sku": "bs.coins.large",
+      "coins": 4000,
+      "price": "₹199"
+    },
+    "starter_pack": {
+      "sku": "bs.starter.pack",
+      "coins": 2000,
+      "bombs": 3,
+      "rainbows": 3,
+      "price": "₹89"
+    },
+    "remove_ads": {
+      "sku": "bs.noads",
+      "price": "₹149"
+    },
+    "piggy_bank": {
+      "sku": "bs.piggy.unlock",
+      "coins": 5000,
+      "price": "₹99"
+    }
+  }
+}

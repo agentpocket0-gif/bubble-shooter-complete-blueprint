@@ -1,0 +1,55 @@
+{
+  "id": 3,
+  "world": 1,
+  "name": "Full 003",
+  "grid": {
+    "cols": 9,
+    "rows": 14,
+    "seed": 1520841726
+  },
+  "shots": 25,
+  "palette": [
+    "red",
+    "blue",
+    "green"
+  ],
+  "layout": [
+    "133222111",
+    "33211221",
+    "331131331",
+    "33213333",
+    "222333232",
+    "11211222",
+    "211111222",
+    "........",
+    ".........",
+    "........",
+    ".........",
+    "........",
+    ".........",
+    "........"
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "red"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "full silhouette, 3 colours, none blockers, 60 bubbles",
+  "greedy": {
+    "score": 1815,
+    "shots_used": 21,
+    "shots_left": 4
+  }
+}

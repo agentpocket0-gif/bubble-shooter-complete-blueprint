@@ -1,0 +1,100 @@
+{
+  "id": 63,
+  "world": 4,
+  "name": "Heart 063",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1873194082
+  },
+  "shots": 21,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "65533322244",
+    "55x3362i44",
+    ".3313i622i.",
+    ".i12226424",
+    ".11112x644.",
+    "..1556654.",
+    "..11i5666..",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 1,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 2,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 6,
+  "notes": "heart silhouette, 6 colours, mixed blockers, 55 bubbles",
+  "greedy": {
+    "score": 1835,
+    "shots_used": 17,
+    "shots_left": 4
+  }
+}

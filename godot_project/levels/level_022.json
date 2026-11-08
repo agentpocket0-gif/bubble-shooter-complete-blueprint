@@ -1,0 +1,80 @@
+{
+  "id": 22,
+  "world": 2,
+  "name": "Full 022",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 415509467
+  },
+  "shots": 9,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "11111443344",
+    "1441143334",
+    "14112i11344",
+    "14i3223344",
+    "113332i3344",
+    "122222i334",
+    "12222223344",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 6,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1500,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "full silhouette, 4 colours, ice blockers, 70 bubbles",
+  "greedy": {
+    "score": 2900,
+    "shots_used": 5,
+    "shots_left": 4
+  }
+}

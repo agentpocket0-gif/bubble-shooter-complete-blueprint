@@ -1,0 +1,82 @@
+{
+  "id": 62,
+  "world": 4,
+  "name": "Cross 062",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1366238771
+  },
+  "shots": 15,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "4333521111.",
+    "....511...",
+    "....x5i....",
+    "....544...",
+    "....644....",
+    "2266624434",
+    "i2i62221334",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 2,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 2,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 6,
+  "notes": "cross silhouette, 6 colours, mixed blockers, 39 bubbles",
+  "greedy": {
+    "score": 865,
+    "shots_used": 11,
+    "shots_left": 4
+  }
+}

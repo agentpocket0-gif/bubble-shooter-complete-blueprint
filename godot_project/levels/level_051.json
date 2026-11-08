@@ -1,0 +1,93 @@
+{
+  "id": 51,
+  "world": 3,
+  "name": "Funnel 051",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 84762798
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "52224112255",
+    "2224141255",
+    "1x1i4455555",
+    "111.....44",
+    "33i.....44i",
+    "335.....44",
+    "3i1.....333",
+    "331.....5x",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 10,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 7,
+      "col": 9,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 8,
+  "notes": "funnel silhouette, 5 colours, mixed blockers, 53 bubbles",
+  "greedy": {
+    "score": 1280,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "id": 36,
+  "world": 2,
+  "name": "Heart 036",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1070416393
+  },
+  "shots": 22,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "11114451122",
+    "133444xx52",
+    ".33243x112.",
+    ".333331441",
+    ".322255544.",
+    "..2245554.",
+    "..xx45555..",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "heart silhouette, 5 colours, ice_stone blockers, 57 bubbles",
+  "greedy": {
+    "score": 1560,
+    "shots_used": 18,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": 20,
+  "world": 1,
+  "name": "Arch 020",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1549131577
+  },
+  "shots": 10,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "4441222333",
+    ".41222233",
+    ".41122233.",
+    "..112333.",
+    "..141443..",
+    "...4ii1..",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 4,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 5,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "arch silhouette, 4 colours, ice blockers, 40 bubbles",
+  "greedy": {
+    "score": 1240,
+    "shots_used": 6,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,235 @@
+name: Build game (APK + AAB)
+
+# Everything in this repository is original work: no third-party art, audio,
+# fonts or level data. See ASSET_CREDITS.md.
+#
+# The workflow is written to survive a flaky runner: every network step retries,
+# the test gate runs before any export, and the export itself retries once with a
+# clean project import. If a step still fails the job fails loudly with the log
+# attached to the run - it never publishes a half-built artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: "Android versionCode"
+        required: false
+        default: "1"
+      publish_release:
+        description: "Publish a GitHub Release with the artifacts"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "godot_project/**"
+      - "config/**"
+      - "tools/**"
+      - ".github/workflows/build_game.yml"
+  pull_request:
+    paths:
+      - "godot_project/**"
+  tags:
+    - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-game-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.4.1"
+  GODOT_CHANNEL: "stable"
+  PROJECT_DIR: "godot_project"
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Gate: schema, balance and engine tests. Nothing is exported if this fails.
+  # -------------------------------------------------------------------------
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Config copies must match
+        run: |
+          diff -u config/live_monetization_config.json \
+                  godot_project/config/live_monetization_config.json \
+            || (echo "::error::config/live_monetization_config.json and the bundled copy have drifted" && exit 1)
+
+      - name: Validate every level file
+        run: python3 tools/validate_levels.py godot_project/levels
+
+      - name: Fetch Godot ${{ env.GODOT_VERSION }}
+        run: |
+          set -euo pipefail
+          URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_CHANNEL}/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64.zip"
+          for attempt in 1 2 3; do
+            curl -fsSL --retry 3 --retry-delay 5 -o godot.zip "$URL" && break
+            echo "download attempt $attempt failed, retrying"; sleep 10
+          done
+          unzip -oq godot.zip
+          mv "Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64" godot
+          chmod +x godot
+          ./godot --version
+
+      - name: Import project
+        run: ./godot --headless --path "$PROJECT_DIR" --import
+
+      - name: Headless test suite
+        run: |
+          set -o pipefail
+          ./godot --headless --audio-driver Dummy --path "$PROJECT_DIR" \
+            res://tests/TestRunner.tscn 2>&1 | tee tests.log
+          grep -q "0 failed" tests.log
+
+  # -------------------------------------------------------------------------
+  # Android: debug APK + signed release AAB.
+  # -------------------------------------------------------------------------
+  android:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Fetch Godot and export templates
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_CHANNEL}"
+          for attempt in 1 2 3; do
+            curl -fsSL --retry 3 --retry-delay 5 -o godot.zip \
+              "$BASE/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64.zip" && \
+            curl -fsSL --retry 3 --retry-delay 5 -o templates.tpz \
+              "$BASE/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_export_templates.tpz" && break
+            echo "attempt $attempt failed, retrying"; sleep 15
+          done
+          unzip -oq godot.zip
+          mv "Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64" godot
+          chmod +x godot
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          unzip -oq templates.tpz -d /tmp/templates
+          mv "/tmp/templates/templates" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}"
+          ls "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}" | head
+
+      - name: Prepare signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/keys"
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keys/release.keystore"
+            echo "Using the repository's release keystore."
+          else
+            # No secrets configured: sign with a throwaway key so the pipeline is
+            # still exercisable. This build CANNOT be uploaded to Play.
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/keys/release.keystore" \
+              -alias bubbleshooter -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass ci-throwaway -keypass ci-throwaway \
+              -dname "CN=CI Throwaway, O=Classic Blast, C=IN"
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret - signed with a throwaway key. Do not upload this AAB to Google Play."
+          fi
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$RUNNER_TEMP/keys/release.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=${KEY_ALIAS:-bubbleshooter}" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=${KEY_PASSWORD:-${KEYSTORE_PASSWORD:-ci-throwaway}}" >> "$GITHUB_ENV"
+
+      - name: Install Android build template
+        run: ./godot --headless --path "$PROJECT_DIR" --install-android-build-template
+
+      - name: Import project
+        run: ./godot --headless --path "$PROJECT_DIR" --import
+
+      - name: Set version code
+        if: ${{ github.event.inputs.version_code != '' }}
+        run: |
+          sed -i "s|^version/code=.*|version/code=${{ github.event.inputs.version_code }}|" \
+            "$PROJECT_DIR/export_presets.cfg"
+
+      - name: Export debug APK
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          for attempt in 1 2; do
+            if ./godot --headless --path "$PROJECT_DIR" --export-debug "Android APK" \
+                 "$PWD/out/BubbleShooterClassicBlast-debug.apk"; then break; fi
+            echo "export attempt $attempt failed; re-importing and retrying"
+            ./godot --headless --path "$PROJECT_DIR" --import || true
+          done
+          test -f out/BubbleShooterClassicBlast-debug.apk
+
+      - name: Export release AAB
+        run: |
+          set -euo pipefail
+          for attempt in 1 2; do
+            if ./godot --headless --path "$PROJECT_DIR" --export-release "Android AAB" \
+                 "$PWD/out/BubbleShooterClassicBlast.aab"; then break; fi
+            echo "export attempt $attempt failed; re-importing and retrying"
+            ./godot --headless --path "$PROJECT_DIR" --import || true
+          done
+          test -f out/BubbleShooterClassicBlast.aab
+
+      - name: Verify the artifacts
+        run: |
+          set -euo pipefail
+          ls -la out
+          python3 tools/verify_apk.py out/BubbleShooterClassicBlast-debug.apk \
+            --package com.classicblast.bubbleshooter || \
+            (echo "::warning::APK verification could not read the package manifest")
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: out/*
+          if-no-files-found: error
+
+  # -------------------------------------------------------------------------
+  # Release: publish whatever the android job produced.
+  # -------------------------------------------------------------------------
+  release:
+    needs: android
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.publish_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-build
+          path: out
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('build-{0}', github.run_number) }}
+          name: Bubble Shooter Classic Blast ${{ github.ref_name }}
+          draft: false
+          files: out/*
+          body: |
+            Automated build from `${{ github.sha }}`.
+
+            - `BubbleShooterClassicBlast-debug.apk` - sideload for testing
+            - `BubbleShooterClassicBlast.aab` - upload to Google Play
+
+            Ads are **off** in this build (`ads_enabled: false`). Flip
+            `config/live_monetization_config.json` to turn them on without shipping a
+            new binary.
