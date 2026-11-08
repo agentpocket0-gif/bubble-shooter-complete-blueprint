@@ -101,7 +101,7 @@ Implemented and CI-tested in this repository:
 - 120 levels, each played by a greedy solver and kept only if it clears with
   2-6 shots to spare; star thresholds derived from that run
 - save integrity, lives regen, economy, daily spin, piggy bank, store UI
-- 27 headless tests including a real gameplay-scene shot pipeline
+- 31 headless tests including a real gameplay-scene shot pipeline
 
 Needs your accounts or hardware:
 
