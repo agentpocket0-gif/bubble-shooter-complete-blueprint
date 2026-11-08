@@ -84,5 +84,5 @@ static func world_of(level_id: int) -> int:
 static func name_of(level_id: int) -> String:
 	if level_id < 1:
 		return "Level"
-	var generated: Dictionary = PROCEDURAL.generate(level_id, GameManager.campaign_seed())
+	var generated: Dictionary = ProceduralLevelGenerator.generate(level_id, GameManager.campaign_seed())
 	return str(generated.get("name", "Level %d" % level_id))
