@@ -34,10 +34,7 @@ func _build() -> void:
 
 	var star_row := UI.star_row(stars, 110)
 	col.add_child(star_row)
-	star_row.modulate.a = 0.0
-	var tw := create_tween()
-	tw.tween_property(star_row, "modulate:a", 1.0, 0.3)
-	tw.tween_callback(func() -> void: AudioManager.play("sfx_level_win") if won else AudioManager.play("sfx_level_fail"))
+	_animate_stars(star_row, stars, won)
 
 	col.add_child(UI.label("Score  %d" % int(r.get("score", 0)), 44, UI.INK, HORIZONTAL_ALIGNMENT_CENTER))
 	if won:
@@ -59,6 +56,18 @@ func _build() -> void:
 			GameManager.start_level(next_id))
 		col.add_child(next)
 
+	if not won:
+		# the fail offer: keep the board, buy five more moves
+		var cost := 150
+		var cont := UI.button("Continue  +5 moves  (%d coins)" % cost, true)
+		cont.disabled = GameManager.coins() < cost
+		if cont.disabled:
+			cont.text = "Continue  +5 moves  (need %d coins)" % cost
+		cont.pressed.connect(func() -> void:
+			if GameManager.spend_coins(cost):
+				GameManager.continue_level(5))
+		col.add_child(cont)
+
 	var retry := UI.button("Retry", not won)
 	retry.pressed.connect(func() -> void: GameManager.retry_level())
 	col.add_child(retry)
@@ -70,6 +79,27 @@ func _build() -> void:
 	var stats := UI.label("%d bubbles popped  ·  %d stars total" % [
 		int(r.get("popped", 0)), GameManager.total_stars()], 32, UI.MUTED, HORIZONTAL_ALIGNMENT_CENTER)
 	col.add_child(stats)
+
+
+## Stars land one at a time, 180 ms apart, with a punch - the reward moment.
+func _animate_stars(row: HBoxContainer, stars: int, won: bool) -> void:
+	var i := 0
+	for child in row.get_children():
+		var star := child as TextureRect
+		if star == null:
+			continue
+		var earned := i < stars
+		star.pivot_offset = star.custom_minimum_size * 0.5
+		star.scale = Vector2.ZERO if earned else Vector2.ONE
+		if earned:
+			var tw := create_tween()
+			tw.tween_interval(0.12 + i * 0.18)
+			tw.tween_callback(func() -> void: AudioManager.play("sfx_coin_tick"))
+			tw.tween_property(star, "scale", Vector2(1.3, 1.3), 0.14)
+			tw.tween_property(star, "scale", Vector2.ONE, 0.12)
+		i += 1
+	await get_tree().create_timer(0.5).timeout
+	AudioManager.play("sfx_level_win" if won else "sfx_level_fail")
 
 
 func _on_double_pressed(dbl: Button) -> void:

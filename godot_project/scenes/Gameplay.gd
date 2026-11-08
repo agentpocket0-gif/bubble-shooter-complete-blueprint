@@ -9,6 +9,7 @@ const OFFSET_Y := 230.0
 const CANNON_POS := Vector2(540.0, 1450.0)
 const SPEED := 2600.0
 const COLOUR_NAMES := ["red", "blue", "green", "yellow", "purple", "orange"]
+const FLOOR_Y := 1520.0   # board space: where a dropped bubble bounces
 
 enum Phase { AIM, FLYING, RESOLVING, DONE }
 
@@ -57,6 +58,8 @@ var _flight_t := 0.0
 var _flight_len := 0.0
 var _landing_cell := Vector2i(-1, -1)
 var _combo := 0
+var _pop_frames_cache: Dictionary = {}
+var _floor_bonus := 0
 
 
 func _ready() -> void:
@@ -69,6 +72,9 @@ func _ready() -> void:
 	board = HexBoard.new(int(level["grid"]["cols"]), int(level["grid"]["rows"]))
 	board.load_layout(level["layout"], palette.size(), level.get("blockers", []))
 	shots_left = int(level["shots"])
+	if GameManager.pending_bonus_shots > 0:
+		shots_left += GameManager.pending_bonus_shots
+		GameManager.pending_bonus_shots = 0
 	rng = Rng32.new(Rng32.seed_for(int(level["id"]), GameManager.attempt_index))
 
 	_build_scene()
@@ -178,6 +184,16 @@ func _build_hud() -> void:
 	score_label.position = Vector2(0, 128)
 	score_label.size = Vector2(1080, 40)
 	hud_root.add_child(score_label)
+
+	# tap the "next" slot to swap: it has to live on the HUD canvas, not the
+	# 2D scene, so it gets touch input
+	var swap_btn := Button.new()
+	swap_btn.flat = true
+	swap_btn.set_meta("action", "swap_tap")
+	swap_btn.position = CANNON_POS + Vector2(-250, -80 + OFFSET_Y)
+	swap_btn.size = Vector2(120, 120)
+	swap_btn.pressed.connect(_tap_swap)
+	hud_root.add_child(swap_btn)
 
 	booster_row = HBoxContainer.new()
 	booster_row.position = Vector2(80, 1800)
@@ -389,6 +405,19 @@ func _update_falling(delta: float) -> void:
 		body["vy"] += 2600.0 * delta
 		node.position += Vector2(body["vx"] * delta, body["vy"] * delta)
 		node.rotation += body["spin"] * delta
+		# bounce off the floor once or twice, paying a small bonus each time
+		if node.position.y > FLOOR_Y and body["vy"] > 0.0:
+			node.position.y = FLOOR_Y
+			body["vy"] = -body["vy"] * 0.45
+			body["vx"] *= 0.7
+			body["bounces"] = int(body.get("bounces", 0)) + 1
+			_floor_bonus += 5
+			score += 5
+			AudioManager.play("sfx_drop_land", 1.0, -6.0)
+			_refresh_hud()
+			if int(body["bounces"]) >= 3:
+				body["vy"] = 0.0
+				body["vx"] = 0.0
 		if node.position.y > 1920.0 + 100.0:
 			dead.append(body)
 	for body in dead:
@@ -483,22 +512,45 @@ func _pop_cells(cells: Array) -> Array[Vector2i]:
 			_add_cell_sprite(cell.x, cell.y)
 			AudioManager.play("sfx_blocker_crack")
 			continue
+		var col := board.colour_at(cell.x, cell.y)
 		board.clear_cell(cell.x, cell.y)
 		popped.append(cell)
-		_animate_pop(cell, step)
+		_animate_pop(cell, col, step)
 		step += 1
 	return popped
 
 
-func _animate_pop(cell: Vector2i, step: int) -> void:
+func _pop_frames(colour: int) -> SpriteFrames:
+	if _pop_frames_cache.has(colour):
+		return _pop_frames_cache[colour]
+	var sf := SpriteFrames.new()
+	sf.remove_animation("default")
+	sf.add_animation("pop")
+	sf.set_animation_speed("pop", 20.0)
+	sf.set_animation_loop("pop", false)
+	var cname: String = COLOUR_NAMES[clampi(colour, 0, COLOUR_NAMES.size() - 1)]
+	for i in 8:
+		var path := "res://assets/bubbles/pop/bubble_%s_pop_%02d.png" % [cname, i]
+		if ResourceLoader.exists(path):
+			sf.add_frame("pop", load(path))
+	_pop_frames_cache[colour] = sf
+	return sf
+
+
+func _animate_pop(cell: Vector2i, colour: int, step: int) -> void:
 	AudioManager.play_pop(step)
 	var node: Node2D = _cell_sprites.get(cell, null)
 	if node != null:
 		_cell_sprites.erase(cell)
-		var tw := create_tween()
-		tw.tween_property(node, "scale", Vector2(1.25, 1.25), 0.07)
-		tw.tween_property(node, "scale", Vector2.ZERO, 0.11)
-		tw.tween_callback(node.queue_free)
+		node.queue_free()
+	# frame-by-frame pop from the sliced sprite set, not a scale tween
+	var anim := AnimatedSprite2D.new()
+	anim.sprite_frames = _pop_frames(colour)
+	anim.position = board.centre(cell.x, cell.y)
+	anim.z_index = 2
+	fx_layer.add_child(anim)
+	anim.play("pop")
+	anim.animation_finished.connect(anim.queue_free)
 	_spawn_particles(cell)
 
 
@@ -529,6 +581,7 @@ func _drop_cells(cells: Array) -> void:
 				"vx": randf_range(-120.0, 120.0),
 				"vy": randf_range(-60.0, 60.0),
 				"spin": deg_to_rad(randf_range(-240.0, 240.0)),
+				"bounces": 0,
 			})
 		board.clear_cell(cell.x, cell.y)
 	AudioManager.play("sfx_drop_land")
@@ -699,9 +752,12 @@ func _lose(reason: String) -> void:
 # HUD
 # --------------------------------------------------------------------------- #
 func _refresh_hud() -> void:
-	UI.set_pill_text(coins_pill, str(GameManager.coins()))
-	UI.set_pill_text(shots_pill, str(maxi(0, shots_left)))
-	score_label.text = "%d" % score
+	if coins_pill != null:
+		UI.set_pill_text(coins_pill, str(GameManager.coins()))
+	if shots_pill != null:
+		UI.set_pill_text(shots_pill, str(maxi(0, shots_left)))
+	if score_label != null:
+		score_label.text = "%d" % score
 
 
 func _shake_hud() -> void:
@@ -714,6 +770,23 @@ func _shake_hud() -> void:
 # --------------------------------------------------------------------------- #
 # boosters
 # --------------------------------------------------------------------------- #
+## Tapping the "next" slot swaps the two bubbles for free. The swap booster
+## still exists for players who want to spend coins on it from the bar.
+func _tap_swap() -> void:
+	if phase != Phase.AIM:
+		return
+	var tmp := current_colour
+	current_colour = next_colour
+	next_colour = tmp
+	_set_cannon_sprite(current_colour)
+	next_preview.texture = _bubble_texture(next_colour)
+	AudioManager.play("sfx_booster_swap")
+	var tw := create_tween()
+	tw.tween_property(next_preview, "scale", Vector2(0.62, 0.62), 0.08)
+	tw.tween_property(next_preview, "scale", Vector2(0.5, 0.5), 0.08)
+	_update_preview()
+
+
 func _on_booster_pressed(kind: String) -> void:
 	if phase != Phase.AIM:
 		return

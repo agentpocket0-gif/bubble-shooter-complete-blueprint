@@ -25,6 +25,9 @@ var pending_level_id: int = 1
 ## Set by the QA harness so a button press can be exercised without the scene
 ## tree being torn down underneath the test.
 var suppress_scene_changes := false
+## Extra shots granted by the "continue" offer on the lose screen. Consumed by
+## the next Gameplay boot, and never charged as a life.
+var pending_bonus_shots := 0
 
 var _lives_tick := 0.0
 
@@ -122,6 +125,14 @@ func start_level(level_id: int) -> bool:
 ## Restart the current level without spending another life. The attempt index
 ## advances, so the colour queue is reproducible but not identical to the run
 ## the player just lost.
+## Continue after a loss: keep the same level, hand out extra shots, no life.
+func continue_level(bonus_shots: int) -> void:
+	pending_bonus_shots = bonus_shots
+	attempt_index += 1
+	save()
+	go_to(State.LEVEL_PLAY, "res://scenes/Gameplay.tscn")
+
+
 func retry_level() -> void:
 	attempt_index += 1
 	save()

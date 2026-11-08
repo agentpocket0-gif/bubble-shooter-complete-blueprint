@@ -62,6 +62,9 @@ jobs:
       - name: Validate every level file
         run: python3 tools/validate_levels.py godot_project/levels
 
+      - name: Asset authenticity gate
+        run: python3 tools/asset_manifest.py --verify
+
       - name: Fetch Godot ${{ env.GODOT_VERSION }}
         run: |
           set -euo pipefail
@@ -241,6 +244,7 @@ jobs:
           ls "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}" | head
 
       - name: Prepare signing keystore
+        id: keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -249,20 +253,35 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/keys"
+          KS="$RUNNER_TEMP/keys/release.keystore"
           if [ -n "${KEYSTORE_BASE64:-}" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keys/release.keystore"
-            echo "Using the repository's release keystore."
+            echo "$KEYSTORE_BASE64" | base64 -d > "$KS"
+            ALIAS="${KEY_ALIAS:-bubbleshooter}"
+            PASS="${KEY_PASSWORD:-${KEYSTORE_PASSWORD:-}}"
+            echo "signed_with=repository-secret" >> "$GITHUB_OUTPUT"
+            echo "This build is signed with the repository's production keystore." 
           else
-            # No secrets configured: sign with a throwaway key so the pipeline is
-            # still exercisable. This build CANNOT be uploaded to Play.
-            keytool -genkeypair -v -keystore "$RUNNER_TEMP/keys/release.keystore" \
-              -alias bubbleshooter -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass ci-throwaway -keypass ci-throwaway \
-              -dname "CN=CI Throwaway, O=Classic Blast, C=IN"
-            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret - signed with a throwaway key. Do not upload this AAB to Google Play."
+            ALIAS="bubbleshooter"
+            PASS="ci-throwaway"
+            keytool -genkeypair -v -keystore "$KS" -alias "$ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=Classic Blast, O=Classic Blast, C=IN"
+            echo "signed_with=ephemeral" >> "$GITHUB_OUTPUT"
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret. This run signs with a brand-new throwaway key, so the AAB cannot be uploaded to Play. Run tools/make_keystore.sh once, keep the .jks somewhere safe, and add it as a secret."
+            mkdir -p keystore-out
+            base64 -w0 "$KS" > keystore-out/release-keystore.b64
+            cp "$KS" keystore-out/classic_blast_release.jks
+            keytool -list -v -keystore "$KS" -storepass "$PASS" -alias "$ALIAS" > keystore-out/fingerprint.txt 2>&1
           fi
-          # Godot's debug export wants the standard debug keystore; create one so
-          # the APK is installable without touching the release key.
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$KS" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=$ALIAS" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+
+          FP=$(keytool -list -v -keystore "$KS" -storepass "$PASS" -alias "$ALIAS" 2>/dev/null | grep -i "SHA256:" | head -1 || true)
+          echo "Signing certificate: ${FP:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Certificate fingerprint: ${FP:-unknown}"
+
           mkdir -p "$HOME/.android"
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
             keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" \
@@ -273,9 +292,17 @@ jobs:
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
-          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$RUNNER_TEMP/keys/release.keystore" >> "$GITHUB_ENV"
-          echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=${KEY_ALIAS:-bubbleshooter}" >> "$GITHUB_ENV"
-          echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=${KEY_PASSWORD:-${KEYSTORE_PASSWORD:-ci-throwaway}}" >> "$GITHUB_ENV"
+
+      # Only ever publish a private signing key when the repository is private.
+      # On a public repo the artifact would be downloadable by anyone, and a
+      # leaked upload key is how impersonation starts. Use secrets instead.
+      - name: Upload the generated keystore
+        if: steps.keystore.outputs.signed_with == 'ephemeral' && github.event.repository.private
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-keystore
+          path: keystore-out/
+          if-no-files-found: error
 
       # --install-android-build-template is meant to run alongside an export and
       # blocks when called on its own, so unpack the template the same way the

@@ -33,6 +33,7 @@ func _run() -> void:
 	await _step_piggy()
 	await _step_store()
 	await _step_gameplay()
+	await _step_result()
 
 
 # --------------------------------------------------------------------------- #
@@ -162,7 +163,42 @@ func _step_gameplay() -> void:
 		"hud=%s score=%d" % [game.score_label.text, game.score])
 	_check("a new bubble is loaded after the shot", game.loaded.visible)
 	await _capture("07_after_shot.png")
+
+	# 08: a booster activation, captured mid-pop so the frame-by-frame VFX is in shot
+	var bombs: int = GameManager.booster_count("bomb")
+	_check("a bomb booster is available to test", bombs > 0, "count=%d" % bombs)
+	game._on_booster_pressed("bomb")
+	game._aim_at(Vector2(720, 900))
+	game._shoot()
+	for i in 300:
+		await get_tree().process_frame
+		if game.phase == 2:
+			break
+	await get_tree().create_timer(0.12).timeout
+	await _capture("08_booster_activation_or_combo_pop.png")
+	await get_tree().create_timer(0.5).timeout
 	game.queue_free()
+	await get_tree().process_frame
+
+
+# --------------------------------------------------------------------------- #
+# 9. the win popup, with its star celebration
+# --------------------------------------------------------------------------- #
+func _step_result() -> void:
+	GameManager.last_result = {
+		"won": true, "stars": 3, "score": 4820, "coins": 140,
+		"level": 1, "popped": 61, "first_clear": true, "shots_left": 4,
+	}
+	var result: Node = (load("res://scenes/Result.tscn") as PackedScene).instantiate()
+	add_child(result)
+	await get_tree().create_timer(1.0).timeout
+
+	var buttons: int = 0
+	for b in result.find_children("*", "Button", true, false):
+		buttons += 1
+	_check("the win popup offers its buttons", buttons >= 3, "buttons=%d" % buttons)
+	await _capture("09_level_win_result_popup.png")
+	result.queue_free()
 	await get_tree().process_frame
 
 

@@ -12,7 +12,26 @@ Three jobs, in order:
 3. **release** — publishes both files to a GitHub Release on a `v*` tag or when
    `publish_release` is set on a manual run.
 
-### Repository secrets
+### The signing key
+
+The `.aab` is only acceptable to Play Console if it is signed with a key you
+control. Generate it **once**, locally:
+
+```bash
+./tools/make_keystore.sh            # writes classic_blast_release.jks, prints its SHA-256
+base64 -w0 classic_blast_release.jks > keystore.b64
+```
+
+Keep the `.jks` and the passwords offline. Losing this key means you cannot ship
+an update under the same listing (unless Play App Signing lets you reset the
+upload key).
+
+Without the secrets below, CI still builds - but with a throwaway key generated
+for that run, so the AAB will be rejected by Play. The keystore artifact is only
+uploaded when the repository is private; on a public repo a downloadable signing
+key would let anyone impersonate your app.
+
+## Repository secrets
 
 | Secret | Purpose |
 |---|---|

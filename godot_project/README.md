@@ -82,7 +82,7 @@ Nothing ships unverified. Two gates run on every push:
    every `res://assets/...` path in the code resolving, and a real shot through
    the gameplay scene.
 2. `tests/VisualQA.tscn` under Xvfb — drives the real scenes, presses the real
-   buttons and captures seven 1080x1920 frames. It asserts the splash logo
+   buttons and captures nine 1080x1920 frames. It asserts the splash logo
    texture is non-null, the map builds 120 level buttons, the piggy popup opens
    and its Close button closes it, tapping Level 1 starts the level, the board
    renders 43 textured sprites rather than drawn circles, and a shot resolves

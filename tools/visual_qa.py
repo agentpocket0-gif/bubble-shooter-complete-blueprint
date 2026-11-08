@@ -26,6 +26,8 @@ EXPECTED = [
     "05_store_and_spin_wheel.png",
     "06_level_1_active_gameplay.png",
     "07_after_shot.png",
+    "08_booster_activation_or_combo_pop.png",
+    "09_level_win_result_popup.png",
 ]
 
 MIN_BRIGHTNESS = 20.0
@@ -80,6 +82,10 @@ def main() -> int:
          "tapping Level 1 must visibly open the board", MIN_DIFFERENCE),
         ("06_level_1_active_gameplay.png", "07_after_shot.png",
          "a shot must visibly change the board", 0.004),
+        ("06_level_1_active_gameplay.png", "08_booster_activation_or_combo_pop.png",
+         "activating a booster must visibly change the board", 0.004),
+        ("02_saga_world_map.png", "09_level_win_result_popup.png",
+         "the win popup must be its own screen", MIN_DIFFERENCE),
     ]
     pair_rows: list[str] = []
     for a_name, b_name, why, threshold in pairs:

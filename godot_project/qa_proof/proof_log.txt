@@ -14,8 +14,14 @@ PASS  tapping level 1 starts that level  [state=3 level=1]
 PASS  level 1 populates the hex grid from level_001.json  [bubbles=43]
 PASS  the board is drawn with real bubble sprites, not drawn circles  [sprites=43 bubbles=43]
 PASS  every bubble sprite has a real texture
+PASS  the bubble in the cannon is visible and textured
 FAIL  captured 06_level_1_active_gameplay.png  [headless: no framebuffer, run under xvfb]
 PASS  firing a bubble resolves and costs one move  [13 -> 12]
 PASS  the score HUD updates after the shot  [hud=50 score=50]
+PASS  a new bubble is loaded after the shot
 FAIL  captured 07_after_shot.png  [headless: no framebuffer, run under xvfb]
-20 checks, 7 failed
+PASS  a bomb booster is available to test  [count=1]
+FAIL  captured 08_booster_activation_or_combo_pop.png  [headless: no framebuffer, run under xvfb]
+PASS  the win popup offers its buttons  [buttons=3]
+FAIL  captured 09_level_win_result_popup.png  [headless: no framebuffer, run under xvfb]
+26 checks, 9 failed

@@ -40,7 +40,7 @@ func _build() -> void:
 	_bar.value = 0
 	add_child(_bar)
 
-	var ver := UI.label("v2.0.0", 30, UI.MUTED, HORIZONTAL_ALIGNMENT_CENTER)
+	var ver := UI.label("v3.0.0", 30, UI.MUTED, HORIZONTAL_ALIGNMENT_CENTER)
 	ver.position = Vector2(0, 1760)
 	ver.size = Vector2(1080, 40)
 	add_child(ver)
