@@ -733,7 +733,10 @@ func _objective_status_text() -> String:
 		"pop_count":
 			return "POP %d / %d BUBBLES" % [popped_total, int(obj.get("count", 0))]
 		"rescue":
-			return "FREE %d / %d CHAINS" % [freed_total, int(obj.get("count", 0))]
+			var text := "FREE %d / %d CHAINS" % [freed_total, int(obj.get("count", 0))]
+			if objectives.size() > 1 and str(objectives[1].get("type", "")) == "pop_count":
+				text += " - POP %d / %d" % [popped_total, int(objectives[1].get("count", 0))]
+			return text
 		"score":
 			return "SCORE %d / %d" % [score, int(obj.get("target", 0))]
 		"survive":
