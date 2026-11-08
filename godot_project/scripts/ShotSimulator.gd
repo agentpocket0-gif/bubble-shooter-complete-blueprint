@@ -44,11 +44,19 @@ static func trace(board: HexBoard, angle: float, origin := Vector2(CANNON_X, CAN
 		# reflect, do not clamp: clamping makes the bubble stick to the wall for
 		# a frame and the preview disagrees with the shot
 		if pos.x - HexBoard.HALF < HexBoard.LEFT_WALL:
+			if t.bounces >= MAX_BOUNCES:
+				pos.x = HexBoard.LEFT_WALL + HexBoard.HALF
+				t.points.append(pos)
+				return t
 			pos.x = HexBoard.LEFT_WALL + HexBoard.HALF + (HexBoard.LEFT_WALL - (pos.x - HexBoard.HALF))
 			dir.x = -dir.x
 			t.bounces += 1
 			t.points.append(pos)
 		elif pos.x + HexBoard.HALF > HexBoard.RIGHT_WALL:
+			if t.bounces >= MAX_BOUNCES:
+				pos.x = HexBoard.RIGHT_WALL - HexBoard.HALF
+				t.points.append(pos)
+				return t
 			pos.x = HexBoard.RIGHT_WALL - HexBoard.HALF - ((pos.x + HexBoard.HALF) - HexBoard.RIGHT_WALL)
 			dir.x = -dir.x
 			t.bounces += 1
@@ -89,13 +97,21 @@ static func _first_hit(board: HexBoard, p: Vector2) -> Vector2i:
 
 
 static func _snap_ceiling(board: HexBoard, x: float) -> Vector2i:
-	var q := int(round((x - HexBoard.ORIGIN_X) / HexBoard.D))
-	q = clampi(q, 0, board.row_len(0) - 1)
-	while q < board.row_len(0) and board.filled(q, 0):
-		q += 1
-	if q >= board.row_len(0):
-		return Vector2i(-1, -1)
-	return Vector2i(q, 0)
+	var q := clampi(int(round((x - HexBoard.ORIGIN_X) / HexBoard.D)), 0, board.row_len(0) - 1)
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	# Pick the closest open cell in row 0, searching both directions.
+	for candidate in board.row_len(0):
+		if board.filled(candidate, 0):
+			continue
+		var d := absf(board.centre(candidate, 0).x - x)
+		if d < best_d:
+			best_d = d
+			best = Vector2i(candidate, 0)
+	if best.x >= 0:
+		return best
+	# A full ceiling row can still have room within the two-cell fallback ring.
+	return _nearest_empty_within(board, Vector2i(q, 0), Vector2(x, 0))
 
 
 static func _snap(board: HexBoard, hit: Vector2i, p: Vector2) -> Vector2i:
@@ -108,6 +124,35 @@ static func _snap(board: HexBoard, hit: Vector2i, p: Vector2) -> Vector2i:
 		if d < best_d:
 			best_d = d
 			best = n
+	if best.x >= 0:
+		return best
+	return _nearest_empty_within(board, hit, p)
+
+
+static func _nearest_empty_within(board: HexBoard, start: Vector2i, point: Vector2) -> Vector2i:
+	if not board.in_bounds(start.x, start.y):
+		return Vector2i(-1, -1)
+	var max_distance_sq := pow(HexBoard.D * 2.0, 2.0)
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	var queue: Array[Vector2i] = [start]
+	var depth_by_cell := {start: 0}
+	var cursor := 0
+	while cursor < queue.size():
+		var cell: Vector2i = queue[cursor]
+		cursor += 1
+		var depth := int(depth_by_cell[cell])
+		var d := board.centre(cell.x, cell.y).distance_squared_to(point)
+		if not board.filled(cell.x, cell.y) and d <= max_distance_sq and d < best_d:
+			best = cell
+			best_d = d
+		if depth >= 2:
+			continue
+		for neighbour in board.neighbours(cell.x, cell.y):
+			if depth_by_cell.has(neighbour):
+				continue
+			depth_by_cell[neighbour] = depth + 1
+			queue.append(neighbour)
 	return best
 
 
