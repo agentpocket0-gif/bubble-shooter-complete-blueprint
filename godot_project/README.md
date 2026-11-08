@@ -98,7 +98,7 @@ the reward is still granted through the callback, never by the button.
 
 Nothing ships unverified. The automated gates run on every push:
 
-1. `tests/TestRunner.tscn` — 33 headless checks: grid geometry, wall bounces,
+1. `tests/TestRunner.tscn` — headless checks: grid geometry, wall bounces,
    cluster and floating detection, save tamper rejection, procedural seed reproduction, all six mission types, increasing difficulty, level 2400 generation,
    every `res://assets/...` path in the code resolving, and a real shot through
    the gameplay scene.
