@@ -72,6 +72,22 @@ func _step_map() -> void:
 			nodes += 1
 	_check("saga map builds 120 level buttons", nodes == 120, "found=%d" % nodes)
 
+	var scroll_nodes := _map.find_children("*", "ScrollContainer", true, false)
+	var can_scroll := false
+	if not scroll_nodes.is_empty():
+		var map_scroll := scroll_nodes[0] as ScrollContainer
+		var vertical_bar := map_scroll.get_v_scroll_bar()
+		can_scroll = vertical_bar.max_value > vertical_bar.page
+	_check("120-level saga map has a working vertical scroll range", can_scroll)
+
+	var rail_actions := {}
+	for rail_button in _map.find_children("*", "TextureButton", true, false):
+		if rail_button.has_meta("action"):
+			rail_actions[str(rail_button.get_meta("action"))] = true
+	_check("map side rail has spin, piggy bank and store actions",
+		rail_actions.size() == 3 and rail_actions.has("spin")
+		and rail_actions.has("piggy") and rail_actions.has("store"))
+
 	var level_one: Button = null
 	for b in _map.find_children("*", "Button", true, false):
 		if b.has_meta("level_id") and int(b.get_meta("level_id")) == 1:
@@ -103,6 +119,30 @@ func _step_store() -> void:
 	await get_tree().create_timer(0.45).timeout
 	_check("store rail button opens the shop", pressed and bool(_map.call("has_overlay")))
 	await _capture("05_store_and_spin_wheel.png")
+	_map.call("close_overlay")
+	await get_tree().create_timer(0.3).timeout
+
+	var spin_pressed: bool = _map.call("press_rail_button", "spin")
+	await get_tree().create_timer(0.45).timeout
+	_check("spin rail button opens the daily wheel",
+		spin_pressed and bool(_map.call("has_overlay")))
+
+	var spin_button: Button = null
+	for candidate in _map.find_children("*", "Button", true, false):
+		if (candidate as Button).text == "SPIN":
+			spin_button = candidate as Button
+			break
+
+	var coins_before := GameManager.coins()
+	_check("daily wheel offers a free spin when ready",
+		spin_button != null and not spin_button.disabled and StoreAndEconomy.spin_ready())
+	var spin_claimed: bool = _map.call("press_overlay_button", "SPIN")
+	await get_tree().create_timer(1.0).timeout
+	_check("free daily spin grants a virtual prize without spending coins",
+		spin_claimed and spin_button != null and spin_button.disabled
+		and GameManager.coins() >= coins_before)
+	_check("daily spin starts its 24-hour cooldown",
+		not StoreAndEconomy.spin_ready() and StoreAndEconomy.spin_wait_seconds() > 0)
 	_map.call("close_overlay")
 	await get_tree().create_timer(0.3).timeout
 
