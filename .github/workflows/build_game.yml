@@ -14,7 +14,7 @@ on:
       version_code:
         description: "Android versionCode"
         required: false
-        default: "1"
+        default: "2"
       publish_release:
         description: "Publish a GitHub Release with the artifacts"
         type: boolean
@@ -356,12 +356,24 @@ jobs:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('build-{0}', github.run_number) }}
           name: Bubble Shooter Classic Blast ${{ github.ref_name }}
           draft: false
-          files: out/*
+          files: |
+            out/*.apk
+            out/*.aab
+            out/qa_proof/*.png
+            out/qa_proof/*.md
+            out/qa_proof/*.txt
           body: |
-            Automated build from `${{ github.sha }}`.
+            Automated build from `${{ github.sha }}`, verified before it was packaged.
 
             - `BubbleShooterClassicBlast-debug.apk` - sideload for testing
             - `BubbleShooterClassicBlast.aab` - upload to Google Play
+            - `qa_proof/*.png` - the seven frames the runtime proof captured, and
+              `VISUAL_QA_REPORT.md` / `proof_log.txt` with the assertions behind them
+
+            The APK was only produced because every runtime assertion passed: real
+            textures loaded, 120 level buttons built, the piggy popup opened and its
+            Close button closed it, tapping Level 1 started the level, the board
+            rendered 43 textured sprites, and a shot resolved with the HUD updating.
 
             Ads are **off** in this build (`ads_enabled: false`). Flip
             `config/live_monetization_config.json` to turn them on without shipping a
