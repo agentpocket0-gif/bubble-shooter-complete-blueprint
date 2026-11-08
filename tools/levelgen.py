@@ -704,8 +704,8 @@ def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Rand
         if added >= desired:
             break
 
-    if added == 0:
-        raise ValueError("no chained-bubble position beside a matchable 3+ group")
+    if added < 2:
+        raise ValueError("fewer than two chained bubbles could be placed beside matchable groups")
     return ["".join(row) for row in grid], blockers, added
 
 
@@ -751,8 +751,8 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
     elif mission_slot == 2:
         objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
     elif mission_slot == 3:
-        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=1)
-        objectives = [{"type": "rescue", "count": 1}]
+        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=3)
+        objectives = [{"type": "rescue", "count": 2}]
     elif mission_slot == 4:
         objectives = [{"type": "score", "target": 1}]
     else:
@@ -815,7 +815,8 @@ def tune(level: dict, spare: int = 4) -> dict | None:
         )
         return None
     used = result["shots_used"]
-    minimum_shots = 3 if probe["objectives"][0].get("type") == "score" else 5
+    mission_type = probe["objectives"][0].get("type")
+    minimum_shots = {"score": 3, "rescue": 2, "survive": 7}.get(mission_type, 5)
     if used < minimum_shots:
         print(
             f"DEBUG level too easy for balance gate: id={level['id']} "
