@@ -471,6 +471,10 @@ func _resolve_shot() -> void:
 
 	var floating := board.find_floating()
 	if not floating.is_empty():
+		# Chains that detach and fall with an unanchored cluster count as rescued.
+		for falling_cell in floating:
+			if board.blocker_at(falling_cell.x, falling_cell.y) == HexBoard.B_CHAIN:
+				freed_total += 1
 		_drop_cells(floating)
 		AudioManager.play("sfx_drop_start")
 
