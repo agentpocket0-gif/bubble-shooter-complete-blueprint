@@ -672,67 +672,37 @@ def _same_colour_component_size(grid: list[list[str]], start: tuple[int, int],
 
 def add_chain_blockers(layout: list[str], blockers: list[dict], rng: random.Random,
                        desired: int = 1) -> tuple[list[str], list[dict], int]:
-    """Place rescue targets beside large, reachable colour groups near the ceiling."""
+    """Place a rescue target beside a matchable colour group."""
     grid = [list(line) for line in layout]
-    candidates = [(q, r) for r in range(1, min(5, len(grid)))
+    candidates = [(q, r) for r in range(1, len(grid))
                   for q, ch in enumerate(grid[r]) if ch.isdigit()]
-    ranked = []
+    rng.shuffle(candidates)
+    added = 0
 
     for q, r in candidates:
         original = grid[r][q]
         grid[r][q] = "c"
-        sizes = [
-            _same_colour_component_size(grid, (nq, nr), original)
-            for nq, nr in _grid_neighbours(grid, q, r)
-            if grid[nr][nq] == original
-        ]
-        grid[r][q] = original
-        largest_group = max(sizes, default=0)
-        if largest_group >= 3:
-            # Large groups and shallow rows are easier for the same solver and
-            # player to reach. Randomness only breaks ties deterministically.
-            ranked.append((largest_group, -r, rng.random(), q, r, original))
-
-    ranked.sort(reverse=True)
-    added = 0
-    used_colours: set[int] = set()
-    selected_positions: list[tuple[int, int]] = []
-    for _size, _shallow, _tie, q, r, original in ranked:
-        if grid[r][q] != original:
-            continue
-        colour_index = int(original) - 1
-        # Rescue missions should require separate colour groups, not one pop
-        # that happens to touch several chained cells in the same blob.
-        if colour_index in used_colours:
-            continue
-        if any(abs(q - sq) + abs(r - sr) < 4 for sq, sr in selected_positions):
-            continue
-
-        # Re-check after each previous chain placement so no target is left
-        # beside an unmatchable fragment.
-        grid[r][q] = "c"
-        still_matchable = any(
+        attachable = any(
             grid[nr][nq] == original
-            and _same_colour_component_size(grid, (nq, nr), original) >= 3
+            and _same_colour_component_size(grid, (nq, nr), original) >= 2
             for nq, nr in _grid_neighbours(grid, q, r)
         )
-        if not still_matchable:
+        if not attachable:
             grid[r][q] = original
             continue
 
         blockers.append({
             "row": r, "col": q, "type": "chain",
-            "color": colour_index, "hp": 0,
+            "color": int(original) - 1, "hp": 0,
         })
-        used_colours.add(colour_index)
-        selected_positions.append((q, r))
         added += 1
         if added >= desired:
             break
 
-    if added < 2:
-        raise ValueError("could not place two separated chain targets of different colours")
+    if added == 0:
+        raise ValueError("could not place a chained bubble beside a matchable group")
     return ["".join(row) for row in grid], blockers, added
+
 
 
 def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
@@ -777,8 +747,11 @@ def make_level(level_id: int, rng: random.Random, degrade: int = 0) -> dict:
     elif mission_slot == 2:
         objectives = [{"type": "pop_count", "count": max(18, int(coloured * 0.65))}]
     elif mission_slot == 3:
-        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=2)
-        objectives = [{"type": "rescue", "count": 2}]
+        layout, blockers, chain_count = add_chain_blockers(layout, blockers, rng, desired=1)
+        objectives = [
+            {"type": "rescue", "count": 1},
+            {"type": "pop_count", "count": max(20, int(coloured * 0.55))},
+        ]
     elif mission_slot == 4:
         objectives = [{"type": "score", "target": 1}]
     else:
@@ -811,7 +784,7 @@ def tune(level: dict, spare: int = 4) -> dict | None:
     probe["shots"] = 140
 
     objectives = [dict(obj) for obj in level.get("objectives", [])]
-    if len(objectives) != 1:
+    if not 1 <= len(objectives) <= 2:
         return None
 
     # Calibrate score missions against a clear-all run using this same board
