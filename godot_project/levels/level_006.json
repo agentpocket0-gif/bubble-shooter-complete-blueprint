@@ -1,0 +1,55 @@
+{
+  "id": 6,
+  "world": 1,
+  "name": "Funnel 006",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 894207179
+  },
+  "shots": 10,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "1111333331",
+    "114422233",
+    "1114222334",
+    "444....34",
+    "222....244",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "funnel silhouette, 4 colours, none blockers, 40 bubbles",
+  "greedy": {
+    "score": 1055,
+    "shots_used": 6,
+    "shots_left": 4
+  }
+}

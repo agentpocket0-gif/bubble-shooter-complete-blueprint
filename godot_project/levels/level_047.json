@@ -1,0 +1,94 @@
+{
+  "id": 47,
+  "world": 3,
+  "name": "Arch 047",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 204409234
+  },
+  "shots": 16,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "55333223444",
+    ".331223314",
+    ".23i12x51i.",
+    "..3152551.",
+    "..3345421..",
+    "...x442i..",
+    "...5i442...",
+    "....244...",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 3,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 40
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 8,
+  "notes": "arch silhouette, 5 colours, mixed blockers, 50 bubbles",
+  "greedy": {
+    "score": 1015,
+    "shots_used": 12,
+    "shots_left": 4
+  }
+}

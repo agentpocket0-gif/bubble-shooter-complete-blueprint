@@ -1,0 +1,75 @@
+{
+  "id": 30,
+  "world": 2,
+  "name": "Checker 030",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 176168019
+  },
+  "shots": 14,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "11113334454",
+    ".1.3.3.4.5",
+    "1.1.3.5.x.5",
+    ".4.3.5.2.2",
+    "4.4.3.5.2.2",
+    ".4.3.5.2.2",
+    "x.4.3.x.2.2",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 8,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "checker silhouette, 5 colours, ice_stone blockers, 41 bubbles",
+  "greedy": {
+    "score": 1100,
+    "shots_used": 10,
+    "shots_left": 4
+  }
+}

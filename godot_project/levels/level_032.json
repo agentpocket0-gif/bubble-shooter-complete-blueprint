@@ -1,0 +1,81 @@
+{
+  "id": 32,
+  "world": 2,
+  "name": "Towers 032",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1190095053
+  },
+  "shots": 18,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "22331444222",
+    "2431x11252",
+    "23511332555",
+    "3551....44",
+    "33x1....x44",
+    "3551....44",
+    "x511....442",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 1,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "towers silhouette, 5 colours, ice_stone blockers, 54 bubbles",
+  "greedy": {
+    "score": 1345,
+    "shots_used": 14,
+    "shots_left": 4
+  }
+}

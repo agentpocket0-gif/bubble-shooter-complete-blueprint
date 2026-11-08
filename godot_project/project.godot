@@ -1,0 +1,63 @@
+; Bubble Shooter: Classic Blast
+; Godot 4.x mobile portrait project. 1080x1920 reference, canvas_items stretch,
+; expand aspect so tall phones get extra vertical room instead of letterboxing.
+
+config_version=5
+
+[application]
+
+config/name="Bubble Shooter: Classic Blast"
+config/description="A 100-level hex-grid bubble shooter."
+config/version="3.0.0"
+run/main_scene="res://scenes/Boot.tscn"
+config/features=PackedStringArray("4.4", "Mobile")
+config/icon="res://assets/icon.png"
+boot_splash/bg_color=Color(0.078, 0.078, 0.102, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+GameManager="*res://autoload/GameManager.gd"
+AudioManager="*res://autoload/AudioManager.gd"
+RemoteConfigAndAds="*res://autoload/RemoteConfigAndAds.gd"
+StoreAndEconomy="*res://autoload/StoreAndEconomy.gd"
+
+[display]
+
+window/size/viewport_width=1080
+window/size/viewport_height=1920
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[dotnet]
+
+project/assembly_name="BubbleShooterClassicBlast"
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+pointing/emulate_mouse_from_touch=true
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
+renderer/rendering_method.mobile="mobile"
+textures/canvas_textures/default_texture_filter=1
+environment/defaults/default_clear_color=Color(0.078, 0.078, 0.102, 1)
+anti_aliasing/quality/msaa_2d=1
+
+[text_server]
+
+fallbacks=["en"]

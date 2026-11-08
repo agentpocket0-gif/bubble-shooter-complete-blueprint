@@ -1,0 +1,55 @@
+{
+  "id": 11,
+  "world": 1,
+  "name": "Arch 011",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1281516662
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "2222114444",
+    ".33113344",
+    ".33313333.",
+    "..224411.",
+    "..222211..",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "arch silhouette, 4 colours, none blockers, 38 bubbles",
+  "greedy": {
+    "score": 855,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

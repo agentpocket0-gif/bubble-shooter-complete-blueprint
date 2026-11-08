@@ -1,0 +1,23 @@
+PASS  splash renders the real title logo texture
+PASS  captured 01_splash_screen.png  [err=0]
+PASS  saga map builds 120 level buttons  [found=120]
+PASS  level 1 button exists and is unlocked
+PASS  level 1 button has a connected pressed signal
+PASS  captured 02_saga_world_map.png  [err=0]
+PASS  piggy bank rail button opens the popup
+PASS  captured 03_piggy_bank_open.png  [err=0]
+PASS  piggy bank Close button actually closes the popup
+PASS  captured 04_piggy_bank_closed_back_to_map.png  [err=0]
+PASS  store rail button opens the shop
+PASS  captured 05_store_and_spin_wheel.png  [err=0]
+PASS  tapping level 1 starts that level  [state=3 level=1]
+PASS  level 1 populates the hex grid from level_001.json  [bubbles=43]
+PASS  the board is drawn with real bubble sprites, not drawn circles  [sprites=43 bubbles=43]
+PASS  every bubble sprite has a real texture
+PASS  the bubble in the cannon is visible and textured
+PASS  captured 06_level_1_active_gameplay.png  [err=0]
+PASS  firing a bubble resolves and costs one move  [13 -> 12]
+PASS  the score HUD updates after the shot  [hud=50 score=50]
+PASS  a new bubble is loaded after the shot
+PASS  captured 07_after_shot.png  [err=0]
+22 checks, 0 failed

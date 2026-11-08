@@ -1,0 +1,76 @@
+{
+  "id": 76,
+  "world": 4,
+  "name": "Diamond 076",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 2021162593
+  },
+  "shots": 11,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "4444423332.",
+    "..........",
+    ".....1.....",
+    "....1x3...",
+    "...2i633...",
+    "..5116662.",
+    ".5555i6622.",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 5,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 4,
+      "col": 4,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 5,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 6,
+  "notes": "diamond silhouette, 6 colours, mixed blockers, 32 bubbles",
+  "greedy": {
+    "score": 735,
+    "shots_used": 7,
+    "shots_left": 4
+  }
+}

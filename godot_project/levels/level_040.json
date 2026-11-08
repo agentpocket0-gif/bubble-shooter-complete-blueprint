@@ -1,0 +1,70 @@
+{
+  "id": 40,
+  "world": 2,
+  "name": "Diamond 040",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 950754629
+  },
+  "shots": 14,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "3333311444.",
+    "..........",
+    ".....5.....",
+    "....255...",
+    "...122x5...",
+    "..1112x44.",
+    ".331225544.",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 26
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "diamond silhouette, 5 colours, ice_stone blockers, 33 bubbles",
+  "greedy": {
+    "score": 765,
+    "shots_used": 10,
+    "shots_left": 4
+  }
+}

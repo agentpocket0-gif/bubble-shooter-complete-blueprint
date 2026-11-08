@@ -1,0 +1,70 @@
+{
+  "id": 26,
+  "world": 2,
+  "name": "Cross 026",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 295830807
+  },
+  "shots": 11,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "5551144444.",
+    "....124...",
+    "....122....",
+    "....112...",
+    "....111....",
+    "x33332x555",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 24
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "cross silhouette, 5 colours, ice_stone blockers, 30 bubbles",
+  "greedy": {
+    "score": 450,
+    "shots_used": 7,
+    "shots_left": 4
+  }
+}

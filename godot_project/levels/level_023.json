@@ -1,0 +1,68 @@
+{
+  "id": 23,
+  "world": 2,
+  "name": "Towers 023",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 922464266
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "44333332222",
+    "4233331i22",
+    "42341113322",
+    "2241....2i",
+    "2141....442",
+    "1111....44",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 1,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 3,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "towers silhouette, 4 colours, ice blockers, 49 bubbles",
+  "greedy": {
+    "score": 1390,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

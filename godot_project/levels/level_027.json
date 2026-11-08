@@ -1,0 +1,81 @@
+{
+  "id": 27,
+  "world": 2,
+  "name": "Heart 027",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 802786118
+  },
+  "shots": 20,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "11142223333",
+    "x445243322",
+    ".145444222.",
+    ".14534x555",
+    ".111334x55.",
+    "..13355x2.",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "heart silhouette, 5 colours, ice_stone blockers, 51 bubbles",
+  "greedy": {
+    "score": 1215,
+    "shots_used": 16,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "id": 8,
+  "world": 1,
+  "name": "Full 008",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1908118373
+  },
+  "shots": 24,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "3444224222",
+    "244244222",
+    "2431142221",
+    "221133321",
+    "3333333341",
+    "333114441",
+    "3111114411",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 1500,
+    "3": 2000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "full silhouette, 4 colours, none blockers, 67 bubbles",
+  "greedy": {
+    "score": 2015,
+    "shots_used": 20,
+    "shots_left": 4
+  }
+}

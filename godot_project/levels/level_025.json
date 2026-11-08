@@ -1,0 +1,68 @@
+{
+  "id": 25,
+  "world": 2,
+  "name": "Zigzag 025",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1936374948
+  },
+  "shots": 27,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "4431344111.",
+    ".33i4.1114",
+    "22.2444.443",
+    "21.1233.43",
+    "2211.223i.3",
+    "2113.2242.",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 8,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 1,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "zigzag silhouette, 4 colours, ice blockers, 50 bubbles",
+  "greedy": {
+    "score": 1230,
+    "shots_used": 23,
+    "shots_left": 4
+  }
+}

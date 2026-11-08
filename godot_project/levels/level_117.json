@@ -1,0 +1,113 @@
+{
+  "id": 117,
+  "world": 6,
+  "name": "Heart 117",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1331348232
+  },
+  "shots": 24,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "41133615533",
+    "i1i3i65553",
+    ".1134x6625.",
+    ".114436622",
+    ".112446622.",
+    "..23x5ix4.",
+    "..ii25544..",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 2,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 42
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "heart silhouette, 6 colours, dense blockers, 53 bubbles",
+  "greedy": {
+    "score": 1225,
+    "shots_used": 20,
+    "shots_left": 4
+  }
+}

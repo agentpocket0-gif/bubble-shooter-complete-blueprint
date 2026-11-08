@@ -1,0 +1,88 @@
+{
+  "id": 111,
+  "world": 6,
+  "name": "Checker 111",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 437099858
+  },
+  "shots": 22,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "66663666444",
+    ".x.3.1.6.i",
+    "1.6.3.3.2.5",
+    ".5.4.3.2.5",
+    "1.5.1.3.i.5",
+    ".5.1.3.2.5",
+    "2.4.i.3.i.4",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 4,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 1,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "checker silhouette, 6 colours, dense blockers, 39 bubbles",
+  "greedy": {
+    "score": 1065,
+    "shots_used": 18,
+    "shots_left": 4
+  }
+}

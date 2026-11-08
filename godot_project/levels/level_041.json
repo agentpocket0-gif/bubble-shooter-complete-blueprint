@@ -1,0 +1,93 @@
+{
+  "id": 41,
+  "world": 3,
+  "name": "Towers 041",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1457660852
+  },
+  "shots": 27,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "21141552222",
+    "21111i5222",
+    "33111152224",
+    "3i11....3x",
+    "3331....43i",
+    "x455....45",
+    "4445....44i",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 3,
+      "col": 1,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 1,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 9,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 10,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 10,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 8,
+  "notes": "towers silhouette, 5 colours, mixed blockers, 52 bubbles",
+  "greedy": {
+    "score": 1725,
+    "shots_used": 23,
+    "shots_left": 4
+  }
+}

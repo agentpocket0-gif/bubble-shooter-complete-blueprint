@@ -1,0 +1,56 @@
+{
+  "id": 67,
+  "world": 4,
+  "name": "Full 067",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1753515966
+  },
+  "shots": 21,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "55513334455",
+    "5413244555",
+    "51112224445",
+    "1444324411",
+    "11143354111",
+    "3133235222",
+    "33222352222",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 1500,
+    "3": 2000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 6,
+  "notes": "full silhouette, 5 colours, none blockers, 74 bubbles",
+  "greedy": {
+    "score": 1910,
+    "shots_used": 17,
+    "shots_left": 4
+  }
+}

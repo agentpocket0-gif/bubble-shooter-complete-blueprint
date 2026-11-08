@@ -1,0 +1,68 @@
+{
+  "id": 16,
+  "world": 1,
+  "name": "Zigzag 016",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1668793853
+  },
+  "shots": 15,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "1222111113",
+    ".2211.121",
+    "44.1144.23",
+    "44.i444.2",
+    "3333.4442.",
+    "3333.44i2",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "zigzag silhouette, 4 colours, ice blockers, 46 bubbles",
+  "greedy": {
+    "score": 1395,
+    "shots_used": 11,
+    "shots_left": 4
+  }
+}

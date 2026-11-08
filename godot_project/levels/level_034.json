@@ -1,0 +1,87 @@
+{
+  "id": 34,
+  "world": 2,
+  "name": "Zigzag 034",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 56522607
+  },
+  "shots": 19,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "5554455555.",
+    ".4441.x333",
+    "41.5113.333",
+    "1x.5144.33",
+    "215x.1444.3",
+    "1122.xx42.",
+    "1.2222.2222",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 5,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "zigzag silhouette, 5 colours, ice_stone blockers, 56 bubbles",
+  "greedy": {
+    "score": 1340,
+    "shots_used": 15,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": 18,
+  "world": 1,
+  "name": "Heart 018",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 535220383
+  },
+  "shots": 15,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "4321333422",
+    "331133342",
+    ".22134434.",
+    ".21i24411",
+    ".32224411.",
+    "..14441i.",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "heart silhouette, 4 colours, ice blockers, 47 bubbles",
+  "greedy": {
+    "score": 1335,
+    "shots_used": 11,
+    "shots_left": 4
+  }
+}

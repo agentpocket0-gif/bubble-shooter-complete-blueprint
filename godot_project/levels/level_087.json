@@ -1,0 +1,101 @@
+{
+  "id": 87,
+  "world": 5,
+  "name": "Funnel 087",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1155139018
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "55552212444",
+    "55562224i3",
+    "51566663333",
+    "1i1.....33",
+    "612.....xi3",
+    "6i2.....44",
+    "x66.....i14",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 1,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 4,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "red"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "funnel silhouette, 6 colours, dense blockers, 47 bubbles",
+  "greedy": {
+    "score": 1300,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

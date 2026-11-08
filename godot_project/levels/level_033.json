@@ -1,0 +1,82 @@
+{
+  "id": 33,
+  "world": 2,
+  "name": "Funnel 033",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1697050940
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "22555554423",
+    "2155554422",
+    "2114xx4x222",
+    "354.....22",
+    "333.....21x",
+    "433.....11",
+    "443.....311",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 10,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 40
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "funnel silhouette, 5 colours, ice_stone blockers, 50 bubbles",
+  "greedy": {
+    "score": 1255,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

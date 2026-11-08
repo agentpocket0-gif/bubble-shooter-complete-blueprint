@@ -1,0 +1,55 @@
+{
+  "id": 7,
+  "world": 1,
+  "name": "Zigzag 007",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1401163066
+  },
+  "shots": 23,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "2333411114",
+    ".2331.111",
+    "22.3211.44",
+    "22.4413.4",
+    "2224.3334.",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "zigzag silhouette, 4 colours, none blockers, 40 bubbles",
+  "greedy": {
+    "score": 1140,
+    "shots_used": 19,
+    "shots_left": 4
+  }
+}

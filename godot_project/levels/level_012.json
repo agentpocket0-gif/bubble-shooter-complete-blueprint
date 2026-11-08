@@ -1,0 +1,56 @@
+{
+  "id": 12,
+  "world": 1,
+  "name": "Full 012",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1788471969
+  },
+  "shots": 11,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "2322233441",
+    "332114433",
+    "1122134333",
+    "122311334",
+    "2122322444",
+    "111234444",
+    "1112444143",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 53
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "full silhouette, 4 colours, none blockers, 67 bubbles",
+  "greedy": {
+    "score": 1695,
+    "shots_used": 7,
+    "shots_left": 4
+  }
+}

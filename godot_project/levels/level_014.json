@@ -1,0 +1,68 @@
+{
+  "id": 14,
+  "world": 1,
+  "name": "Towers 014",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 654899523
+  },
+  "shots": 12,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "1133333211",
+    "134332211",
+    "44442i2111",
+    "4444...22",
+    "3444...22i",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 5,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 4,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "towers silhouette, 4 colours, ice blockers, 40 bubbles",
+  "greedy": {
+    "score": 1160,
+    "shots_used": 8,
+    "shots_left": 4
+  }
+}

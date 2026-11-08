@@ -1,0 +1,88 @@
+{
+  "id": 107,
+  "world": 6,
+  "name": "Cross 107",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 556761622
+  },
+  "shots": 9,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "4444422222.",
+    "....442...",
+    "....433....",
+    "....333...",
+    "....3i3....",
+    "6i653111i6",
+    "x6i55111556",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 2,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 5,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 5,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "cross silhouette, 6 colours, dense blockers, 38 bubbles",
+  "greedy": {
+    "score": 1020,
+    "shots_used": 5,
+    "shots_left": 4
+  }
+}

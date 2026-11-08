@@ -1,0 +1,124 @@
+{
+  "id": 118,
+  "world": 6,
+  "name": "Full 118",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1838303611
+  },
+  "shots": 42,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "55226555111",
+    "i62366ii11",
+    "6i22x51ii14",
+    "666x553344",
+    "66224523i44",
+    "6623333544",
+    "3ix43335544",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 1,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 2,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 7,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 6,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "type": "ice",
+      "hp": 2
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 1500,
+    "3": 2000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "full silhouette, 6 colours, dense blockers, 63 bubbles",
+  "greedy": {
+    "score": 2105,
+    "shots_used": 38,
+    "shots_left": 4
+  }
+}

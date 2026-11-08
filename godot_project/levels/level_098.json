@@ -1,0 +1,88 @@
+{
+  "id": 98,
+  "world": 5,
+  "name": "Cross 098",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 289196847
+  },
+  "shots": 19,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "6666634444.",
+    "....x64...",
+    "....366....",
+    "....i6i...",
+    "....531....",
+    "222111i554",
+    "2223115i544",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 3,
+      "col": 4,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 7,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 5,
+  "notes": "cross silhouette, 6 colours, dense blockers, 38 bubbles",
+  "greedy": {
+    "score": 965,
+    "shots_used": 15,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "id": 31,
+  "world": 2,
+  "name": "Diamond 031",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 683139714
+  },
+  "shots": 9,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "1111112221.",
+    "..........",
+    ".....5.....",
+    "....44x...",
+    "...44433...",
+    "..2x33355.",
+    ".322235555.",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "red"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "diamond silhouette, 5 colours, ice_stone blockers, 33 bubbles",
+  "greedy": {
+    "score": 740,
+    "shots_used": 5,
+    "shots_left": 4
+  }
+}

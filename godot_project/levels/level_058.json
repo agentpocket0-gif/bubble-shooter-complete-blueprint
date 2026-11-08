@@ -1,0 +1,81 @@
+{
+  "id": 58,
+  "world": 3,
+  "name": "Diamond 058",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1485950199
+  },
+  "shots": 9,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "3333455555.",
+    "..........",
+    ".....1.....",
+    "....11i...",
+    "...1x334...",
+    "..1124443.",
+    ".45124i233.",
+    ".45i222222",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 6,
+      "col": 6,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 7,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 8,
+  "notes": "diamond silhouette, 5 colours, mixed blockers, 40 bubbles",
+  "greedy": {
+    "score": 880,
+    "shots_used": 5,
+    "shots_left": 4
+  }
+}

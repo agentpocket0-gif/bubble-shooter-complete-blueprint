@@ -1,0 +1,68 @@
+{
+  "id": 15,
+  "world": 1,
+  "name": "Funnel 015",
+  "grid": {
+    "cols": 10,
+    "rows": 14,
+    "seed": 1161854898
+  },
+  "shots": 18,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "4222242233",
+    "422334i23",
+    "412i334333",
+    "111....13",
+    "441....144",
+    "441....11",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    ".........",
+    "..........",
+    "........."
+  ],
+  "blockers": [
+    {
+      "row": 1,
+      "col": 6,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 2000,
+    "3": 3000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "funnel silhouette, 4 colours, ice blockers, 43 bubbles",
+  "greedy": {
+    "score": 1000,
+    "shots_used": 14,
+    "shots_left": 4
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "id": 28,
+  "world": 2,
+  "name": "Full 028",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 1309741489
+  },
+  "shots": 13,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "44411153444",
+    "x114155344",
+    "114115x5355",
+    "1x4x235555",
+    "x2223225355",
+    "2222233333",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 2,
+      "col": 6,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "type": "stone",
+      "hp": 0
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 1500,
+    "3": 2000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 0,
+  "notes": "full silhouette, 5 colours, ice_stone blockers, 58 bubbles",
+  "greedy": {
+    "score": 1935,
+    "shots_used": 9,
+    "shots_left": 4
+  }
+}

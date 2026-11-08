@@ -1,0 +1,105 @@
+{
+  "id": 43,
+  "world": 3,
+  "name": "Zigzag 043",
+  "grid": {
+    "cols": 11,
+    "rows": 14,
+    "seed": 324087382
+  },
+  "shots": 18,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "3332224555.",
+    ".3322.2555",
+    "11.5522.122",
+    "1i.5324.22",
+    "11i5.3ii4.1",
+    "1115.3ix4.",
+    "1.1553.i444",
+    "2.53x3.444",
+    "...........",
+    "..........",
+    "...........",
+    "..........",
+    "...........",
+    ".........."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 7,
+      "type": "ice",
+      "hp": 2
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 4,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 7,
+      "col": 4,
+      "type": "stone",
+      "hp": 0
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "type": "ice",
+      "hp": 1
+    },
+    {
+      "row": 6,
+      "col": 7,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 1000,
+    "2": 1500,
+    "3": 2000
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "ceilingDropEvery": 8,
+  "notes": "zigzag silhouette, 5 colours, mixed blockers, 61 bubbles",
+  "greedy": {
+    "score": 1870,
+    "shots_used": 14,
+    "shots_left": 4
+  }
+}

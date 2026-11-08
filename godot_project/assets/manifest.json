@@ -1,0 +1,1355 @@
+{
+  "generated_by": "scripts/generate_original_assets.py",
+  "origin": "100% procedurally generated; no third-party art, audio or fonts",
+  "license": "yours - generated for this project, no attribution required",
+  "counts": {
+    "sprites": 142,
+    "audio": 46,
+    "total": 188
+  },
+  "files": [
+    {
+      "path": "bubbles/bubble_red_idle.png",
+      "kind": "sprite",
+      "bytes": 10364,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_red_plain.png",
+      "kind": "sprite",
+      "bytes": 8459,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_00.png",
+      "kind": "sprite",
+      "bytes": 6631,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8075,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_02.png",
+      "kind": "sprite",
+      "bytes": 11656,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_03.png",
+      "kind": "sprite",
+      "bytes": 12589,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_04.png",
+      "kind": "sprite",
+      "bytes": 3978,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_05.png",
+      "kind": "sprite",
+      "bytes": 2637,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1318,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_red_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_blue_idle.png",
+      "kind": "sprite",
+      "bytes": 10503,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_blue_plain.png",
+      "kind": "sprite",
+      "bytes": 8823,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_00.png",
+      "kind": "sprite",
+      "bytes": 6923,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8370,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_02.png",
+      "kind": "sprite",
+      "bytes": 11951,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_03.png",
+      "kind": "sprite",
+      "bytes": 12767,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_04.png",
+      "kind": "sprite",
+      "bytes": 3757,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_05.png",
+      "kind": "sprite",
+      "bytes": 2445,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1199,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_blue_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_green_idle.png",
+      "kind": "sprite",
+      "bytes": 9407,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_green_plain.png",
+      "kind": "sprite",
+      "bytes": 8911,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_00.png",
+      "kind": "sprite",
+      "bytes": 7009,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8580,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_02.png",
+      "kind": "sprite",
+      "bytes": 12244,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_03.png",
+      "kind": "sprite",
+      "bytes": 13093,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_04.png",
+      "kind": "sprite",
+      "bytes": 4094,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_05.png",
+      "kind": "sprite",
+      "bytes": 2923,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1509,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_green_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_yellow_idle.png",
+      "kind": "sprite",
+      "bytes": 9792,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_yellow_plain.png",
+      "kind": "sprite",
+      "bytes": 8255,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_00.png",
+      "kind": "sprite",
+      "bytes": 6762,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8071,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_02.png",
+      "kind": "sprite",
+      "bytes": 11670,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_03.png",
+      "kind": "sprite",
+      "bytes": 12452,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_04.png",
+      "kind": "sprite",
+      "bytes": 3933,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_05.png",
+      "kind": "sprite",
+      "bytes": 2803,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1339,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_yellow_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_purple_idle.png",
+      "kind": "sprite",
+      "bytes": 10356,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_purple_plain.png",
+      "kind": "sprite",
+      "bytes": 8425,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_00.png",
+      "kind": "sprite",
+      "bytes": 6803,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8298,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_02.png",
+      "kind": "sprite",
+      "bytes": 11851,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_03.png",
+      "kind": "sprite",
+      "bytes": 12529,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_04.png",
+      "kind": "sprite",
+      "bytes": 3872,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_05.png",
+      "kind": "sprite",
+      "bytes": 3089,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1525,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_purple_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_orange_idle.png",
+      "kind": "sprite",
+      "bytes": 9096,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/bubble_orange_plain.png",
+      "kind": "sprite",
+      "bytes": 8592,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_00.png",
+      "kind": "sprite",
+      "bytes": 6735,
+      "w": 96,
+      "h": 96,
+      "frame": 0
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_01.png",
+      "kind": "sprite",
+      "bytes": 8179,
+      "w": 96,
+      "h": 96,
+      "frame": 1
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_02.png",
+      "kind": "sprite",
+      "bytes": 11858,
+      "w": 96,
+      "h": 96,
+      "frame": 2
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_03.png",
+      "kind": "sprite",
+      "bytes": 12467,
+      "w": 96,
+      "h": 96,
+      "frame": 3
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_04.png",
+      "kind": "sprite",
+      "bytes": 3756,
+      "w": 96,
+      "h": 96,
+      "frame": 4
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_05.png",
+      "kind": "sprite",
+      "bytes": 2777,
+      "w": 96,
+      "h": 96,
+      "frame": 5
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1452,
+      "w": 96,
+      "h": 96,
+      "frame": 6
+    },
+    {
+      "path": "bubbles/pop/bubble_orange_pop_07.png",
+      "kind": "sprite",
+      "bytes": 116,
+      "w": 96,
+      "h": 96,
+      "frame": 7
+    },
+    {
+      "path": "bubbles/bubble_ghost.png",
+      "kind": "sprite",
+      "bytes": 4487,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_ice_01.png",
+      "kind": "sprite",
+      "bytes": 4244,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_ice_02.png",
+      "kind": "sprite",
+      "bytes": 4661,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_ice_03.png",
+      "kind": "sprite",
+      "bytes": 5774,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_stone.png",
+      "kind": "sprite",
+      "bytes": 6676,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_chain.png",
+      "kind": "sprite",
+      "bytes": 3095,
+      "w": 112,
+      "h": 112
+    },
+    {
+      "path": "blockers/blocker_cage.png",
+      "kind": "sprite",
+      "bytes": 1669,
+      "w": 112,
+      "h": 112
+    },
+    {
+      "path": "blockers/blocker_cloud.png",
+      "kind": "sprite",
+      "bytes": 2660,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "blockers/blocker_morph_ring.png",
+      "kind": "sprite",
+      "bytes": 2747,
+      "w": 112,
+      "h": 112
+    },
+    {
+      "path": "boosters/booster_bomb.png",
+      "kind": "sprite",
+      "bytes": 5091,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_rainbow.png",
+      "kind": "sprite",
+      "bytes": 8972,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_laser.png",
+      "kind": "sprite",
+      "bytes": 956,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_swap.png",
+      "kind": "sprite",
+      "bytes": 3676,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_extra_moves.png",
+      "kind": "sprite",
+      "bytes": 6980,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_continue.png",
+      "kind": "sprite",
+      "bytes": 3971,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "boosters/booster_slot_empty.png",
+      "kind": "sprite",
+      "bytes": 2118,
+      "w": 132,
+      "h": 132
+    },
+    {
+      "path": "fx/pop/fx_pop_00.png",
+      "kind": "sprite",
+      "bytes": 9548,
+      "w": 128,
+      "h": 128,
+      "frame": 0
+    },
+    {
+      "path": "fx/pop/fx_pop_01.png",
+      "kind": "sprite",
+      "bytes": 11933,
+      "w": 128,
+      "h": 128,
+      "frame": 1
+    },
+    {
+      "path": "fx/pop/fx_pop_02.png",
+      "kind": "sprite",
+      "bytes": 17084,
+      "w": 128,
+      "h": 128,
+      "frame": 2
+    },
+    {
+      "path": "fx/pop/fx_pop_03.png",
+      "kind": "sprite",
+      "bytes": 18124,
+      "w": 128,
+      "h": 128,
+      "frame": 3
+    },
+    {
+      "path": "fx/pop/fx_pop_04.png",
+      "kind": "sprite",
+      "bytes": 5069,
+      "w": 128,
+      "h": 128,
+      "frame": 4
+    },
+    {
+      "path": "fx/pop/fx_pop_05.png",
+      "kind": "sprite",
+      "bytes": 3000,
+      "w": 128,
+      "h": 128,
+      "frame": 5
+    },
+    {
+      "path": "fx/pop/fx_pop_06.png",
+      "kind": "sprite",
+      "bytes": 1304,
+      "w": 128,
+      "h": 128,
+      "frame": 6
+    },
+    {
+      "path": "fx/pop/fx_pop_07.png",
+      "kind": "sprite",
+      "bytes": 143,
+      "w": 128,
+      "h": 128,
+      "frame": 7
+    },
+    {
+      "path": "fx/fx_star.png",
+      "kind": "sprite",
+      "bytes": 2487,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "fx/fx_shockwave.png",
+      "kind": "sprite",
+      "bytes": 21041,
+      "w": 256,
+      "h": 256
+    },
+    {
+      "path": "fx/fx_laser_beam.png",
+      "kind": "sprite",
+      "bytes": 676,
+      "w": 64,
+      "h": 256
+    },
+    {
+      "path": "fx/fx_particle_dot.png",
+      "kind": "sprite",
+      "bytes": 1811,
+      "w": 32,
+      "h": 32
+    },
+    {
+      "path": "ui/btn_primary_normal.png",
+      "kind": "sprite",
+      "bytes": 5585,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/btn_secondary_normal.png",
+      "kind": "sprite",
+      "bytes": 5613,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/btn_primary_pressed.png",
+      "kind": "sprite",
+      "bytes": 5680,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/btn_secondary_pressed.png",
+      "kind": "sprite",
+      "bytes": 5641,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/btn_primary_disabled.png",
+      "kind": "sprite",
+      "bytes": 5708,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/btn_secondary_disabled.png",
+      "kind": "sprite",
+      "bytes": 5712,
+      "w": 240,
+      "h": 96,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/pill_hud.png",
+      "kind": "sprite",
+      "bytes": 4000,
+      "w": 240,
+      "h": 84,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/popup_frame.png",
+      "kind": "sprite",
+      "bytes": 10576,
+      "w": 720,
+      "h": 900,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/popup_ribbon.png",
+      "kind": "sprite",
+      "bytes": 4716,
+      "w": 480,
+      "h": 110,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/popup_scrim.png",
+      "kind": "sprite",
+      "bytes": 208,
+      "w": 64,
+      "h": 64,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/progress_bg.png",
+      "kind": "sprite",
+      "bytes": 1254,
+      "w": 600,
+      "h": 24,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/progress_fill.png",
+      "kind": "sprite",
+      "bytes": 1051,
+      "w": 600,
+      "h": 24,
+      "nine_slice": true
+    },
+    {
+      "path": "ui/loading_logo_plate.png",
+      "kind": "sprite",
+      "bytes": 5126,
+      "w": 520,
+      "h": 200
+    },
+    {
+      "path": "hud/icon_coin_96.png",
+      "kind": "sprite",
+      "bytes": 5404,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_coin_64.png",
+      "kind": "sprite",
+      "bytes": 3330,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_heart_96.png",
+      "kind": "sprite",
+      "bytes": 3166,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_heart_64.png",
+      "kind": "sprite",
+      "bytes": 1953,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_star_on_96.png",
+      "kind": "sprite",
+      "bytes": 3446,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_star_on_64.png",
+      "kind": "sprite",
+      "bytes": 2546,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_star_off_96.png",
+      "kind": "sprite",
+      "bytes": 3422,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_star_off_64.png",
+      "kind": "sprite",
+      "bytes": 2540,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_gem_96.png",
+      "kind": "sprite",
+      "bytes": 2305,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_gem_64.png",
+      "kind": "sprite",
+      "bytes": 1935,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_pause_96.png",
+      "kind": "sprite",
+      "bytes": 725,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_pause_64.png",
+      "kind": "sprite",
+      "bytes": 445,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_settings_96.png",
+      "kind": "sprite",
+      "bytes": 1913,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_settings_64.png",
+      "kind": "sprite",
+      "bytes": 1318,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_sound_on_96.png",
+      "kind": "sprite",
+      "bytes": 1670,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_sound_on_64.png",
+      "kind": "sprite",
+      "bytes": 1074,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_sound_off_96.png",
+      "kind": "sprite",
+      "bytes": 1673,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_sound_off_64.png",
+      "kind": "sprite",
+      "bytes": 1199,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_music_on_96.png",
+      "kind": "sprite",
+      "bytes": 1537,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_music_on_64.png",
+      "kind": "sprite",
+      "bytes": 1176,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_spin_96.png",
+      "kind": "sprite",
+      "bytes": 2267,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_spin_64.png",
+      "kind": "sprite",
+      "bytes": 1569,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_piggy_96.png",
+      "kind": "sprite",
+      "bytes": 3625,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_piggy_64.png",
+      "kind": "sprite",
+      "bytes": 2450,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_shop_96.png",
+      "kind": "sprite",
+      "bytes": 1308,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_shop_64.png",
+      "kind": "sprite",
+      "bytes": 949,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_gift_96.png",
+      "kind": "sprite",
+      "bytes": 871,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_gift_64.png",
+      "kind": "sprite",
+      "bytes": 702,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_lock_96.png",
+      "kind": "sprite",
+      "bytes": 1231,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_lock_64.png",
+      "kind": "sprite",
+      "bytes": 911,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_close_96.png",
+      "kind": "sprite",
+      "bytes": 582,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_close_64.png",
+      "kind": "sprite",
+      "bytes": 442,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "hud/icon_play_96.png",
+      "kind": "sprite",
+      "bytes": 760,
+      "w": 96,
+      "h": 96
+    },
+    {
+      "path": "hud/icon_play_64.png",
+      "kind": "sprite",
+      "bytes": 629,
+      "w": 64,
+      "h": 64
+    },
+    {
+      "path": "cannon/cannon_base.png",
+      "kind": "sprite",
+      "bytes": 8233,
+      "w": 220,
+      "h": 180
+    },
+    {
+      "path": "cannon/cannon_barrel.png",
+      "kind": "sprite",
+      "bytes": 4496,
+      "w": 120,
+      "h": 200,
+      "pivot": "bottom-centre"
+    },
+    {
+      "path": "map/map_node_locked.png",
+      "kind": "sprite",
+      "bytes": 7106,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "map/map_node_current.png",
+      "kind": "sprite",
+      "bytes": 7796,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "map/map_node_done.png",
+      "kind": "sprite",
+      "bytes": 8432,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "map/map_node_done3.png",
+      "kind": "sprite",
+      "bytes": 8266,
+      "w": 128,
+      "h": 128
+    },
+    {
+      "path": "map/map_bg_tile.png",
+      "kind": "sprite",
+      "bytes": 81209,
+      "w": 512,
+      "h": 512,
+      "seamless": true
+    },
+    {
+      "path": "audio/sfx/sfx_cannon_rotate.wav",
+      "kind": "audio",
+      "bytes": 35324,
+      "duration": 0.4
+    },
+    {
+      "path": "audio/sfx/sfx_aim_lock.wav",
+      "kind": "audio",
+      "bytes": 7100,
+      "duration": 0.08
+    },
+    {
+      "path": "audio/sfx/sfx_shot.wav",
+      "kind": "audio",
+      "bytes": 22094,
+      "duration": 0.25
+    },
+    {
+      "path": "audio/sfx/sfx_wall_bounce.wav",
+      "kind": "audio",
+      "bytes": 10628,
+      "duration": 0.12
+    },
+    {
+      "path": "audio/sfx/sfx_snap.wav",
+      "kind": "audio",
+      "bytes": 7982,
+      "duration": 0.09
+    },
+    {
+      "path": "audio/sfx/sfx_pop_01.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_pop_02.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_pop_03.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_pop_04.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_pop_05.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_cluster_big.wav",
+      "kind": "audio",
+      "bytes": 44144,
+      "duration": 0.5
+    },
+    {
+      "path": "audio/sfx/sfx_drop_start.wav",
+      "kind": "audio",
+      "bytes": 26504,
+      "duration": 0.3
+    },
+    {
+      "path": "audio/sfx/sfx_drop_land.wav",
+      "kind": "audio",
+      "bytes": 13274,
+      "duration": 0.15
+    },
+    {
+      "path": "audio/sfx/sfx_ceiling_drop.wav",
+      "kind": "audio",
+      "bytes": 52964,
+      "duration": 0.6
+    },
+    {
+      "path": "audio/sfx/sfx_booster_bomb.wav",
+      "kind": "audio",
+      "bytes": 61782,
+      "duration": 0.7
+    },
+    {
+      "path": "audio/sfx/sfx_booster_rainbow.wav",
+      "kind": "audio",
+      "bytes": 70604,
+      "duration": 0.8
+    },
+    {
+      "path": "audio/sfx/sfx_booster_laser.wav",
+      "kind": "audio",
+      "bytes": 26504,
+      "duration": 0.3
+    },
+    {
+      "path": "audio/sfx/sfx_booster_swap.wav",
+      "kind": "audio",
+      "bytes": 17684,
+      "duration": 0.2
+    },
+    {
+      "path": "audio/sfx/sfx_booster_extra_moves.wav",
+      "kind": "audio",
+      "bytes": 35324,
+      "duration": 0.4
+    },
+    {
+      "path": "audio/sfx/sfx_ui_click.wav",
+      "kind": "audio",
+      "bytes": 5336,
+      "duration": 0.06
+    },
+    {
+      "path": "audio/sfx/sfx_ui_back.wav",
+      "kind": "audio",
+      "bytes": 7100,
+      "duration": 0.08
+    },
+    {
+      "path": "audio/sfx/sfx_popup_open.wav",
+      "kind": "audio",
+      "bytes": 22094,
+      "duration": 0.25
+    },
+    {
+      "path": "audio/sfx/sfx_popup_close.wav",
+      "kind": "audio",
+      "bytes": 15920,
+      "duration": 0.18
+    },
+    {
+      "path": "audio/sfx/sfx_coin_tick.wav",
+      "kind": "audio",
+      "bytes": 3572,
+      "duration": 0.04
+    },
+    {
+      "path": "audio/sfx/sfx_star_01.wav",
+      "kind": "audio",
+      "bytes": 44144,
+      "duration": 0.5
+    },
+    {
+      "path": "audio/sfx/sfx_star_02.wav",
+      "kind": "audio",
+      "bytes": 61782,
+      "duration": 0.7
+    },
+    {
+      "path": "audio/sfx/sfx_star_03.wav",
+      "kind": "audio",
+      "bytes": 79424,
+      "duration": 0.9
+    },
+    {
+      "path": "audio/sfx/sfx_level_win.wav",
+      "kind": "audio",
+      "bytes": 158804,
+      "duration": 1.8
+    },
+    {
+      "path": "audio/sfx/sfx_level_fail.wav",
+      "kind": "audio",
+      "bytes": 123522,
+      "duration": 1.4
+    },
+    {
+      "path": "audio/sfx/sfx_lives_empty.wav",
+      "kind": "audio",
+      "bytes": 88244,
+      "duration": 1.0
+    },
+    {
+      "path": "audio/sfx/sfx_life_refill.wav",
+      "kind": "audio",
+      "bytes": 44144,
+      "duration": 0.5
+    },
+    {
+      "path": "audio/sfx/sfx_spin_tick.wav",
+      "kind": "audio",
+      "bytes": 4454,
+      "duration": 0.05
+    },
+    {
+      "path": "audio/sfx/sfx_spin_win.wav",
+      "kind": "audio",
+      "bytes": 158804,
+      "duration": 1.8
+    },
+    {
+      "path": "audio/sfx/sfx_piggy_fill.wav",
+      "kind": "audio",
+      "bytes": 13274,
+      "duration": 0.15
+    },
+    {
+      "path": "audio/sfx/sfx_purchase_success.wav",
+      "kind": "audio",
+      "bytes": 66194,
+      "duration": 0.75
+    },
+    {
+      "path": "audio/sfx/sfx_purchase_fail.wav",
+      "kind": "audio",
+      "bytes": 52964,
+      "duration": 0.6
+    },
+    {
+      "path": "audio/sfx/sfx_ad_reward.wav",
+      "kind": "audio",
+      "bytes": 44144,
+      "duration": 0.5
+    },
+    {
+      "path": "audio/sfx/sfx_countdown.wav",
+      "kind": "audio",
+      "bytes": 8864,
+      "duration": 0.1
+    },
+    {
+      "path": "audio/sfx/sfx_blocker_crack.wav",
+      "kind": "audio",
+      "bytes": 17684,
+      "duration": 0.2
+    },
+    {
+      "path": "audio/sfx/sfx_blocker_break.wav",
+      "kind": "audio",
+      "bytes": 30912,
+      "duration": 0.35
+    },
+    {
+      "path": "audio/sfx/sfx_chain_break.wav",
+      "kind": "audio",
+      "bytes": 35324,
+      "duration": 0.4
+    },
+    {
+      "path": "audio/sfx/sfx_tutorial_point.wav",
+      "kind": "audio",
+      "bytes": 8864,
+      "duration": 0.1
+    },
+    {
+      "path": "audio/sfx/sfx_tension_layer.wav",
+      "kind": "audio",
+      "bytes": 176444,
+      "duration": 2.0
+    },
+    {
+      "path": "audio/music/bgm_map.wav",
+      "kind": "audio",
+      "bytes": 1764044,
+      "duration": 20.0,
+      "loop": true
+    },
+    {
+      "path": "audio/music/bgm_game.wav",
+      "kind": "audio",
+      "bytes": 1568044,
+      "duration": 17.778,
+      "loop": true
+    },
+    {
+      "path": "audio/music/bgm_tension.wav",
+      "kind": "audio",
+      "bytes": 1568044,
+      "duration": 17.778,
+      "loop": true
+    }
+  ]
+}
