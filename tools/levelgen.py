@@ -263,6 +263,9 @@ def place_and_resolve(board: Board, cell: tuple[int, int, bool], colour: int) ->
 
     floating = board.find_floating()
     for fq, fr in floating:
+        # A chained bubble that loses its support and falls is also rescued.
+        if board.blocker[fr][fq] == B_CHAIN:
+            freed += 1
         board.colour[fr][fq] = EMPTY
         board.hp[fr][fq] = 0
         board.blocker[fr][fq] = B_NONE
