@@ -140,6 +140,12 @@ jobs:
           cp "$PROJECT_DIR"/qa_proof/proof_log.txt qa_proof/ 2>/dev/null || true
           ls -la qa_proof
 
+      # the gate runs before the upload so the report it writes is published too
+      - name: Check the screenshots are not blank
+        id: gate
+        continue-on-error: true
+        run: python3 tools/visual_qa.py qa_proof
+
       - name: Upload the proof
         if: always()
         uses: actions/upload-artifact@v4
@@ -148,8 +154,11 @@ jobs:
           path: qa_proof/
           if-no-files-found: warn
 
-      - name: Check the screenshots are not blank
-        run: python3 tools/visual_qa.py qa_proof
+      - name: Fail if the visual gate did not pass
+        if: steps.gate.outcome != 'success'
+        run: |
+          echo "::error::visual QA failed - see qa_proof/VISUAL_QA_REPORT.md in the artifact"
+          exit 1
 
       - name: Commit the proof back to the branch
         if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')

@@ -73,6 +73,25 @@ minutes, 120 s cooldown, 8 per day, minimum level 6, rewarded always opt-in.
 `test_ads_simulation: true` lets you walk the rewarded flows with no SDK at all -
 the reward is still granted through the callback, never by the button.
 
+## Verification
+
+Nothing ships unverified. Two gates run on every push:
+
+1. `tests/TestRunner.tscn` — 27 headless checks: grid geometry, wall bounces,
+   cluster and floating detection, save tamper rejection, all 120 level schemas,
+   every `res://assets/...` path in the code resolving, and a real shot through
+   the gameplay scene.
+2. `tests/VisualQA.tscn` under Xvfb — drives the real scenes, presses the real
+   buttons and captures seven 1080x1920 frames. It asserts the splash logo
+   texture is non-null, the map builds 120 level buttons, the piggy popup opens
+   and its Close button closes it, tapping Level 1 starts the level, the board
+   renders 43 textured sprites rather than drawn circles, and a shot resolves
+   with the HUD updating. `tools/visual_qa.py` then rejects blank or flat frames
+   and proves that the screens that must differ do.
+
+The Android build depends on both jobs, so a broken button cannot reach a
+release. `qa_proof/` holds the frames and the report from the last run.
+
 ## What is real and what still needs you
 
 Real, tested, in this repo:
