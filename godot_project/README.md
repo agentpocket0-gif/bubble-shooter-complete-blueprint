@@ -35,7 +35,7 @@ tools/
 # editor
 godot --path godot_project
 
-# headless test suite (27 checks, exits non-zero on failure)
+# headless test suite (33 checks, exits non-zero on failure)
 godot --headless --audio-driver Dummy --path godot_project res://tests/TestRunner.tscn
 
 # runtime proof + screenshots (needs a display; CI uses xvfb)
@@ -44,7 +44,7 @@ xvfb-run -a -s "-screen 0 1080x1920x24" \
   --audio-driver Dummy res://tests/VisualQA.tscn
 python3 tools/visual_qa.py godot_project/qa_proof
 
-# regenerate every level from scratch (about 20 seconds)
+# regenerate every level from scratch (the validator requires all six missions)
 python3 tools/levelgen.py --out godot_project/levels --count 120
 python3 tools/validate_levels.py godot_project/levels
 ```
@@ -77,7 +77,7 @@ the reward is still granted through the callback, never by the button.
 
 Nothing ships unverified. Two gates run on every push:
 
-1. `tests/TestRunner.tscn` — 27 headless checks: grid geometry, wall bounces,
+1. `tests/TestRunner.tscn` — 33 headless checks: grid geometry, wall bounces,
    cluster and floating detection, save tamper rejection, all 120 level schemas,
    every `res://assets/...` path in the code resolving, and a real shot through
    the gameplay scene.
@@ -98,18 +98,20 @@ Implemented and CI-tested in this repository:
 
 - grid geometry, substepped collision, wall reflection, snapping, matching,
   floating-cluster removal, ice/stone/chained blockers, five boosters
-- 120 levels, each played by a greedy solver and kept only if it clears with
-  2-6 shots to spare; star thresholds derived from that run
+- 120 deterministic, solver-checked levels across all six primary mission types:
+  clear-all, clear-colour, pop-count, rescue, score and survive. There are 20
+  levels per primary mission; rescue levels also include a secondary pop-count
+  goal. Each level is retained only after the greedy solver clears its mission;
+  the shot budget and star thresholds are derived from that run.
 - save integrity, lives regen, economy, daily spin, piggy bank, store UI
-- 31 headless tests including a real gameplay-scene shot pipeline
+- 33 headless checks, including six-mission coverage, chained-bubble rescue, survive timing, and a real gameplay-scene shot pipeline
 
 Needs your accounts or hardware:
 
 - **Google Play / App Store**: signing keystore, listing assets, content rating
 - **Ad units**: real AdMob/MAX ids in the config (15-day switch)
-- **IAP**: `bs.*` products still need to be created in Play Console and a native billing bridge must be integrated and purchase-tested.
-- **Native ad SDK**: the Godot project talks to a `ClassicBlastAds` singleton when
-  one is installed. Without it, ads stay in simulation/off mode - by design.
+- **IAP**: `bs.*` products still need to be created in Play Console. Paid purchases now fail closed unless a native billing bridge and server-side receipt validation are present and tested.
+- **Native ad SDK**: no production ad adapter is bundled. Ads remain disabled until a supported native bridge, valid ad units and the required consent flow are integrated and tested.
 - **iOS**: `export_presets.cfg` ships an `iOS` preset that exports an Xcode project
   (`application/export_project_only=true`). Building it needs a macOS runner, Xcode
   and your Apple team id in `application/app_store_team_id`.
