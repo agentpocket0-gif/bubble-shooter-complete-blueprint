@@ -1,0 +1,20 @@
+{
+  "level_id": 1,
+  "moves": 27,
+  "objective": {
+    "type": "clear_all",
+    "target": 40
+  },
+  "colors": [
+    "red",
+    "blue",
+    "green"
+  ],
+  "star_thresholds": [
+    1500,
+    3000,
+    4500
+  ],
+  "grid_cols": 11,
+  "initial_rows": 7
+}
