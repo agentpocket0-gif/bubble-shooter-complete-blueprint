@@ -1,0 +1,153 @@
+name: Autonomous 6-Department Game Studio
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "qa_proof/**"
+      - "godot_project/assets/own/**"
+      - "godot_project/levels/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autonomous-6dept-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install OpenCV, Xvfb and system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth unzip curl
+          python -m pip install --upgrade pip
+          python -m pip install opencv-python-headless numpy
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android API 36 and Godot 4.7 toolchain dependencies
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platform-tools" "cmdline-tools;latest" "platforms;android-36" "build-tools;36.1.0" "ndk;28.1.13356709" "cmake;3.10.2.4988404"
+          test -d "$ANDROID_HOME/platforms/android-36"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+
+      - name: Install Godot 4.7.2 stable and matching export templates
+        run: |
+          set -euo pipefail
+          GODOT_VERSION="4.7.2-stable"
+          curl -fL --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          sudo install -m 0755 /tmp/godot-bin/Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
+          curl -fL --retry 3 -o /tmp/godot-templates.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable" /tmp/godot-templates
+          unzip -q /tmp/godot-templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+          if [ -f /tmp/godot-templates/version.txt ]; then
+            cp /tmp/godot-templates/version.txt "$HOME/.local/share/godot/export_templates/4.7.2.stable/version.txt"
+          fi
+          godot --version
+          test -f "$HOME/.local/share/godot/export_templates/4.7.2.stable/android_debug.apk"
+          test -f "$HOME/.local/share/godot/export_templates/4.7.2.stable/android_release.apk"
+
+      - name: Configure Godot Android SDK paths
+        run: |
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+
+      - name: Depts 1-4 - reference analysis, game generation and self-healing
+        run: python3 tools/retry_step.py --retries 2 -- python3 tools/autonomous_studio_orchestrator.py --pass 1
+
+      - name: Dept 5 - headless validation and gameplay assertions
+        run: python3 tools/retry_step.py --retries 2 -- bash tools/run_validation.sh
+
+      - name: Depts 5-6 - Xvfb play-bot and nine full-HD screenshots
+        run: python3 tools/retry_step.py --retries 2 -- bash tools/run_visual_qa.sh
+
+      - name: Dept 6 - Replica report and multimodal screenshot inspection
+        run: python3 tools/retry_step.py --retries 2 -- python3 tools/autonomous_studio_orchestrator.py --pass 2
+
+      - name: Commit generated original assets, 120 levels and QA proofs to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add godot_project/assets/own godot_project/levels qa_proof
+          if ! git diff --cached --quiet; then
+            git commit -m "ci: save generated game content and QA proofs [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Prepare persistent Android upload keystore
+        run: python3 tools/configure_android_signing.py
+
+      - name: Install Gradle Android build template and export debug APK
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          godot --headless --path godot_project --install-android-build-template --export-debug "Android APK" "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast-debug.apk"
+          test -s "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast-debug.apk"
+
+      - name: Export signed Play Store AAB
+        run: |
+          set -euo pipefail
+          godot --headless --path godot_project --export-release "Android AAB" "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast.aab"
+          test -s "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast.aab"
+          ls -lh "$GITHUB_WORKSPACE/out/"
+
+      - name: Publish prerelease APK, AAB and QA proof bundle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v5.0.0-autonomous-studio
+          target_commitish: main
+          name: Bubble Shooter Classic Blast - Autonomous Studio
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            Automated six-department build output. Review the attached QA report and screenshots.
+            This is a prerelease build. Real-device testing and Play Console review are still required.
+          files: |
+            out/BubbleShooterClassicBlast-debug.apk
+            out/BubbleShooterClassicBlast.aab
+            qa_proof/*.png
+            qa_proof/*.md
+            qa_proof/*.json

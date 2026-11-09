@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "ads_enabled": false,
+  "iap_enabled": false,
+  "remote_activation_allowed": true,
+  "review_mode": true,
+  "placements": {
+    "rewarded_extra_moves": false,
+    "rewarded_double_reward": false,
+    "rewarded_free_booster": false,
+    "rewarded_extra_life": false,
+    "interstitial": false,
+    "app_open": false
+  },
+  "note": "No advertising or billing SDK is bundled. Enabling flags alone does not show ads or process payments. Provider setup, user consent, privacy disclosures, and store-policy review are required first."
+}

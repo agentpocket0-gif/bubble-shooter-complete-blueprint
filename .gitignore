@@ -5,8 +5,16 @@ decoded_apk/
 raw_apk/
 xapk_parts/
 *.apk
+*.aab
 *.xapk
 *.apks
+
+# local Godot state and Android build outputs
+godot_project/.godot/
+godot_project/build/
+out/
+*.keystore
+*.jks
 
 # keep the reference drop-box readable but out of git if it holds a package
 !reference/README.md
