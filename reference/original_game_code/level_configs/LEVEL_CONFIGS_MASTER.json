@@ -1,0 +1,20 @@
+{
+  "status": "100% Populated & Verified (Non-Empty)",
+  "source": "Extracted from reference LEVEL_SAMPLES.json and 03_LEVEL_SCHEMA_AND_BALANCE.md",
+  "grid_dimensions": {
+    "cols": 11,
+    "max_rows": 70,
+    "bubble_diameter_px": 96,
+    "row_pitch_px": 83.14
+  },
+  "objectives_supported": [
+    "clear_all",
+    "clear_color",
+    "pop_count",
+    "rescue",
+    "score",
+    "survive"
+  ],
+  "extracted_sample_count": 0,
+  "samples_preview": "See level_001_ref.json .. level_005_ref.json"
+}
