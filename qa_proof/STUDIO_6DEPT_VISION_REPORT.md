@@ -22,7 +22,7 @@
 - 08_cluster_pop_effect.png -> 09_level_win_result_popup.png: mean pixel difference 55.13
 
 ## Optional multimodal vision inspection
-Overlapping panels (the "LEVEL COMPLETE!" pop-up obscures the game interface, including the bubble grid, cannon, and lower controls)
+Overlapping panel (the "LEVEL COMPLETE!" pop-up obscures part of the game interface, including the bubble grid and cannon area)
 
 ## Result
 
