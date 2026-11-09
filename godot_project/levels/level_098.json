@@ -1,0 +1,51 @@
+{
+  "id": 98,
+  "world": 3,
+  "name": "Bubble Bay 098",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86098
+  },
+  "shots": 47,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "111333222..",
+    "444222333..",
+    "444555333..",
+    "666555444..",
+    "555111666..",
+    "222111666..",
+    "111333222..",
+    "444222333..",
+    "444555333..",
+    "444555666..",
+    "666111555..",
+    "666222111..",
+    "222333111.."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "purple"
+    }
+  ],
+  "stars": {
+    "1": 331,
+    "2": 695,
+    "3": 994
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

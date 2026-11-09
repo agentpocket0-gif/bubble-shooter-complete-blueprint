@@ -1,0 +1,55 @@
+{
+  "id": 72,
+  "world": 2,
+  "name": "Bubble Bay 072",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86072
+  },
+  "shots": 38,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "444555666..",
+    "111666555..",
+    "222111666..",
+    "222333111..",
+    "444333222..",
+    "444555333..",
+    "666444555..",
+    "666111555..",
+    "222666111..",
+    "222333111.."
+  ],
+  "blockers": [
+    {
+      "row": 9,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "survive",
+      "shots": 15
+    }
+  ],
+  "stars": {
+    "1": 255,
+    "2": 535,
+    "3": 765
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

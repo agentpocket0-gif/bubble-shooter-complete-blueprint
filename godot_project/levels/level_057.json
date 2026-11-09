@@ -1,0 +1,53 @@
+{
+  "id": 57,
+  "world": 2,
+  "name": "Bubble Bay 057",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86057
+  },
+  "shots": 35,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "333444555..",
+    "444111555..",
+    "111555222..",
+    "222333111..",
+    "333222444..",
+    "444333555..",
+    "111444555..",
+    "555111222..",
+    "222111333.."
+  ],
+  "blockers": [
+    {
+      "row": 8,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 54
+    }
+  ],
+  "stars": {
+    "1": 229,
+    "2": 481,
+    "3": 688
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

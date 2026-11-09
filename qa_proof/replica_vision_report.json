@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "errors": [],
+  "differences": [
+    {
+      "from": "01_splash_screen.png",
+      "to": "02_saga_world_map.png",
+      "mean_absolute_difference": 30.0796
+    },
+    {
+      "from": "02_saga_world_map.png",
+      "to": "03_settings_popup.png",
+      "mean_absolute_difference": 43.5366
+    },
+    {
+      "from": "03_settings_popup.png",
+      "to": "04_booster_shop_popup.png",
+      "mean_absolute_difference": 1.8176
+    },
+    {
+      "from": "04_booster_shop_popup.png",
+      "to": "05_level_1_gameplay.png",
+      "mean_absolute_difference": 57.9821
+    },
+    {
+      "from": "05_level_1_gameplay.png",
+      "to": "06_level_1_aim_preview.png",
+      "mean_absolute_difference": 0.9035
+    },
+    {
+      "from": "06_level_1_aim_preview.png",
+      "to": "07_projectile_shot.png",
+      "mean_absolute_difference": 1.1148
+    },
+    {
+      "from": "07_projectile_shot.png",
+      "to": "08_cluster_pop_effect.png",
+      "mean_absolute_difference": 0.9676
+    },
+    {
+      "from": "08_cluster_pop_effect.png",
+      "to": "09_level_win_result_popup.png",
+      "mean_absolute_difference": 55.1405
+    }
+  ]
+}

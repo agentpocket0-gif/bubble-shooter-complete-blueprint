@@ -1,0 +1,49 @@
+{
+  "id": 34,
+  "world": 1,
+  "name": "Bubble Bay 034",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86034
+  },
+  "shots": 26,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "333111222..",
+    "444333222..",
+    "333111444..",
+    "111222444..",
+    "222333111..",
+    "222333444.."
+  ],
+  "blockers": [
+    {
+      "row": 5,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "rescue",
+      "count": 1
+    }
+  ],
+  "stars": {
+    "1": 153,
+    "2": 321,
+    "3": 459
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

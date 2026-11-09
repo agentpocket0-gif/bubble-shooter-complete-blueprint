@@ -1,0 +1,52 @@
+{
+  "id": 46,
+  "world": 2,
+  "name": "Bubble Bay 046",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86046
+  },
+  "shots": 32,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "layout": [
+    "333111222..",
+    "222444333..",
+    "333555444..",
+    "444555111..",
+    "111222555..",
+    "333222111..",
+    "333444222..",
+    "333444555.."
+  ],
+  "blockers": [
+    {
+      "row": 7,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "rescue",
+      "count": 1
+    }
+  ],
+  "stars": {
+    "1": 204,
+    "2": 428,
+    "3": 612
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

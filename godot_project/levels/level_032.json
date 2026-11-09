@@ -1,0 +1,42 @@
+{
+  "id": 32,
+  "world": 1,
+  "name": "Bubble Bay 032",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86032
+  },
+  "shots": 26,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "222333111..",
+    "444333222..",
+    "444333111..",
+    "222111444..",
+    "222333111..",
+    "333222444.."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "blue"
+    }
+  ],
+  "stars": {
+    "1": 153,
+    "2": 321,
+    "3": 459
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

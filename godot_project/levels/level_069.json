@@ -1,0 +1,55 @@
+{
+  "id": 69,
+  "world": 2,
+  "name": "Bubble Bay 069",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86069
+  },
+  "shots": 38,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "555444333..",
+    "555666444..",
+    "111555666..",
+    "111222666..",
+    "333111222..",
+    "333222444..",
+    "444555333..",
+    "555666444..",
+    "111555666..",
+    "222111666.."
+  ],
+  "blockers": [
+    {
+      "row": 9,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 60
+    }
+  ],
+  "stars": {
+    "1": 255,
+    "2": 535,
+    "3": 765
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

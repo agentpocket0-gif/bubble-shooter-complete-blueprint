@@ -1,0 +1,59 @@
+{
+  "id": 120,
+  "world": 3,
+  "name": "Bubble Bay 120",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86120
+  },
+  "shots": 50,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "666444555..",
+    "111666555..",
+    "222666111..",
+    "111333222..",
+    "222444333..",
+    "333555444..",
+    "555444666..",
+    "111666555..",
+    "111666222..",
+    "222333111..",
+    "222333444..",
+    "555333444..",
+    "444666555..",
+    "666555111.."
+  ],
+  "blockers": [
+    {
+      "row": 13,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "survive",
+      "shots": 20
+    }
+  ],
+  "stars": {
+    "1": 357,
+    "2": 749,
+    "3": 1071
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

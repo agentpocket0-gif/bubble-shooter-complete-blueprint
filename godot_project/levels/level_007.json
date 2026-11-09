@@ -1,0 +1,37 @@
+{
+  "id": 7,
+  "world": 1,
+  "name": "Bubble Bay 007",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86007
+  },
+  "shots": 17,
+  "palette": [
+    "red",
+    "blue",
+    "green"
+  ],
+  "layout": [
+    "333222111..",
+    "111333222..",
+    "111333222.."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_all"
+    }
+  ],
+  "stars": {
+    "1": 76,
+    "2": 160,
+    "3": 229
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

@@ -1,0 +1,28 @@
+{
+  "department": "REA",
+  "blueprint_documents": [
+    "01_ARCHITECTURE_AND_STACK.md",
+    "02_HEXGRID_PHYSICS_AND_MATCHING.md",
+    "03_LEVEL_SCHEMA_AND_BALANCE.md",
+    "04_ECONOMY_AND_AD_MEDIATION.md",
+    "05_MASTER_BUILD_SPEC.md",
+    "06_AUDIO_AND_SOUND_DESIGN.md",
+    "07_ASSET_PRODUCTION_SPEC.md",
+    "08_QA_DEVICE_MATRIX_AND_RELEASE.md",
+    "09_LIVEOPS_ASO_AND_LAUNCH.md",
+    "10_APP_FLOW_A_TO_Z.md"
+  ],
+  "reference_level_sample_files": 5,
+  "reference_sample_data_is_not_shipped": true,
+  "mechanics_reference": {
+    "grid": "staggered odd rows",
+    "row_pitch": "bubble_diameter * sqrt(3) / 2",
+    "odd_row_offset": "bubble_diameter / 2",
+    "neighbour_count": 6
+  },
+  "asset_rights": {
+    "real_pack_publishable": false,
+    "real_pack_excluded_from_game": true,
+    "real_pack_files": 1595
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": 21,
+  "world": 1,
+  "name": "Bubble Bay 021",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86021
+  },
+  "shots": 23,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "layout": [
+    "444111333..",
+    "444111222..",
+    "222333111..",
+    "222444333..",
+    "444333111.."
+  ],
+  "blockers": [
+    {
+      "row": 4,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "pop_count",
+      "count": 30
+    }
+  ],
+  "stars": {
+    "1": 127,
+    "2": 267,
+    "3": 382
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

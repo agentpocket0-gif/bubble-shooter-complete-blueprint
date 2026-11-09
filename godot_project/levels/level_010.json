@@ -1,0 +1,46 @@
+{
+  "id": 10,
+  "world": 1,
+  "name": "Bubble Bay 010",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86010
+  },
+  "shots": 20,
+  "palette": [
+    "red",
+    "blue",
+    "green"
+  ],
+  "layout": [
+    "333222111..",
+    "333222111..",
+    "111222333..",
+    "333111222.."
+  ],
+  "blockers": [
+    {
+      "row": 3,
+      "col": 9,
+      "type": "ice",
+      "hp": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "rescue",
+      "count": 1
+    }
+  ],
+  "stars": {
+    "1": 102,
+    "2": 214,
+    "3": 306
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}

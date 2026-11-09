@@ -1,0 +1,52 @@
+{
+  "id": 116,
+  "world": 3,
+  "name": "Bubble Bay 116",
+  "grid": {
+    "cols": 11,
+    "rows": 20,
+    "seed": 86116
+  },
+  "shots": 50,
+  "palette": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "layout": [
+    "555444333..",
+    "555666444..",
+    "111555666..",
+    "111222666..",
+    "222111333..",
+    "333222444..",
+    "333444555..",
+    "666444555..",
+    "111555666..",
+    "111222666..",
+    "111222333..",
+    "222333444..",
+    "333555444..",
+    "666555444.."
+  ],
+  "blockers": [],
+  "objectives": [
+    {
+      "type": "clear_color",
+      "color": "blue"
+    }
+  ],
+  "stars": {
+    "1": 357,
+    "2": 749,
+    "3": 1071
+  },
+  "rewards": {
+    "coins": 40,
+    "firstClearBonus": 100
+  },
+  "notes": "Original procedural level. Validate the aim path and progression on device before release."
+}
