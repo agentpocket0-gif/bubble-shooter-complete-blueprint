@@ -28,7 +28,9 @@ def main() -> int:
         print("ERROR: AssetRegistry refers to the non-publishable extracted asset pack", file=sys.stderr)
         return 1
     relative_assets = re.findall(r'ROOT\s*\+\s*"([^"]+)"', registry)
-    missing = [rel for rel in relative_assets if not (OWN / rel).is_file()]
+    # Dynamic format strings such as effects/pop_%02d.svg are checked explicitly below.
+    literal_assets = [rel for rel in relative_assets if "%" not in rel]
+    missing = [rel for rel in literal_assets if not (OWN / rel).is_file()]
     for frame in range(1, 9):
         rel = f"effects/pop_{frame:02d}.svg"
         if not (OWN / rel).is_file():
