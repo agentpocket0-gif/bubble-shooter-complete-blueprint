@@ -115,6 +115,19 @@ jobs:
             git push origin HEAD:main
           fi
 
+      - name: Create temporary CI debug keystore
+        run: |
+          set -euo pipefail
+          mkdir -p godot_project/build
+          keytool -genkeypair -noprompt -v \
+            -keystore godot_project/build/debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          test -s godot_project/build/debug.keystore
+
       - name: Install Gradle Android build template and export debug APK
         run: |
           set -euo pipefail
