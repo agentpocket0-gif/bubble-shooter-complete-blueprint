@@ -1,0 +1,21 @@
+{
+  "level_id": 2,
+  "moves": 29,
+  "objective": {
+    "type": "pop_count",
+    "target": 50
+  },
+  "colors": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "star_thresholds": [
+    3000,
+    6000,
+    9000
+  ],
+  "grid_cols": 11,
+  "initial_rows": 8
+}
