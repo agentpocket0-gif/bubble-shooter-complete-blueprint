@@ -307,7 +307,7 @@ func _simulate_shot(direction: Vector2) -> Dictionary:
             velocity.x = absf(velocity.x)
             bounce_count += 1
         elif position.x > 540.0 - DIAMETER * 0.5:
-            position.x = 540.0 - DIAMETER - (position.x - (540.0 - DIAMETER))
+            position.x = 2.0 * (540.0 - DIAMETER * 0.5) - position.x
             velocity.x = -absf(velocity.x)
             bounce_count += 1
         points.append(position)

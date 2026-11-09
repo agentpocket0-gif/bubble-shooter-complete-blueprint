@@ -53,7 +53,7 @@ def build_level(level_id: int) -> dict:
     bubble_count = sum(ch.isdigit() for line in layout for ch in line)
     estimated_clusters = max(3, row_count * 3)
     shots = min(60, max(12, estimated_clusters + 5))
-    score_target = max(100, bubble_count * 18)
+    score_target = max(100, bubble_count * 8)
     stars = {
         "1": max(50, int(score_target * 0.45)),
         "2": max(100, int(score_target * 0.68)),

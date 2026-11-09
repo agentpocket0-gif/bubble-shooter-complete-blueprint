@@ -142,10 +142,13 @@ func _show_settings() -> void:
         row.add_child(label)
         var toggle := CheckButton.new()
         toggle.button_pressed = bool(GameState.settings.get(setting_name, true))
-        toggle.toggled.connect(func(value: bool): GameState.set_setting(setting_name, value))
+        toggle.toggled.connect(_on_setting_toggled.bind(setting_name))
         row.add_child(toggle)
         content.add_child(row)
     _add_close_to_popup()
+
+func _on_setting_toggled(value: bool, setting_name: String) -> void:
+    GameState.set_setting(setting_name, value)
 
 func _show_store() -> void:
     _ensure_popup()
@@ -219,7 +222,8 @@ func _popup_title(parent: VBoxContainer, value: String) -> void:
 func _add_close_to_popup() -> void:
     var close := Button.new()
     close.text = "CLOSE"
-    close.custom_minimum_size = Vector2(220, 52)
+    close.position = Vector2(160, 780)
+    close.size = Vector2(220, 52)
     _style_button(close, true)
     close.pressed.connect(func():
         if popup_layer != null:
