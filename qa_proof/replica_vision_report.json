@@ -5,7 +5,7 @@
     {
       "from": "01_splash_screen.png",
       "to": "02_saga_world_map.png",
-      "mean_absolute_difference": 30.0796
+      "mean_absolute_difference": 30.0676
     },
     {
       "from": "02_saga_world_map.png",
@@ -30,17 +30,17 @@
     {
       "from": "06_level_1_aim_preview.png",
       "to": "07_projectile_shot.png",
-      "mean_absolute_difference": 1.1148
+      "mean_absolute_difference": 1.1134
     },
     {
       "from": "07_projectile_shot.png",
       "to": "08_cluster_pop_effect.png",
-      "mean_absolute_difference": 0.9676
+      "mean_absolute_difference": 0.9495
     },
     {
       "from": "08_cluster_pop_effect.png",
       "to": "09_level_win_result_popup.png",
-      "mean_absolute_difference": 55.1405
+      "mean_absolute_difference": 55.1308
     }
   ]
 }

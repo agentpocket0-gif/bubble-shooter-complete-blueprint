@@ -12,17 +12,17 @@
 - 09_level_win_result_popup.png: 1080x1920, mean=39.2, std=35.0
 
 ## State transition visual differences
-- 01_splash_screen.png -> 02_saga_world_map.png: mean pixel difference 30.08
+- 01_splash_screen.png -> 02_saga_world_map.png: mean pixel difference 30.07
 - 02_saga_world_map.png -> 03_settings_popup.png: mean pixel difference 43.54
 - 03_settings_popup.png -> 04_booster_shop_popup.png: mean pixel difference 1.82
 - 04_booster_shop_popup.png -> 05_level_1_gameplay.png: mean pixel difference 57.98
 - 05_level_1_gameplay.png -> 06_level_1_aim_preview.png: mean pixel difference 0.90
 - 06_level_1_aim_preview.png -> 07_projectile_shot.png: mean pixel difference 1.11
-- 07_projectile_shot.png -> 08_cluster_pop_effect.png: mean pixel difference 0.97
-- 08_cluster_pop_effect.png -> 09_level_win_result_popup.png: mean pixel difference 55.14
+- 07_projectile_shot.png -> 08_cluster_pop_effect.png: mean pixel difference 0.95
+- 08_cluster_pop_effect.png -> 09_level_win_result_popup.png: mean pixel difference 55.13
 
 ## Optional multimodal vision inspection
-Overlapping panel (the "LEVEL COMPLETE!" pop-up obscures the game area)
+Overlapping panels (the "LEVEL COMPLETE!" pop-up obscures the game interface, including the bubble grid, cannon, and lower controls)
 
 ## Result
 
