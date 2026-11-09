@@ -29,6 +29,7 @@ var projectile_velocity := Vector2.ZERO
 var projectile_color := "blue"
 var board_layer: Node2D
 var aim_line: Line2D
+var aim_ghost: Sprite2D
 var hud_label: Label
 var popup_layer: Control
 var booster_status: Label
@@ -76,11 +77,19 @@ func _build_ui() -> void:
     cannon_barrel.scale = Vector2(0.52, 0.52)
     add_child(cannon_barrel)
     aim_line = Line2D.new()
-    aim_line.width = 3.0
-    aim_line.default_color = Color(0.75, 0.95, 1.0, 0.78)
+    aim_line.width = 6.0
+    aim_line.default_color = Color("#fff07a")
     aim_line.begin_cap_mode = Line2D.LINE_CAP_ROUND
     aim_line.end_cap_mode = Line2D.LINE_CAP_ROUND
     add_child(aim_line)
+    aim_ghost = Sprite2D.new()
+    aim_ghost.name = "PredictedLandingBubble"
+    aim_ghost.texture = AssetRegistry.bubble(current_color)
+    aim_ghost.scale = Vector2(0.38, 0.38)
+    aim_ghost.modulate = Color(0.9, 1.0, 1.0, 0.92)
+    aim_ghost.z_index = 20
+    aim_ghost.visible = false
+    add_child(aim_ghost)
     _refresh_cannon()
     _update_hud()
     var buttons := ["Bomb", "Fireball", "Rainbow", "+5 Moves"]
@@ -276,6 +285,11 @@ func _build_trajectory_preview() -> void:
             break
         if bounces >= 3:
             break
+    if aim_ghost != null:
+        aim_ghost.texture = AssetRegistry.bubble(current_color)
+        var predicted := HexGrid.nearest_attach(position, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
+        aim_ghost.position = HexGrid.center(predicted, GRID_ORIGIN, DIAMETER) if predicted.x >= 0 else position
+        aim_ghost.visible = true
 
 func _collides_with_board(point: Vector2) -> bool:
     for cell in board.keys():
@@ -298,6 +312,8 @@ func _launch_shot() -> void:
     if shooting or shots_left <= 0:
         return
     shooting = true
+    if aim_ghost != null:
+        aim_ghost.visible = false
     projectile_color = current_color
     projectile = Sprite2D.new()
     projectile.texture = AssetRegistry.bubble(projectile_color)
