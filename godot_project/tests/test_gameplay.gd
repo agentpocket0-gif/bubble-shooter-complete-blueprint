@@ -26,13 +26,16 @@ func _run_tests() -> void:
     var point := HexGrid.center(Vector2i(3, 4), Vector2(10, 20), 42.0)
     assert(HexGrid.cell_from_point(point, Vector2(10, 20), 42.0, 11, 20) == Vector2i(3, 4))
     checks += 1
-    assert(GameState.MAX_LEVELS == 600)
+    var game_state_script = load("res://autoload/GameState.gd")
+    var test_state = game_state_script.new()
+    assert(test_state.MAX_LEVELS == 600)
     checks += 1
-    var first_level := GameState.get_level_data(1)
+    var first_level: Dictionary = test_state.get_level_data(1)
     assert(not first_level.is_empty() and int(first_level.get("id", 0)) == 1)
     checks += 1
-    var last_level := GameState.get_level_data(600)
+    var last_level: Dictionary = test_state.get_level_data(600)
     assert(not last_level.is_empty() and int(last_level.get("id", 0)) == 600)
     checks += 1
+    test_state.free()
     print("Godot core tests passed: ", checks)
     quit(0)
