@@ -39,7 +39,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
 
       - name: Install OpenCV, Xvfb and system tools
         run: |
@@ -114,9 +113,6 @@ jobs:
             git push origin HEAD:main
           fi
 
-      - name: Prepare persistent Android upload keystore
-        run: python3 tools/configure_android_signing.py
-
       - name: Install Gradle Android build template and export debug APK
         run: |
           set -euo pipefail
@@ -124,14 +120,30 @@ jobs:
           godot --headless --path godot_project --install-android-build-template --export-debug "Android APK" "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast-debug.apk"
           test -s "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast-debug.apk"
 
+      - name: Check Android release signing secrets
+        id: android_signing
+        shell: bash
+        run: |
+          if [[ -n "$ANDROID_KEYSTORE_BASE64" && -n "$ANDROID_KEYSTORE_PASSWORD" && -n "$ANDROID_KEY_ALIAS" && -n "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Android upload keystore secrets are missing. Debug APK can still be built; signed Play Store AAB will be skipped."
+          fi
+
+      - name: Prepare persistent Android upload keystore
+        if: steps.android_signing.outputs.available == 'true'
+        run: python3 tools/configure_android_signing.py
+
       - name: Export signed Play Store AAB
+        if: steps.android_signing.outputs.available == 'true'
         run: |
           set -euo pipefail
           godot --headless --path godot_project --export-release "Android AAB" "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast.aab"
           test -s "$GITHUB_WORKSPACE/out/BubbleShooterClassicBlast.aab"
           ls -lh "$GITHUB_WORKSPACE/out/"
 
-      - name: Publish prerelease APK, AAB and QA proof bundle
+      - name: Publish debug APK and QA evidence
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v5.0.0-autonomous-studio
@@ -144,10 +156,24 @@ jobs:
           generate_release_notes: true
           body: |
             Automated six-department build output. Review the attached QA report and screenshots.
+            Debug APK is available. A Play Store AAB is attached only when a persistent publisher upload keystore is configured.
             This is a prerelease build. Real-device testing and Play Console review are still required.
           files: |
             out/BubbleShooterClassicBlast-debug.apk
-            out/BubbleShooterClassicBlast.aab
             qa_proof/*.png
             qa_proof/*.md
             qa_proof/*.json
+
+      - name: Publish signed Play Store AAB
+        if: steps.android_signing.outputs.available == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v5.0.0-autonomous-studio
+          target_commitish: main
+          name: Bubble Shooter Classic Blast - Autonomous Studio
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: |
+            out/BubbleShooterClassicBlast.aab
