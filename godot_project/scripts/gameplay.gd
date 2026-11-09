@@ -131,19 +131,10 @@ func _style_button(button: Button) -> void:
     button.add_theme_color_override("font_color", Color.WHITE)
 
 func _load_level(level_id: int) -> void:
-    var path := "res://levels/level_%03d.json" % clampi(level_id, 1, 600)
-    if not FileAccess.file_exists(path):
-        path = "res://levels/level_001.json"
-    var file := FileAccess.open(path, FileAccess.READ)
-    if file == null:
-        push_error("Cannot open level file: " + path)
+    level_data = GameState.get_level_data(level_id)
+    if level_data.is_empty():
+        push_error("Missing level data for id %d" % level_id)
         return
-    var parsed = JSON.parse_string(file.get_as_text())
-    file.close()
-    if typeof(parsed) != TYPE_DICTIONARY:
-        push_error("Invalid level JSON: " + path)
-        return
-    level_data = parsed
     palette = level_data.get("palette", ["red", "blue", "green"])
     shots_left = int(level_data.get("shots", 30))
     board.clear()
@@ -171,10 +162,15 @@ func _load_level(level_id: int) -> void:
     var attempt_number := GameState.begin_attempt(level_id)
     var level_seed := int(level_data.get("grid", {}).get("seed", level_id))
     queue_rng.seed = level_seed + attempt_number * 100003
-    var available := palette.duplicate()
-    available.shuffle()
-    current_color = str(available[0])
-    next_color = str(available[1]) if available.size() > 1 else str(available[0])
+    var available: Array = []
+    for value in board.values():
+        if not available.has(str(value)):
+            available.append(str(value))
+    if available.is_empty():
+        available = palette.duplicate()
+    available.sort()
+    current_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
+    next_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
 
 func _render_board() -> void:
     for child in board_layer.get_children():

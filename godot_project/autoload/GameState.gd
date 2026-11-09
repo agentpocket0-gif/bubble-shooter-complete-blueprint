@@ -17,6 +17,7 @@ var settings: Dictionary = {"music": true, "sound": true, "haptics": true, "lang
 var tutorial_done: bool = false
 var last_daily_spin_unix: int = 0
 var pending_result: Dictionary = {}
+var level_catalog: Array = []
 
 func _ready() -> void:
     load_progress()
@@ -109,6 +110,32 @@ func complete_level(level_id: int, earned_stars: int, reward: int) -> bool:
         rewards_claimed[key] = true
     save_progress()
     return first_clear
+
+func get_level_data(level_id: int) -> Dictionary:
+    var safe_id := clampi(level_id, 1, MAX_LEVELS)
+    if level_catalog.is_empty():
+        var pack_file := FileAccess.open("res://levels/campaign_600.json", FileAccess.READ)
+        if pack_file != null:
+            var parsed = JSON.parse_string(pack_file.get_as_text())
+            pack_file.close()
+            if typeof(parsed) == TYPE_DICTIONARY:
+                var entries = parsed.get("levels", [])
+                if typeof(entries) == TYPE_ARRAY:
+                    level_catalog = entries
+    if level_catalog.size() >= safe_id:
+        var entry = level_catalog[safe_id - 1]
+        if typeof(entry) == TYPE_DICTIONARY and int(entry.get("id", 0)) == safe_id:
+            return entry.duplicate(true)
+    var legacy_path := "res://levels/level_%03d.json" % safe_id
+    if FileAccess.file_exists(legacy_path):
+        var legacy_file := FileAccess.open(legacy_path, FileAccess.READ)
+        if legacy_file != null:
+            var legacy = JSON.parse_string(legacy_file.get_as_text())
+            legacy_file.close()
+            if typeof(legacy) == TYPE_DICTIONARY:
+                return legacy
+    push_error("Campaign level is missing: %d" % safe_id)
+    return {}
 
 func buy_booster(booster_name: String, price: int, amount: int = 1) -> bool:
     if price < 0 or amount <= 0 or coins < price:

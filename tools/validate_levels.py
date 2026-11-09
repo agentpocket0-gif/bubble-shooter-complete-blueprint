@@ -70,7 +70,7 @@ def validate(path: Path) -> list[str]:
     return errors
 
 def main() -> int:
-    files = sorted(LEVEL_DIR.glob("level_*.json"))
+    files = sorted(LEVEL_DIR.glob("level_[0-9][0-9][0-9].json"))
     if len(files) != EXPECTED:
         print(f"ERROR: expected {EXPECTED} levels, found {len(files)}", file=sys.stderr)
         return 1
@@ -79,6 +79,16 @@ def main() -> int:
         ids = [json.loads(path.read_text(encoding="utf-8"))["id"] for path in files]
         if sorted(ids) != list(range(1, EXPECTED + 1)):
             errors.append("level IDs must be unique and continuous")
+        pack_file = LEVEL_DIR / "campaign_600.json"
+        if not pack_file.exists():
+            errors.append("runtime campaign_600.json pack is missing")
+        else:
+            pack = json.loads(pack_file.read_text(encoding="utf-8"))
+            packed = pack.get("levels", [])
+            if int(pack.get("campaign_levels", 0)) != EXPECTED or len(packed) != EXPECTED:
+                errors.append("runtime campaign pack must contain exactly 600 levels")
+            elif [int(item.get("id", 0)) for item in packed] != list(range(1, EXPECTED + 1)):
+                errors.append("runtime campaign pack IDs must be continuous")
         signatures = [tuple(json.loads(path.read_text(encoding="utf-8"))["layout"]) for path in files]
         if len(set(signatures)) != EXPECTED:
             errors.append("level layouts must be unique in this generated set")
@@ -87,7 +97,7 @@ def main() -> int:
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print("Validated exactly 600 level records: IDs, schema, blockers, objectives and unique layouts passed.")
+    print("Validated 600 level records and the runtime campaign pack: IDs, schema, blockers, objectives and unique layouts passed.")
     print("IMPORTANT: structural validation only. No trajectory-aware solvability claim is made.")
     return 0
 
