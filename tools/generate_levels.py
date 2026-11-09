@@ -58,7 +58,7 @@ def build_level(level_id: int) -> dict:
     elif objective_kind == "pop_count":
         objectives = [{"type": "pop_count", "count": max(6, row_count * 3)}]
     elif objective_kind == "score":
-        objectives = [{"type": "score", "target": row_count * 180}]
+        objectives = [{"type": "score", "target": row_count * 60}]
     else:
         objectives = [{"type": "clear_all"}]
 
@@ -112,6 +112,15 @@ def main() -> None:
         path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         index.append({"id": level_id, "world": data["world"], "file": path.name, "name": data["name"], "status": data["playability_status"]})
     (OUT / "index.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+    pack = {
+        "schema_version": 1,
+        "campaign_levels": TARGET_LEVELS,
+        "generator_version": "campaign600-lcg-v1",
+        "levels": packed_levels
+    }
+    (OUT / "campaign_600.json").write_text(
+        json.dumps(pack, separators=(",", ":")) + "\n", encoding="utf-8"
+    )
     print(f"Generated {len(index)} deterministic campaign level records and the runtime campaign pack.")
     print("Status: structurally generated only; trajectory-aware solvability is not asserted.")
 
