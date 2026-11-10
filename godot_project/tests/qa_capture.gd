@@ -109,7 +109,7 @@ func _ensure_autoloads(root_window: Window) -> void:
         if script == null:
             push_error("Cannot load autoload script: " + str(required[autoload_name]))
             continue
-        var instance := script.new()
+        var instance: Node = script.new()
         instance.name = str(autoload_name)
         root_window.add_child(instance)
 
