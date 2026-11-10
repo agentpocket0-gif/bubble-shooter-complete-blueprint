@@ -2,15 +2,23 @@ extends Control
 
 const PathDrawer = preload("res://scripts/map_path_drawer.gd")
 const MODE_NAMES := {"classic": "CLASSIC", "hard": "HARD LEVELS", "challenge": "CHALLENGE"}
+const WORLD_COUNT := 6
+const LEVELS_PER_WORLD := 100
 
 var popup_layer: Control
 var coin_label: Label
 var lives_label: Label
 var life_timer: Label
+var world_label: Label
+var world_buttons: Array[Button] = []
 var scroll: ScrollContainer
+var path: Control
+var selected_world := 1
 
 func _ready() -> void:
-    _build_map()
+    var unlocked := GameState.get_mode_unlocked_level()
+    selected_world = clampi(int((unlocked - 1) / LEVELS_PER_WORLD) + 1, 1, WORLD_COUNT)
+    await _build_map()
 
 func _build_map() -> void:
     var bg := TextureRect.new()
@@ -21,8 +29,8 @@ func _build_map() -> void:
     add_child(bg)
 
     var header := Panel.new()
-    header.position = Vector2(12, 16)
-    header.size = Vector2(516, 126)
+    header.position = Vector2(12, 12)
+    header.size = Vector2(516, 124)
     var header_style := StyleBoxFlat.new()
     header_style.bg_color = Color("#0d2855")
     header_style.border_color = Color("#7fdfff")
@@ -31,11 +39,10 @@ func _build_map() -> void:
     header.add_theme_stylebox_override("panel", header_style)
     add_child(header)
 
-    var title := _label("BUBBLE BAY", Vector2(20, 18), Vector2(250, 42), 28, Color("#fff0a8"))
-    header.add_child(title)
+    header.add_child(_label("BUBBLE BAY", Vector2(20, 16), Vector2(250, 42), 28, Color("#fff0a8")))
     var mode_button := Button.new()
     mode_button.text = str(MODE_NAMES.get(GameState.game_mode, "CLASSIC")) + "  ▾"
-    mode_button.position = Vector2(280, 17)
+    mode_button.position = Vector2(280, 14)
     mode_button.size = Vector2(215, 44)
     _style_button(mode_button, true)
     mode_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ModeSelect.tscn"))
@@ -48,38 +55,30 @@ func _build_map() -> void:
     life_timer = _label(_life_timer_text(), Vector2(354, 75), Vector2(145, 26), 12, Color("#c8e7ff"))
     header.add_child(life_timer)
 
-    var current_level := GameState.get_mode_unlocked_level()
-    var world_number := int((current_level - 1) / 100) + 1
-    var world := _label("WORLD %d  •  %s" % [world_number, str(MODE_NAMES.get(GameState.game_mode, "CLASSIC"))],
-        Vector2(20, 151), Vector2(490, 30), 16, Color("#c8edff"))
-    add_child(world)
+    world_label = _label("", Vector2(20, 145), Vector2(490, 28), 15, Color("#c8edff"))
+    add_child(world_label)
+
+    var world_picker := HBoxContainer.new()
+    world_picker.position = Vector2(12, 176)
+    world_picker.size = Vector2(516, 52)
+    world_picker.add_theme_constant_override("separation", 5)
+    add_child(world_picker)
+    for world_index in range(1, WORLD_COUNT + 1):
+        var world_button := Button.new()
+        world_button.text = "WORLD %d" % world_index
+        world_button.custom_minimum_size = Vector2(78, 48)
+        world_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        world_button.add_theme_font_size_override("font_size", 11)
+        world_button.pressed.connect(_select_world.bind(world_index))
+        world_picker.add_child(world_button)
+        world_buttons.append(world_button)
 
     scroll = ScrollContainer.new()
-    scroll.position = Vector2(12, 190)
-    scroll.size = Vector2(516, 640)
+    scroll.position = Vector2(12, 236)
+    scroll.size = Vector2(516, 600)
     scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
     scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
     add_child(scroll)
-
-    var path := PathDrawer.new()
-    path.name = "CampaignPath"
-    path.custom_minimum_size = Vector2(500, 55.0 + 92.0 * GameState.MAX_LEVELS)
-    path.size = path.custom_minimum_size
-    scroll.add_child(path)
-
-    for level in range(1, GameState.MAX_LEVELS + 1):
-        var button := Button.new()
-        var stars_count := GameState.get_mode_stars(level)
-        var unlocked := level <= GameState.get_mode_unlocked_level()
-        button.text = str(level) + ("\n" + "★".repeat(stars_count) if stars_count > 0 else "")
-        button.position = path.node_position(level) - Vector2(34, 34)
-        button.custom_minimum_size = Vector2(68, 68)
-        button.size = Vector2(68, 68)
-        button.disabled = not unlocked
-        button.add_theme_font_size_override("font_size", 14)
-        _style_node(button, level == GameState.get_mode_unlocked_level(), not unlocked, stars_count)
-        button.pressed.connect(_on_level_pressed.bind(level))
-        path.add_child(button)
 
     var bottom := HBoxContainer.new()
     bottom.position = Vector2(8, 850)
@@ -92,10 +91,56 @@ func _build_map() -> void:
     _add_nav_button(bottom, "SHOP", qa_open_store)
     _add_nav_button(bottom, "SETTINGS", qa_open_settings)
 
+    await _rebuild_level_path(true)
+
+func _select_world(world_index: int) -> void:
+    selected_world = clampi(world_index, 1, WORLD_COUNT)
+    await _rebuild_level_path(false)
+
+func _rebuild_level_path(initial_load: bool) -> void:
+    if path != null and is_instance_valid(path):
+        path.queue_free()
+        await get_tree().process_frame
+
+    var unlocked_level := GameState.get_mode_unlocked_level()
+    var first_level := (selected_world - 1) * LEVELS_PER_WORLD + 1
+    var last_level := selected_world * LEVELS_PER_WORLD
+    var world_unlocked := unlocked_level >= first_level
+    var cleared := clampi(unlocked_level - first_level, 0, LEVELS_PER_WORLD)
+    world_label.text = "WORLD %d  •  LEVELS %03d–%03d  •  %d / 100 CLEARED" % [
+        selected_world, first_level, last_level, cleared
+    ]
+
+    for index in range(world_buttons.size()):
+        var world_index := index + 1
+        _style_world_button(world_buttons[index], world_index == selected_world,
+            world_index == 1 or unlocked_level >= (world_index - 1) * LEVELS_PER_WORLD + 1)
+
+    path = PathDrawer.new()
+    path.name = "WorldLevelPath"
+    path.custom_minimum_size = Vector2(500, 55.0 + 92.0 * LEVELS_PER_WORLD)
+    path.size = path.custom_minimum_size
+    scroll.add_child(path)
+
+    for local_level in range(1, LEVELS_PER_WORLD + 1):
+        var level_id := first_level + local_level - 1
+        var stars_count := GameState.get_mode_stars(level_id)
+        var unlocked := level_id <= unlocked_level
+        var button := Button.new()
+        button.text = str(local_level) + ("\n" + "★".repeat(stars_count) if stars_count > 0 else "")
+        button.position = path.node_position(local_level) - Vector2(34, 34)
+        button.custom_minimum_size = Vector2(68, 68)
+        button.size = Vector2(68, 68)
+        button.disabled = not unlocked
+        button.add_theme_font_size_override("font_size", 14)
+        _style_node(button, level_id == unlocked_level, not unlocked, stars_count)
+        button.pressed.connect(_on_level_pressed.bind(level_id))
+        path.add_child(button)
+
     await get_tree().process_frame
-    if scroll != null:
-        var current_node: Vector2 = path.node_position(GameState.get_mode_unlocked_level())
-        scroll.scroll_vertical = maxi(0, int(current_node.y - scroll.size.y * 0.45))
+    if scroll != null and is_instance_valid(scroll):
+        var local_current := clampi(unlocked_level - first_level + 1, 1, LEVELS_PER_WORLD)
+        scroll.scroll_vertical = int(path.node_position(local_current).y - scroll.size.y * 0.45) if initial_load and world_unlocked else 0
 
 func _process(_delta: float) -> void:
     if life_timer != null:
@@ -137,6 +182,15 @@ func _style_button(button: Button, highlighted: bool) -> void:
     style.shadow_size = 3
     button.add_theme_stylebox_override("normal", style)
     button.add_theme_color_override("font_color", Color.WHITE)
+
+func _style_world_button(button: Button, selected: bool, available: bool) -> void:
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color("#287f9e") if selected else (Color("#17466f") if available else Color("#29394c"))
+    style.border_color = Color("#ffe49b") if selected else Color("#83c7e8")
+    style.set_border_width_all(3 if selected else 1)
+    style.set_corner_radius_all(12)
+    button.add_theme_stylebox_override("normal", style)
+    button.add_theme_color_override("font_color", Color.WHITE if available else Color("#94a4b3"))
 
 func _style_node(button: Button, current: bool, locked: bool, stars_count: int) -> void:
     var style := StyleBoxFlat.new()
