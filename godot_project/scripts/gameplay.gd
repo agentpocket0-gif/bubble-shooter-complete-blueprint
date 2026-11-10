@@ -794,10 +794,17 @@ func qa_set_stage(stage: String) -> void:
         if projectile != null:
             projectile.position = Vector2(250, 460)
     elif stage == "booster":
+        if projectile != null and is_instance_valid(projectile):
+            projectile.queue_free()
+            projectile = null
+        shooting = false
+        aiming = false
+        aim_line.clear_points()
         if not board.is_empty():
             _on_booster_pressed("Fireball")
             if not armed_booster.is_empty():
                 _apply_targeted_booster(HexGrid.center(board.keys()[0], GRID_ORIGIN, DIAMETER))
+        _update_booster_inventory()
     elif stage == "pop":
         if not board.is_empty():
             _spawn_pop_effect(board.keys()[0])

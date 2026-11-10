@@ -1,17 +1,18 @@
 extends SceneTree
 
-const SEQUENCE := [
-    ["01_splash_screen.png", "res://scenes/Splash.tscn", 0.18, ""],
-    ["02_intro_screen.png", "res://scenes/Intro.tscn", 0.0, ""],
-    ["03_loading_screen.png", "res://scenes/Loading.tscn", 0.0, ""],
-    ["04_mode_select_screen.png", "res://scenes/ModeSelect.tscn", 0.08, ""],
-    ["05_saga_world_map.png", "res://scenes/SagaMap.tscn", 0.08, ""],
-    ["06_settings_popup.png", "res://scenes/SagaMap.tscn", 0.08, "settings"],
-    ["07_booster_shop_popup.png", "res://scenes/SagaMap.tscn", 0.08, "store"],
-    ["08_daily_spin_popup.png", "res://scenes/SagaMap.tscn", 0.08, "spin"],
-    ["09_piggy_bank_popup.png", "res://scenes/SagaMap.tscn", 0.08, "piggy"],
-    ["10_events_popup.png", "res://scenes/SagaMap.tscn", 0.08, "events"],
-    ["11_level_1_gameplay.png", "res://scenes/Gameplay.tscn", 0.08, ""]
+const BASE_SEQUENCE := [
+    ["01_splash_screen.png", "res://scenes/Splash.tscn", 0.18],
+    ["02_intro_screen.png", "res://scenes/Intro.tscn", 0.0],
+    ["03_loading_screen.png", "res://scenes/Loading.tscn", 0.0],
+    ["04_mode_select_screen.png", "res://scenes/ModeSelect.tscn", 0.08],
+    ["05_saga_world_map.png", "res://scenes/SagaMap.tscn", 0.08]
+]
+const OVERLAY_SEQUENCE := [
+    ["06_settings_popup.png", "qa_open_settings"],
+    ["07_booster_shop_popup.png", "qa_open_store"],
+    ["08_daily_spin_popup.png", "qa_open_spin"],
+    ["09_piggy_bank_popup.png", "qa_open_piggy"],
+    ["10_events_popup.png", "qa_open_events"]
 ]
 
 func _initialize() -> void:
@@ -26,28 +27,23 @@ func _capture() -> void:
     var root_window := get_root()
     root_window.size = Vector2i(1080, 1920)
     _ensure_autoloads(root_window)
-    var current: Node = null
 
-    for item in SEQUENCE:
+    var current: Node = null
+    for item in BASE_SEQUENCE:
         current = await _replace_scene(root_window, current, str(item[1]))
         var delay := float(item[2])
         if delay > 0.0:
             await create_timer(delay).timeout
-        var action := str(item[3])
-        if not action.is_empty():
-            match action:
-                "settings":
-                    current.call("qa_open_settings")
-                "store":
-                    current.call("qa_open_store")
-                "spin":
-                    current.call("qa_open_spin")
-                "piggy":
-                    current.call("qa_open_piggy")
-                "events":
-                    current.call("qa_open_events")
-            await process_frame
         await _save_frame(output_dir.path_join(str(item[0])))
+
+    # Keep one 600-node map alive while taking every overlay screenshot.
+    for item in OVERLAY_SEQUENCE:
+        current.call(str(item[1]))
+        await process_frame
+        await _save_frame(output_dir.path_join(str(item[0])))
+        if current.has_method("_close_popup"):
+            current.call("_close_popup")
+        await process_frame
 
     current = await _replace_scene(root_window, current, "res://scenes/Gameplay.tscn")
     await create_timer(0.12).timeout
