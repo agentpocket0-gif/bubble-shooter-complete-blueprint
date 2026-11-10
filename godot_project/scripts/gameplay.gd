@@ -114,6 +114,8 @@ func _build_ui() -> void:
         var kind: String = buttons[index]
         var button := Button.new()
         button.text = kind
+        button.icon = AssetRegistry.booster_icon(kind)
+        button.icon_max_width = 24
         button.position = Vector2(8 + index * 132, 914)
         button.size = Vector2(128, 44)
         button.add_theme_font_size_override("font_size", 11)

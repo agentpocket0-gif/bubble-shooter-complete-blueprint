@@ -157,6 +157,8 @@ func _life_timer_text() -> String:
 func _add_nav_button(parent: HBoxContainer, title_text: String, action: Callable) -> void:
     var button := Button.new()
     button.text = title_text
+    button.icon = AssetRegistry.ui_icon(title_text.to_lower())
+    button.icon_max_width = 22
     button.custom_minimum_size = Vector2(96, 68)
     button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     _style_button(button, title_text == "SHOP")
