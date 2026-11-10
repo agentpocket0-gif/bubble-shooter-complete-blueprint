@@ -26,6 +26,10 @@ var aiming := false
 var shooting := false
 var projectile: Sprite2D
 var projectile_velocity := Vector2.ZERO
+var queue_rng := RandomNumberGenerator.new()
+var shot_path := PackedVector2Array()
+var shot_elapsed := 0.0
+var pending_attach_cell := Vector2i(-1, -1)
 var projectile_color := "blue"
 var board_layer: Node2D
 var aim_line: Line2D
@@ -35,6 +39,12 @@ var popup_layer: Control
 var booster_status: Label
 var score_slots_label: Label
 var cannon_barrel: Sprite2D
+var objective_label: Label
+var booster_buttons: Dictionary = {}
+var armed_booster := ""
+var start_shots := 30
+var shots_used := 0
+var rescued_count := 0
 
 func _ready() -> void:
     var bg := TextureRect.new()
@@ -92,23 +102,35 @@ func _build_ui() -> void:
     add_child(aim_ghost)
     _refresh_cannon()
     _update_hud()
+    objective_label = Label.new()
+    objective_label.position = Vector2(22, 126)
+    objective_label.size = Vector2(496, 34)
+    objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    objective_label.add_theme_font_size_override("font_size", 15)
+    objective_label.add_theme_color_override("font_color", Color("#bdeaff"))
+    add_child(objective_label)
     var buttons := ["Bomb", "Fireball", "Rainbow", "+5 Moves"]
     for index in range(buttons.size()):
+        var kind: String = buttons[index]
         var button := Button.new()
-        button.text = buttons[index]
-        button.position = Vector2(10 + index * 131, 914)
-        button.size = Vector2(124, 44)
-        button.add_theme_font_size_override("font_size", 12)
+        button.text = kind
+        button.icon = AssetRegistry.booster_icon(kind)
+        button.icon_max_width = 24
+        button.position = Vector2(8 + index * 132, 914)
+        button.size = Vector2(128, 44)
+        button.add_theme_font_size_override("font_size", 11)
         _style_button(button)
-        button.pressed.connect(_activate_booster.bind(buttons[index]))
+        button.pressed.connect(_on_booster_pressed.bind(kind))
         add_child(button)
-    var map_button := Button.new()
-    map_button.text = "MAP"
-    map_button.position = Vector2(18, 85)
-    map_button.size = Vector2(78, 44)
-    _style_button(map_button)
-    map_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/SagaMap.tscn"))
-    add_child(map_button)
+        booster_buttons[kind] = button
+    var pause_button := Button.new()
+    pause_button.text = "PAUSE"
+    pause_button.position = Vector2(410, 78)
+    pause_button.size = Vector2(110, 44)
+    _style_button(pause_button)
+    pause_button.pressed.connect(_show_pause)
+    add_child(pause_button)
+    _update_booster_inventory()
 
 func _style_button(button: Button) -> void:
     var style := StyleBoxFlat.new()
@@ -120,21 +142,16 @@ func _style_button(button: Button) -> void:
     button.add_theme_color_override("font_color", Color.WHITE)
 
 func _load_level(level_id: int) -> void:
-    var path := "res://levels/level_%03d.json" % clampi(level_id, 1, 120)
-    if not FileAccess.file_exists(path):
-        path = "res://levels/level_001.json"
-    var file := FileAccess.open(path, FileAccess.READ)
-    if file == null:
-        push_error("Cannot open level file: " + path)
+    level_data = GameState.get_level_data(level_id)
+    if level_data.is_empty():
+        push_error("Missing level data for id %d" % level_id)
         return
-    var parsed = JSON.parse_string(file.get_as_text())
-    file.close()
-    if typeof(parsed) != TYPE_DICTIONARY:
-        push_error("Invalid level JSON: " + path)
-        return
-    level_data = parsed
     palette = level_data.get("palette", ["red", "blue", "green"])
     shots_left = int(level_data.get("shots", 30))
+    start_shots = shots_left
+    shots_used = 0
+    rescued_count = 0
+    armed_booster = ""
     board.clear()
     blockers.clear()
     blocker_hp.clear()
@@ -157,8 +174,18 @@ func _load_level(level_id: int) -> void:
         blocker_hp[cell] = int(item.get("hp", 1))
     if palette.is_empty():
         palette = ["red", "blue", "green"]
-    current_color = str(palette[0])
-    next_color = str(palette[1]) if palette.size() > 1 else str(palette[0])
+    var attempt_number := GameState.begin_attempt(level_id)
+    var level_seed := int(level_data.get("grid", {}).get("seed", level_id))
+    queue_rng.seed = level_seed + attempt_number * 100003
+    var available: Array = []
+    for value in board.values():
+        if not available.has(str(value)):
+            available.append(str(value))
+    if available.is_empty():
+        available = palette.duplicate()
+    available.sort()
+    current_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
+    next_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
 
 func _render_board() -> void:
     for child in board_layer.get_children():
@@ -208,7 +235,12 @@ func _update_hud() -> void:
     if hud_label != null:
         hud_label.text = "LEVEL %03d     MOVES %02d     SCORE %05d     COINS %d" % [GameState.current_level, shots_left, score, GameState.coins]
     if booster_status != null:
-        booster_status.text = "DRAG TO AIM  •  RELEASE TO SHOOT  •  TAP NEXT BUBBLE TO SWAP"
+        booster_status.text = "DRAG TO AIM  •  RELEASE TO SHOOT" if armed_booster.is_empty() else "%s  •  TAP BOARD TARGET" % armed_booster.to_upper()
+    if objective_label != null:
+        var objectives: Array = level_data.get("objectives", [])
+        var objective: Dictionary = objectives[0] if not objectives.is_empty() else {"type": "clear_all"}
+        objective_label.text = _objective_text(objective)
+    _update_booster_inventory()
 
 func _unhandled_input(event: InputEvent) -> void:
     if popup_layer != null:
@@ -229,6 +261,10 @@ func _unhandled_input(event: InputEvent) -> void:
         _update_aim(event.position)
 
 func _pointer_down(point: Vector2) -> void:
+    if not armed_booster.is_empty():
+        if point.y < CANNON_POINT.y - 120.0:
+            _apply_targeted_booster(point)
+        return
     if point.distance_to(NEXT_BUBBLE_POINT) < 42.0:
         _swap_bubbles()
         return
@@ -266,39 +302,91 @@ func _update_aim(point: Vector2) -> void:
 
 func _build_trajectory_preview() -> void:
     aim_line.clear_points()
-    var position := CANNON_POINT + Vector2(0, -38)
-    var velocity := aim_direction * SHOT_SPEED
-    aim_line.add_point(position)
-    var bounces := 0
-    for step in range(1, 260):
-        position += velocity * (1.0 / 60.0)
-        if position.x < DIAMETER * 0.5:
-            position.x = DIAMETER * 0.5
-            velocity.x = absf(velocity.x)
-            bounces += 1
-        elif position.x > 540.0 - DIAMETER * 0.5:
-            position.x = 540.0 - DIAMETER * 0.5
-            velocity.x = -absf(velocity.x)
-            bounces += 1
-        aim_line.add_point(position)
-        if position.y < GRID_ORIGIN.y - 20.0 or _collides_with_board(position):
-            break
-        if bounces >= 3:
-            break
+    var simulation := _simulate_shot(aim_direction)
+    shot_path = simulation.get("points", PackedVector2Array())
+    pending_attach_cell = simulation.get("cell", Vector2i(-1, -1))
+    for point in shot_path:
+        aim_line.add_point(point)
     if aim_ghost != null:
         aim_ghost.texture = AssetRegistry.bubble(current_color)
-        var predicted := HexGrid.nearest_attach(position, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
-        aim_ghost.position = HexGrid.center(predicted, GRID_ORIGIN, DIAMETER) if predicted.x >= 0 else position
-        aim_ghost.visible = true
+        aim_ghost.visible = pending_attach_cell.x >= 0
+        if aim_ghost.visible:
+            aim_ghost.position = HexGrid.center(pending_attach_cell, GRID_ORIGIN, DIAMETER)
 
-func _collides_with_board(point: Vector2) -> bool:
+func _simulate_shot(direction: Vector2) -> Dictionary:
+    var position := CANNON_POINT + Vector2(0, -38)
+    var velocity := direction.normalized() * SHOT_SPEED
+    var points := PackedVector2Array()
+    points.append(position)
+    var bounce_count := 0
+    const STEP := 1.0 / 120.0
+    for _step in range(720):
+        position += velocity * STEP
+        if position.x < DIAMETER * 0.5:
+            position.x = DIAMETER - position.x
+            velocity.x = absf(velocity.x)
+            bounce_count += 1
+        elif position.x > 540.0 - DIAMETER * 0.5:
+            position.x = 2.0 * (540.0 - DIAMETER * 0.5) - position.x
+            velocity.x = -absf(velocity.x)
+            bounce_count += 1
+        points.append(position)
+        var hit_cell := _first_collision_cell(position)
+        if hit_cell.x >= 0:
+            return {"points": points, "cell": _attach_adjacent_to_hit(hit_cell, position)}
+        if position.y <= GRID_ORIGIN.y - DIAMETER * 0.35:
+            return {"points": points, "cell": _attach_to_ceiling(position)}
+        if bounce_count >= 3:
+            break
+    return {"points": points, "cell": _attach_to_ceiling(position)}
+
+func _first_collision_cell(point: Vector2) -> Vector2i:
+    var closest := Vector2i(-1, -1)
+    var best_distance := DIAMETER * 0.84
     for cell in board.keys():
-        if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(point) < DIAMETER * 0.84:
-            return true
+        var distance := HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(point)
+        if distance < best_distance:
+            best_distance = distance
+            closest = cell
     for cell in blockers.keys():
-        if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(point) < DIAMETER * 0.84:
-            return true
-    return false
+        var distance := HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(point)
+        if distance < best_distance:
+            best_distance = distance
+            closest = cell
+    return closest
+
+func _cell_is_free(cell: Vector2i) -> bool:
+    return cell.x >= 0 and cell.x < COLS and cell.y >= 0 and cell.y < ROWS and not board.has(cell) and not blockers.has(cell)
+
+func _attach_adjacent_to_hit(hit_cell: Vector2i, point: Vector2) -> Vector2i:
+    var best := Vector2i(-1, -1)
+    var best_distance := INF
+    for candidate in HexGrid.neighbours(hit_cell):
+        if not _cell_is_free(candidate):
+            continue
+        var distance := HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_squared_to(point)
+        if distance < best_distance:
+            best_distance = distance
+            best = candidate
+    if best.x >= 0:
+        return best
+    return HexGrid.nearest_attach(point, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
+
+func _attach_to_ceiling(point: Vector2) -> Vector2i:
+    var first_col := clampi(roundi((point.x - GRID_ORIGIN.x) / DIAMETER), 0, COLS - 1)
+    var best := Vector2i(-1, -1)
+    var best_distance := INF
+    for col in range(COLS):
+        var candidate := Vector2i(col, 0)
+        if not _cell_is_free(candidate):
+            continue
+        var distance := HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_squared_to(point)
+        if distance < best_distance:
+            best_distance = distance
+            best = candidate
+    if best.x >= 0:
+        return best
+    return HexGrid.nearest_attach(point, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
 
 func _end_aim(point: Vector2) -> void:
     if not aiming:
@@ -311,61 +399,50 @@ func _end_aim(point: Vector2) -> void:
 func _launch_shot() -> void:
     if shooting or shots_left <= 0:
         return
+    var simulation := _simulate_shot(aim_direction)
+    shot_path = simulation.get("points", PackedVector2Array())
+    pending_attach_cell = simulation.get("cell", Vector2i(-1, -1))
+    if shot_path.size() < 2 or pending_attach_cell.x < 0:
+        _show_result(false)
+        return
     shooting = true
+    shot_elapsed = 0.0
     if aim_ghost != null:
         aim_ghost.visible = false
     projectile_color = current_color
     projectile = Sprite2D.new()
     projectile.texture = AssetRegistry.bubble(projectile_color)
-    projectile.position = CANNON_POINT + Vector2(0, -38)
+    projectile.position = shot_path[0]
     projectile.scale = Vector2(0.33, 0.33)
     add_child(projectile)
-    projectile_velocity = aim_direction * SHOT_SPEED
     shots_left -= 1
+    shots_used += 1
     _update_hud()
 
 func _process(delta: float) -> void:
     if not shooting or projectile == null:
         return
-    var remaining := delta
-    while remaining > 0.0 and shooting:
-        var step := minf(remaining, 1.0 / 120.0)
-        remaining -= step
-        projectile.position += projectile_velocity * step
-        if projectile.position.x < DIAMETER * 0.5:
-            projectile.position.x = DIAMETER * 0.5
-            projectile_velocity.x = absf(projectile_velocity.x)
-        elif projectile.position.x > 540.0 - DIAMETER * 0.5:
-            projectile.position.x = 540.0 - DIAMETER * 0.5
-            projectile_velocity.x = -absf(projectile_velocity.x)
-        if projectile.position.y < GRID_ORIGIN.y - DIAMETER * 0.45 or _collides_with_board(projectile.position):
-            _land_projectile(projectile.position)
+    shot_elapsed += delta
+    var path_index := mini(int(shot_elapsed * 120.0), shot_path.size() - 1)
+    projectile.position = shot_path[path_index]
+    if path_index >= shot_path.size() - 1:
+        var landing := HexGrid.center(pending_attach_cell, GRID_ORIGIN, DIAMETER)
+        _land_projectile(landing)
 
 func _nearest_open_cell(point: Vector2) -> Vector2i:
-    var selected := HexGrid.nearest_attach(point, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
-    if selected.x < 0 or not blockers.has(selected):
-        return selected
-    var best := Vector2i(-1, -1)
-    var best_distance := INF
-    for candidate in HexGrid.neighbours(selected):
-        if candidate.x < 0 or candidate.x >= COLS or candidate.y < 0 or candidate.y >= ROWS:
-            continue
-        if board.has(candidate) or blockers.has(candidate):
-            continue
-        var distance := HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_squared_to(point)
-        if distance < best_distance:
-            best_distance = distance
-            best = candidate
-    return best
+    return HexGrid.nearest_attach(point, board, COLS, ROWS, GRID_ORIGIN, DIAMETER)
+
 
 func _land_projectile(point: Vector2) -> void:
     shooting = false
     if projectile != null:
         projectile.queue_free()
         projectile = null
-    var cell := _nearest_open_cell(point)
+    var cell := pending_attach_cell if _cell_is_free(pending_attach_cell) else _nearest_open_cell(point)
+    pending_attach_cell = Vector2i(-1, -1)
+    shot_path.clear()
     if cell.x < 0 or board.has(cell) or blockers.has(cell):
-        _show_result(false)
+        _show_result(false, "No space left")
         return
     board[cell] = projectile_color
     _render_board()
@@ -442,12 +519,14 @@ func _damage_adjacent_blockers(cells: Array) -> void:
             if kind == "chain":
                 blockers.erase(neighbour)
                 blocker_hp.erase(neighbour)
+                rescued_count += 1
                 _remove_blocker_visual(neighbour)
             else:
                 var hp := int(blocker_hp.get(neighbour, 1)) - 1
                 if hp <= 0:
                     blockers.erase(neighbour)
                     blocker_hp.erase(neighbour)
+                    rescued_count += 1
                     _remove_blocker_visual(neighbour)
                 else:
                     blocker_hp[neighbour] = hp
@@ -467,133 +546,243 @@ func _advance_colors() -> void:
             available.append(str(value))
     if available.is_empty():
         available = palette.duplicate()
-    next_color = str(available[randi() % available.size()])
+    available.sort()
+    next_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
     _refresh_cannon()
+
+func _objective_text(objective: Dictionary) -> String:
+    var kind := str(objective.get("type", "clear_all"))
+    match kind:
+        "clear_all":
+            return "OBJECTIVE  •  CLEAR ALL BUBBLES"
+        "clear_color":
+            return "OBJECTIVE  •  CLEAR %s" % str(objective.get("color", "red")).to_upper()
+        "pop_count":
+            return "OBJECTIVE  •  POP %d  (%d)" % [int(objective.get("count", 0)), total_popped]
+        "score":
+            return "OBJECTIVE  •  SCORE %d  (%d)" % [int(objective.get("target", 0)), score]
+        "rescue":
+            return "OBJECTIVE  •  RESCUE %d  (%d)" % [int(objective.get("count", 0)), rescued_count]
+        "survive":
+            return "OBJECTIVE  •  SURVIVE %d SHOTS" % int(objective.get("shots", 0))
+        _:
+            return "OBJECTIVE  •  CLEAR ALL BUBBLES"
+
+func _has_any_attachment_cell() -> bool:
+    for col in range(COLS):
+        if _cell_is_free(Vector2i(col, 0)):
+            return true
+    for cell in board.keys():
+        for candidate in HexGrid.neighbours(cell):
+            if _cell_is_free(candidate):
+                return true
+    return false
 
 func _check_objectives() -> void:
     var objectives: Array = level_data.get("objectives", [{"type": "clear_all"}])
     var won := true
     for objective in objectives:
         var kind := str(objective.get("type", "clear_all"))
-        if kind == "clear_all":
-            won = won and board.is_empty()
-        elif kind == "clear_color":
-            var target_color := str(objective.get("color", "red"))
-            for value in board.values():
-                if str(value) == target_color:
-                    won = false
-        elif kind == "pop_count":
-            won = won and total_popped >= int(objective.get("count", 10))
-        elif kind == "rescue":
-            won = won and blockers.is_empty()
-        elif kind == "score":
-            won = won and score >= int(objective.get("target", 250))
-        elif kind == "survive":
-            won = won and shots_left <= 0
+        match kind:
+            "clear_all":
+                won = won and board.is_empty()
+            "clear_color":
+                var target_color := str(objective.get("color", "red"))
+                for value in board.values():
+                    if str(value) == target_color:
+                        won = false
+            "pop_count":
+                won = won and total_popped >= int(objective.get("count", 10))
+            "rescue":
+                won = won and rescued_count >= int(objective.get("count", 1))
+            "score":
+                won = won and score >= int(objective.get("target", 250))
+            "survive":
+                won = won and shots_used >= int(objective.get("shots", start_shots))
     if won:
         _show_result(true)
     elif shots_left <= 0:
-        _show_result(false)
+        _show_result(false, "Out of shots")
+    elif not _has_any_attachment_cell():
+        _show_result(false, "No space left")
 
-func _activate_booster(kind: String) -> void:
-    var count := int(GameState.boosters.get(kind, 0))
-    if count <= 0 or shooting:
+func _update_booster_inventory() -> void:
+    for kind in booster_buttons.keys():
+        var button: Button = booster_buttons[kind]
+        if is_instance_valid(button):
+            var count := int(GameState.boosters.get(str(kind), 0))
+            button.text = "%s  %d" % [str(kind).to_upper(), count]
+            button.disabled = count <= 0 or shooting or aiming
+            button.modulate = Color("#ffe08a") if armed_booster == str(kind) else Color.WHITE
+
+func _on_booster_pressed(kind: String) -> void:
+    if shooting or aiming:
         return
-    GameState.boosters[kind] = count - 1
+    if int(GameState.boosters.get(kind, 0)) <= 0:
+        _show_popup("BOOSTER EMPTY", "Visit the coin shop to add this booster.")
+        return
+    if kind == "Bomb" or kind == "Fireball":
+        armed_booster = "" if armed_booster == kind else kind
+        _update_hud()
+        return
+    GameState.boosters[kind] = int(GameState.boosters.get(kind, 0)) - 1
     if kind == "+5 Moves":
         shots_left += 5
     elif kind == "Rainbow":
-        var most_common: Dictionary = {}
+        var counts: Dictionary = {}
         for value in board.values():
-            most_common[str(value)] = int(most_common.get(str(value), 0)) + 1
+            counts[str(value)] = int(counts.get(str(value), 0)) + 1
         var best_color := current_color
-        for key in most_common.keys():
-            if int(most_common[key]) > int(most_common.get(best_color, 0)):
+        for key in counts.keys():
+            if int(counts[key]) > int(counts.get(best_color, 0)):
                 best_color = str(key)
         current_color = best_color
-    elif kind == "Fireball":
-        var column := clampi(roundi((CANNON_POINT.x - GRID_ORIGIN.x) / DIAMETER), 0, COLS - 1)
-        for cell in board.keys().duplicate():
-            if cell.x == column:
-                board.erase(cell)
-        for cell in blockers.keys().duplicate():
-            if cell.x == column:
-                blockers.erase(cell)
-                blocker_hp.erase(cell)
-    elif kind == "Bomb":
-        var target := Vector2i(COLS / 2, 0)
-        if not board.is_empty():
-            target = board.keys()[0]
-        var centre := HexGrid.center(target, GRID_ORIGIN, DIAMETER)
-        for cell in board.keys().duplicate():
-            if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(centre) < DIAMETER * 2.4:
-                board.erase(cell)
-        for cell in blockers.keys().duplicate():
-            if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(centre) < DIAMETER * 2.4:
-                blockers.erase(cell)
-                blocker_hp.erase(cell)
     GameState.save_progress()
-    _render_board()
+    _refresh_cannon()
+    _update_hud()
     _check_objectives()
 
-func _show_result(won: bool) -> void:
+func _apply_targeted_booster(point: Vector2) -> void:
+    var cell := HexGrid.cell_from_point(point, GRID_ORIGIN, DIAMETER, COLS, ROWS)
+    if cell.x < 0 or (not board.has(cell) and not blockers.has(cell)):
+        _show_popup("CHOOSE A TARGET", "Tap an occupied bubble or blocker on the board.")
+        return
+    var affected_bubbles: Array = []
+    var affected_blockers: Array = []
+    if armed_booster == "Fireball":
+        for candidate in board.keys():
+            if candidate.x == cell.x:
+                affected_bubbles.append(candidate)
+        for candidate in blockers.keys():
+            if candidate.x == cell.x:
+                affected_blockers.append(candidate)
+    elif armed_booster == "Bomb":
+        var centre := HexGrid.center(cell, GRID_ORIGIN, DIAMETER)
+        for candidate in board.keys():
+            if HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_to(centre) <= DIAMETER * 2.4:
+                affected_bubbles.append(candidate)
+        for candidate in blockers.keys():
+            if HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_to(centre) <= DIAMETER * 2.4:
+                affected_blockers.append(candidate)
+    if affected_bubbles.is_empty() and affected_blockers.is_empty():
+        _show_popup("NO TARGET", "This booster cannot affect that cell.")
+        return
+
+    var used_kind := armed_booster
+    armed_booster = ""
+    GameState.boosters[used_kind] = int(GameState.boosters.get(used_kind, 0)) - 1
+    for bubble_cell in affected_bubbles:
+        _spawn_pop_effect(bubble_cell)
+    total_popped += affected_bubbles.size()
+    score += affected_bubbles.size() * 10
+    _remove_cells(affected_bubbles)
+    for blocker_cell in affected_blockers:
+        blockers.erase(blocker_cell)
+        blocker_hp.erase(blocker_cell)
+        rescued_count += 1
+        _remove_blocker_visual(blocker_cell)
+
+    var floating := HexGrid.find_floating(board, COLS, ROWS)
+    if not floating.is_empty():
+        total_popped += floating.size()
+        score += floating.size() * 20
+        for floating_cell in floating:
+            _spawn_falling_bubble(floating_cell)
+        _remove_cells(floating)
+    GameState.save_progress()
+    _update_hud()
+    _check_objectives()
+
+func _show_result(won: bool, reason: String = "") -> void:
     if popup_layer != null:
+        return
+    var star_count := 0
+    var reward := 0
+    if won:
+        star_count = 1
+        var thresholds: Dictionary = level_data.get("stars", {})
+        if score >= int(thresholds.get("2", 999999)):
+            star_count = 2
+        if score >= int(thresholds.get("3", 999999)):
+            star_count = 3
+        var reward_data: Dictionary = level_data.get("rewards", {})
+        var base_reward := int(reward_data.get("coins", 40)) + int(reward_data.get("firstClearBonus", 0))
+        var first_clear := GameState.complete_level(GameState.current_level, star_count, base_reward)
+        reward = base_reward if first_clear else 0
+    GameState.pending_result = {
+        "won": won,
+        "level": GameState.current_level,
+        "mode": GameState.game_mode,
+        "score": score,
+        "stars": star_count,
+        "reward": reward,
+        "loss_reason": reason
+    }
+    GameState.save_progress()
+    get_tree().change_scene_to_file("res://scenes/Result.tscn")
+
+func _show_pause() -> void:
+    if shooting or aiming or popup_layer != null:
         return
     popup_layer = Control.new()
     popup_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(popup_layer)
-    var panel := Panel.new()
-    panel.position = Vector2(34, 300)
-    panel.size = Vector2(472, 360)
-    var style := StyleBoxFlat.new()
-    style.bg_color = Color("#174d7b")
-    style.border_color = Color("#a1eeff")
-    style.set_border_width_all(4)
-    style.set_corner_radius_all(26)
-    panel.add_theme_stylebox_override("panel", style)
-    popup_layer.add_child(panel)
     var shade := ColorRect.new()
-    shade.color = Color(0.01, 0.025, 0.07, 0.82)
+    shade.color = Color(0.01, 0.02, 0.06, 0.82)
     shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     popup_layer.add_child(shade)
-    popup_layer.move_child(shade, 0)
+    var panel := Panel.new()
+    panel.position = Vector2(45, 300)
+    panel.size = Vector2(450, 350)
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color("#153f70")
+    style.border_color = Color("#91e6ff")
+    style.set_border_width_all(3)
+    style.set_corner_radius_all(24)
+    panel.add_theme_stylebox_override("panel", style)
+    popup_layer.add_child(panel)
     var title := Label.new()
-    title.text = "LEVEL COMPLETE!" if won else "TRY AGAIN"
-    title.position = Vector2(15, 35)
-    title.size = Vector2(442, 60)
+    title.text = "PAUSED"
+    title.position = Vector2(20, 35)
+    title.size = Vector2(410, 55)
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.add_theme_font_size_override("font_size", 28)
-    title.add_theme_color_override("font_color", Color("#ffe79a"))
+    title.add_theme_color_override("font_color", Color("#ffe49b"))
     panel.add_child(title)
-    var star_count := 1
-    var thresholds: Dictionary = level_data.get("stars", {})
-    if won and score >= int(thresholds.get("2", 999999)):
-        star_count = 2
-    if won and score >= int(thresholds.get("3", 999999)):
-        star_count = 3
-    var body := Label.new()
-    body.text = "Score: %d\n%s\n+40 coins" % [score, "★".repeat(star_count)] if won else "Your next shot can do it.\nTry a different angle."
-    body.position = Vector2(30, 115)
-    body.size = Vector2(412, 108)
-    body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    body.add_theme_font_size_override("font_size", 22)
-    body.add_theme_color_override("font_color", Color.WHITE)
-    panel.add_child(body)
-    if won:
-        GameState.complete_level(GameState.current_level, star_count, 40)
-    var button := Button.new()
-    button.text = "NEXT LEVEL" if won else "RETRY"
-    button.position = Vector2(118, 252)
-    button.size = Vector2(236, 58)
-    _style_button(button)
-    button.pressed.connect(func():
-        if won:
-            GameState.current_level = mini(120, GameState.current_level + 1)
-            get_tree().change_scene_to_file("res://scenes/Gameplay.tscn")
-        else:
-            get_tree().reload_current_scene()
+    var resume := Button.new()
+    resume.text = "RESUME"
+    resume.position = Vector2(65, 115)
+    resume.size = Vector2(320, 58)
+    _style_button(resume)
+    resume.pressed.connect(func():
+        popup_layer.queue_free()
+        popup_layer = null
     )
-    panel.add_child(button)
+    panel.add_child(resume)
+    var restart := Button.new()
+    restart.text = "RESTART LEVEL"
+    restart.position = Vector2(65, 190)
+    restart.size = Vector2(320, 58)
+    _style_button(restart)
+    restart.pressed.connect(func(): get_tree().reload_current_scene())
+    panel.add_child(restart)
+    var map := Button.new()
+    map.text = "BACK TO MAP"
+    map.position = Vector2(65, 265)
+    map.size = Vector2(320, 58)
+    _style_button(map)
+    map.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/SagaMap.tscn"))
+    panel.add_child(map)
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+    if event.is_action_pressed("ui_cancel"):
+        if popup_layer != null and is_instance_valid(popup_layer):
+            popup_layer.queue_free()
+            popup_layer = null
+        else:
+            _show_pause()
+        get_viewport().set_input_as_handled()
 
 func qa_set_stage(stage: String) -> void:
     if stage == "aim":
@@ -607,11 +796,17 @@ func qa_set_stage(stage: String) -> void:
         if projectile != null:
             projectile.position = Vector2(250, 460)
     elif stage == "booster":
-        if projectile != null:
+        if projectile != null and is_instance_valid(projectile):
             projectile.queue_free()
             projectile = null
         shooting = false
-        _activate_booster("Fireball")
+        aiming = false
+        aim_line.clear_points()
+        if not board.is_empty():
+            _on_booster_pressed("Fireball")
+            if not armed_booster.is_empty():
+                _apply_targeted_booster(HexGrid.center(board.keys()[0], GRID_ORIGIN, DIAMETER))
+        _update_booster_inventory()
     elif stage == "pop":
         if not board.is_empty():
             _spawn_pop_effect(board.keys()[0])

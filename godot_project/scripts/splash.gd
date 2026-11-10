@@ -7,29 +7,32 @@ func _ready() -> void:
     background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     background.stretch_mode = TextureRect.STRETCH_SCALE
     add_child(background)
+
     var logo := TextureRect.new()
     logo.texture = AssetRegistry.ui("logo")
-    logo.position = Vector2(36, 285)
-    logo.size = Vector2(468, 250)
+    logo.position = Vector2(36, 270)
+    logo.size = Vector2(468, 270)
     logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    logo.modulate.a = 0.0
     add_child(logo)
-    var title := Label.new()
-    title.text = "LOADING YOUR NEXT ADVENTURE"
-    title.position = Vector2(24, 610)
-    title.size = Vector2(492, 46)
-    title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    title.add_theme_font_size_override("font_size", 20)
-    title.add_theme_color_override("font_color", Color("#e8f7ff"))
-    add_child(title)
-    var bar := ProgressBar.new()
-    bar.position = Vector2(70, 675)
-    bar.size = Vector2(400, 20)
-    bar.max_value = 100
-    bar.value = 15
-    add_child(bar)
+
+    var version := Label.new()
+    version.text = "VERSION 1.1"
+    version.position = Vector2(24, 890)
+    version.size = Vector2(492, 28)
+    version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    version.add_theme_font_size_override("font_size", 13)
+    version.add_theme_color_override("font_color", Color("#b9dff0"))
+    add_child(version)
+
     var tween := create_tween()
-    tween.tween_property(bar, "value", 100.0, 1.1)
-    await get_tree().create_timer(1.35).timeout
-    if is_inside_tree():
-        get_tree().change_scene_to_file("res://scenes/SagaMap.tscn")
+    tween.tween_property(logo, "modulate:a", 1.0, 0.2)
+    tween.tween_interval(0.8)
+    tween.tween_property(logo, "modulate:a", 0.0, 0.25)
+    await tween.finished
+    if not is_inside_tree():
+        return
+    var next_scene := "res://scenes/Intro.tscn" if not GameState.tutorial_done else "res://scenes/Loading.tscn"
+    get_tree().change_scene_to_file(next_scene)
+

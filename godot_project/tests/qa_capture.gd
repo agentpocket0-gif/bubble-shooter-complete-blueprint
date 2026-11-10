@@ -1,11 +1,18 @@
 extends SceneTree
 
-const SEQUENCE := [
-    ["01_splash_screen.png", "res://scenes/Splash.tscn", ""],
-    ["02_saga_world_map.png", "res://scenes/SagaMap.tscn", ""],
-    ["03_settings_popup.png", "res://scenes/SagaMap.tscn", "settings"],
-    ["04_booster_shop_popup.png", "res://scenes/SagaMap.tscn", "store"],
-    ["05_level_1_gameplay.png", "res://scenes/Gameplay.tscn", ""]
+const BASE_SEQUENCE := [
+    ["01_splash_screen.png", "res://scenes/Splash.tscn", 0.18],
+    ["02_intro_screen.png", "res://scenes/Intro.tscn", 0.0],
+    ["03_loading_screen.png", "res://scenes/Loading.tscn", 0.0],
+    ["04_mode_select_screen.png", "res://scenes/ModeSelect.tscn", 0.08],
+    ["05_saga_world_map.png", "res://scenes/SagaMap.tscn", 0.08]
+]
+const OVERLAY_SEQUENCE := [
+    ["06_settings_popup.png", "qa_open_settings"],
+    ["07_booster_shop_popup.png", "qa_open_store"],
+    ["08_daily_spin_popup.png", "qa_open_spin"],
+    ["09_piggy_bank_popup.png", "qa_open_piggy"],
+    ["10_events_popup.png", "qa_open_events"]
 ]
 
 func _initialize() -> void:
@@ -16,40 +23,124 @@ func _capture() -> void:
     if output_dir.is_empty():
         output_dir = ProjectSettings.globalize_path("res://../qa_proof")
     DirAccess.make_dir_recursive_absolute(output_dir)
+
     var root_window := get_root()
     root_window.size = Vector2i(1080, 1920)
+    _ensure_autoloads(root_window)
+
     var current: Node = null
-    for item in SEQUENCE:
-        if current != null:
-            current.queue_free()
-            await process_frame
-        current = load(item[1]).instantiate()
-        root_window.add_child(current)
+    for item in BASE_SEQUENCE:
+        current = await _replace_scene(root_window, current, str(item[1]))
+        var delay := float(item[2])
+        if delay > 0.0:
+            await create_timer(delay).timeout
+        await _save_frame(output_dir.path_join(str(item[0])))
+
+    # Keep one 600-node map alive while taking every overlay screenshot.
+    for item in OVERLAY_SEQUENCE:
+        current.call(str(item[1]))
         await process_frame
-        await create_timer(0.35).timeout
-        if item[2] == "settings":
-            current.call("qa_open_settings")
-        elif item[2] == "store":
-            current.call("qa_open_store")
-        await _save_frame(output_dir.path_join(item[0]))
-    if current != null:
-        current.queue_free()
+        await _save_frame(output_dir.path_join(str(item[0])))
+        if current.has_method("_close_popup"):
+            current.call("_close_popup")
         await process_frame
-    current = load("res://scenes/Gameplay.tscn").instantiate()
-    root_window.add_child(current)
-    await process_frame
-    await create_timer(0.4).timeout
+
+    current = await _replace_scene(root_window, current, "res://scenes/Gameplay.tscn")
+    await create_timer(0.12).timeout
+    await _save_frame(output_dir.path_join("11_level_1_gameplay.png"))
     current.call("qa_set_stage", "aim")
-    await _save_frame(output_dir.path_join("06_level_1_aim_preview.png"))
+    await _save_frame(output_dir.path_join("12_level_1_aim_preview.png"))
+
     current.call("qa_set_stage", "shoot")
-    await _save_frame(output_dir.path_join("07_projectile_shot.png"))
+    await _save_frame(output_dir.path_join("13_projectile_shot.png"))
+
     current.call("qa_set_stage", "booster")
     current.call("qa_set_stage", "pop")
-    await _save_frame(output_dir.path_join("08_cluster_pop_effect.png"))
-    current.call("qa_show_result")
-    await _save_frame(output_dir.path_join("09_level_win_result_popup.png"))
-    print("Captured nine full-HD QA screenshots in ", output_dir)
+    await _save_frame(output_dir.path_join("14_booster_and_pop_effects.png"))
+
+    current.call("_show_pause")
+    await _save_frame(output_dir.path_join("15_pause_overlay.png"))
+
+    current = await _capture_result(
+        root_window,
+        current,
+        {
+            "won": true,
+            "level": 1,
+            "mode": "classic",
+            "score": 7420,
+            "stars": 3,
+            "reward": 140,
+            "loss_reason": ""
+        },
+        output_dir.path_join("16_level_win_result.png")
+    )
+    current = await _capture_result(
+        root_window,
+        current,
+        {
+            "won": false,
+            "level": 1,
+            "mode": "classic",
+            "score": 1180,
+            "stars": 0,
+            "reward": 0,
+            "loss_reason": "Out of shots"
+        },
+        output_dir.path_join("17_level_lose_result.png")
+    )
+
+    print("Captured 17 full-HD app-flow screenshots in ", output_dir)
     quit(0)
+
+func _ensure_autoloads(root_window: Window) -> void:
+    var required := {
+        "GameState": "res://autoload/GameState.gd",
+        "AssetRegistry": "res://autoload/AssetRegistry.gd",
+        "MonetizationConfig": "res://autoload/MonetizationConfig.gd"
+    }
+    for autoload_name in required.keys():
+        if root_window.get_node_or_null(str(autoload_name)) != null:
+            continue
+        var script := load(str(required[autoload_name])) as Script
+        if script == null:
+            push_error("Cannot load autoload script: " + str(required[autoload_name]))
+            continue
+        var instance: Node = script.new()
+        instance.name = str(autoload_name)
+        root_window.add_child(instance)
+
+func _capture_result(root_window: Window, current: Node, payload: Dictionary, path: String) -> Node:
+    if current != null and is_instance_valid(current):
+        current.queue_free()
+        await process_frame
+    var game_state := root_window.get_node_or_null("GameState")
+    if game_state == null:
+        push_error("GameState autoload was not available to the visual capture.")
+        return null
+    game_state.set("pending_result", payload)
+    var packed := load("res://scenes/Result.tscn") as PackedScene
+    if packed == null:
+        push_error("Cannot load result scene during visual capture.")
+        return null
+    var instance: Node = packed.instantiate()
+    root_window.add_child(instance)
+    await process_frame
+    await _save_frame(path)
+    return instance
+
+func _replace_scene(root_window: Window, current: Node, scene_path: String) -> Node:
+    if current != null and is_instance_valid(current):
+        current.queue_free()
+        await process_frame
+    var packed := load(scene_path) as PackedScene
+    if packed == null:
+        push_error("Unable to load QA scene: " + scene_path)
+        return null
+    var instance: Node = packed.instantiate()
+    root_window.add_child(instance)
+    await process_frame
+    return instance
 
 func _save_frame(path: String) -> void:
     await process_frame

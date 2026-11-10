@@ -10,9 +10,12 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 QA = ROOT / "qa_proof"
 NAMES = [
-    "01_splash_screen.png", "02_saga_world_map.png", "03_settings_popup.png",
-    "04_booster_shop_popup.png", "05_level_1_gameplay.png", "06_level_1_aim_preview.png",
-    "07_projectile_shot.png", "08_cluster_pop_effect.png", "09_level_win_result_popup.png"
+    "01_splash_screen.png", "02_intro_screen.png", "03_loading_screen.png",
+    "04_mode_select_screen.png", "05_saga_world_map.png", "06_settings_popup.png",
+    "07_booster_shop_popup.png", "08_daily_spin_popup.png", "09_piggy_bank_popup.png",
+    "10_events_popup.png", "11_level_1_gameplay.png", "12_level_1_aim_preview.png",
+    "13_projectile_shot.png", "14_booster_and_pop_effects.png", "15_pause_overlay.png",
+    "16_level_win_result.png", "17_level_lose_result.png"
 ]
 
 def main() -> int:
@@ -54,8 +57,8 @@ def main() -> int:
         try:
             from llm_router import LLMRouter
             router = LLMRouter()
-            sample = QA / "09_level_win_result_popup.png"
-            prompt = ("Inspect this screenshot of an original mobile bubble puzzle game. "
+            sample = QA / "16_level_win_result.png"
+            prompt = ("Inspect this screenshot of the current mobile bubble puzzle game rebuild. "
                       "List only clear visual defects: blank areas, clipped text, missing controls, "
                       "overlapping panels, or a result state that is not visible. Do not identify another game.")
             answer = router.complete(prompt, purpose="vision", image_b64=base64.b64encode(sample.read_bytes()).decode("ascii"))
