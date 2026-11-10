@@ -25,6 +25,7 @@ func _capture() -> void:
 
     var root_window := get_root()
     root_window.size = Vector2i(1080, 1920)
+    _ensure_autoloads(root_window)
     var current: Node = null
 
     for item in SEQUENCE:
@@ -63,41 +64,73 @@ func _capture() -> void:
     current.call("_show_pause")
     await _save_frame(output_dir.path_join("15_pause_overlay.png"))
 
-    current = await _replace_scene(root_window, current, "res://scenes/Result.tscn")
-    GameState.pending_result = {
-        "won": true,
-        "level": 1,
-        "mode": "classic",
-        "score": 7420,
-        "stars": 3,
-        "reward": 140,
-        "loss_reason": ""
-    }
-    current.queue_free()
-    await process_frame
-    current = load("res://scenes/Result.tscn").instantiate()
-    root_window.add_child(current)
-    await process_frame
-    await _save_frame(output_dir.path_join("16_level_win_result.png"))
-
-    current.queue_free()
-    await process_frame
-    GameState.pending_result = {
-        "won": false,
-        "level": 1,
-        "mode": "classic",
-        "score": 1180,
-        "stars": 0,
-        "reward": 0,
-        "loss_reason": "Out of shots"
-    }
-    current = load("res://scenes/Result.tscn").instantiate()
-    root_window.add_child(current)
-    await process_frame
-    await _save_frame(output_dir.path_join("17_level_lose_result.png"))
+    current = await _capture_result(
+        root_window,
+        current,
+        {
+            "won": true,
+            "level": 1,
+            "mode": "classic",
+            "score": 7420,
+            "stars": 3,
+            "reward": 140,
+            "loss_reason": ""
+        },
+        output_dir.path_join("16_level_win_result.png")
+    )
+    current = await _capture_result(
+        root_window,
+        current,
+        {
+            "won": false,
+            "level": 1,
+            "mode": "classic",
+            "score": 1180,
+            "stars": 0,
+            "reward": 0,
+            "loss_reason": "Out of shots"
+        },
+        output_dir.path_join("17_level_lose_result.png")
+    )
 
     print("Captured 17 full-HD app-flow screenshots in ", output_dir)
     quit(0)
+
+func _ensure_autoloads(root_window: Window) -> void:
+    var required := {
+        "GameState": "res://autoload/GameState.gd",
+        "AssetRegistry": "res://autoload/AssetRegistry.gd",
+        "MonetizationConfig": "res://autoload/MonetizationConfig.gd"
+    }
+    for autoload_name in required.keys():
+        if root_window.get_node_or_null(str(autoload_name)) != null:
+            continue
+        var script := load(str(required[autoload_name])) as Script
+        if script == null:
+            push_error("Cannot load autoload script: " + str(required[autoload_name]))
+            continue
+        var instance := script.new()
+        instance.name = str(autoload_name)
+        root_window.add_child(instance)
+
+func _capture_result(root_window: Window, current: Node, payload: Dictionary, path: String) -> Node:
+    if current != null and is_instance_valid(current):
+        current.queue_free()
+        await process_frame
+    var game_state := root_window.get_node_or_null("GameState")
+    if game_state == null:
+        push_error("GameState autoload was not available to the visual capture.")
+        return null
+    game_state.set("pending_result", payload)
+    var packed := load("res://scenes/Result.tscn") as PackedScene
+    if packed == null:
+        push_error("Cannot load result scene during visual capture.")
+        return null
+    var instance := packed.instantiate()
+    root_window.add_child(instance)
+    await process_frame
+    await _save_frame(path)
+    return instance
 
 func _replace_scene(root_window: Window, current: Node, scene_path: String) -> Node:
     if current != null and is_instance_valid(current):
