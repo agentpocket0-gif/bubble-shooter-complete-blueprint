@@ -39,6 +39,12 @@ var popup_layer: Control
 var booster_status: Label
 var score_slots_label: Label
 var cannon_barrel: Sprite2D
+var objective_label: Label
+var booster_buttons: Dictionary = {}
+var armed_booster := ""
+var start_shots := 30
+var shots_used := 0
+var rescued_count := 0
 
 func _ready() -> void:
     var bg := TextureRect.new()
@@ -96,30 +102,33 @@ func _build_ui() -> void:
     add_child(aim_ghost)
     _refresh_cannon()
     _update_hud()
+    objective_label = Label.new()
+    objective_label.position = Vector2(22, 126)
+    objective_label.size = Vector2(496, 34)
+    objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    objective_label.add_theme_font_size_override("font_size", 15)
+    objective_label.add_theme_color_override("font_color", Color("#bdeaff"))
+    add_child(objective_label)
     var buttons := ["Bomb", "Fireball", "Rainbow", "+5 Moves"]
     for index in range(buttons.size()):
+        var kind: String = buttons[index]
         var button := Button.new()
-        button.text = buttons[index]
-        button.position = Vector2(10 + index * 131, 914)
-        button.size = Vector2(124, 44)
-        button.add_theme_font_size_override("font_size", 12)
+        button.text = kind
+        button.position = Vector2(8 + index * 132, 914)
+        button.size = Vector2(128, 44)
+        button.add_theme_font_size_override("font_size", 11)
         _style_button(button)
-        button.pressed.connect(_activate_booster.bind(buttons[index]))
+        button.pressed.connect(_on_booster_pressed.bind(kind))
         add_child(button)
-    var map_button := Button.new()
-    map_button.text = "MAP"
-    map_button.position = Vector2(18, 85)
-    map_button.size = Vector2(78, 44)
-    _style_button(map_button)
-    map_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/SagaMap.tscn"))
-    add_child(map_button)
+        booster_buttons[kind] = button
     var pause_button := Button.new()
     pause_button.text = "PAUSE"
-    pause_button.position = Vector2(410, 85)
+    pause_button.position = Vector2(410, 78)
     pause_button.size = Vector2(110, 44)
     _style_button(pause_button)
     pause_button.pressed.connect(_show_pause)
     add_child(pause_button)
+    _update_booster_inventory()
 
 func _style_button(button: Button) -> void:
     var style := StyleBoxFlat.new()
@@ -137,6 +146,10 @@ func _load_level(level_id: int) -> void:
         return
     palette = level_data.get("palette", ["red", "blue", "green"])
     shots_left = int(level_data.get("shots", 30))
+    start_shots = shots_left
+    shots_used = 0
+    rescued_count = 0
+    armed_booster = ""
     board.clear()
     blockers.clear()
     blocker_hp.clear()
@@ -220,7 +233,12 @@ func _update_hud() -> void:
     if hud_label != null:
         hud_label.text = "LEVEL %03d     MOVES %02d     SCORE %05d     COINS %d" % [GameState.current_level, shots_left, score, GameState.coins]
     if booster_status != null:
-        booster_status.text = "DRAG TO AIM  •  RELEASE TO SHOOT  •  TAP NEXT BUBBLE TO SWAP"
+        booster_status.text = "DRAG TO AIM  •  RELEASE TO SHOOT" if armed_booster.is_empty() else "%s  •  TAP BOARD TARGET" % armed_booster.to_upper()
+    if objective_label != null:
+        var objectives: Array = level_data.get("objectives", [])
+        var objective: Dictionary = objectives[0] if not objectives.is_empty() else {"type": "clear_all"}
+        objective_label.text = _objective_text(objective)
+    _update_booster_inventory()
 
 func _unhandled_input(event: InputEvent) -> void:
     if popup_layer != null:
@@ -241,6 +259,10 @@ func _unhandled_input(event: InputEvent) -> void:
         _update_aim(event.position)
 
 func _pointer_down(point: Vector2) -> void:
+    if not armed_booster.is_empty():
+        if point.y < CANNON_POINT.y - 120.0:
+            _apply_targeted_booster(point)
+        return
     if point.distance_to(NEXT_BUBBLE_POINT) < 42.0:
         _swap_bubbles()
         return
@@ -392,6 +414,7 @@ func _launch_shot() -> void:
     projectile.scale = Vector2(0.33, 0.33)
     add_child(projectile)
     shots_left -= 1
+    shots_used += 1
     _update_hud()
 
 func _process(delta: float) -> void:
@@ -417,7 +440,7 @@ func _land_projectile(point: Vector2) -> void:
     pending_attach_cell = Vector2i(-1, -1)
     shot_path.clear()
     if cell.x < 0 or board.has(cell) or blockers.has(cell):
-        _show_result(false)
+        _show_result(false, "No space left")
         return
     board[cell] = projectile_color
     _render_board()
@@ -494,12 +517,14 @@ func _damage_adjacent_blockers(cells: Array) -> void:
             if kind == "chain":
                 blockers.erase(neighbour)
                 blocker_hp.erase(neighbour)
+                rescued_count += 1
                 _remove_blocker_visual(neighbour)
             else:
                 var hp := int(blocker_hp.get(neighbour, 1)) - 1
                 if hp <= 0:
                     blockers.erase(neighbour)
                     blocker_hp.erase(neighbour)
+                    rescued_count += 1
                     _remove_blocker_visual(neighbour)
                 else:
                     blocker_hp[neighbour] = hp
@@ -523,73 +548,150 @@ func _advance_colors() -> void:
     next_color = str(available[queue_rng.randi_range(0, available.size() - 1)])
     _refresh_cannon()
 
+func _objective_text(objective: Dictionary) -> String:
+    var kind := str(objective.get("type", "clear_all"))
+    match kind:
+        "clear_all":
+            return "OBJECTIVE  •  CLEAR ALL BUBBLES"
+        "clear_color":
+            return "OBJECTIVE  •  CLEAR %s" % str(objective.get("color", "red")).to_upper()
+        "pop_count":
+            return "OBJECTIVE  •  POP %d  (%d)" % [int(objective.get("count", 0)), total_popped]
+        "score":
+            return "OBJECTIVE  •  SCORE %d  (%d)" % [int(objective.get("target", 0)), score]
+        "rescue":
+            return "OBJECTIVE  •  RESCUE %d  (%d)" % [int(objective.get("count", 0)), rescued_count]
+        "survive":
+            return "OBJECTIVE  •  SURVIVE %d SHOTS" % int(objective.get("shots", 0))
+        _:
+            return "OBJECTIVE  •  CLEAR ALL BUBBLES"
+
+func _has_any_attachment_cell() -> bool:
+    for col in range(COLS):
+        if _cell_is_free(Vector2i(col, 0)):
+            return true
+    for cell in board.keys():
+        for candidate in HexGrid.neighbours(cell):
+            if _cell_is_free(candidate):
+                return true
+    return false
+
 func _check_objectives() -> void:
     var objectives: Array = level_data.get("objectives", [{"type": "clear_all"}])
     var won := true
     for objective in objectives:
         var kind := str(objective.get("type", "clear_all"))
-        if kind == "clear_all":
-            won = won and board.is_empty()
-        elif kind == "clear_color":
-            var target_color := str(objective.get("color", "red"))
-            for value in board.values():
-                if str(value) == target_color:
-                    won = false
-        elif kind == "pop_count":
-            won = won and total_popped >= int(objective.get("count", 10))
-        elif kind == "rescue":
-            won = won and blockers.is_empty()
-        elif kind == "score":
-            won = won and score >= int(objective.get("target", 250))
-        elif kind == "survive":
-            won = won and shots_left <= 0
+        match kind:
+            "clear_all":
+                won = won and board.is_empty()
+            "clear_color":
+                var target_color := str(objective.get("color", "red"))
+                for value in board.values():
+                    if str(value) == target_color:
+                        won = false
+            "pop_count":
+                won = won and total_popped >= int(objective.get("count", 10))
+            "rescue":
+                won = won and rescued_count >= int(objective.get("count", 1))
+            "score":
+                won = won and score >= int(objective.get("target", 250))
+            "survive":
+                won = won and shots_used >= int(objective.get("shots", start_shots))
     if won:
         _show_result(true)
     elif shots_left <= 0:
-        _show_result(false)
+        _show_result(false, "Out of shots")
+    elif not _has_any_attachment_cell():
+        _show_result(false, "No space left")
 
-func _activate_booster(kind: String) -> void:
-    var count := int(GameState.boosters.get(kind, 0))
-    if count <= 0 or shooting:
+func _update_booster_inventory() -> void:
+    for kind in booster_buttons.keys():
+        var button: Button = booster_buttons[kind]
+        if is_instance_valid(button):
+            var count := int(GameState.boosters.get(str(kind), 0))
+            button.text = "%s  %d" % [str(kind).to_upper(), count]
+            button.disabled = count <= 0 or shooting or aiming
+            button.modulate = Color("#ffe08a") if armed_booster == str(kind) else Color.WHITE
+
+func _on_booster_pressed(kind: String) -> void:
+    if shooting or aiming:
         return
-    GameState.boosters[kind] = count - 1
+    if int(GameState.boosters.get(kind, 0)) <= 0:
+        _show_popup("BOOSTER EMPTY", "Visit the coin shop to add this booster.")
+        return
+    if kind == "Bomb" or kind == "Fireball":
+        armed_booster = "" if armed_booster == kind else kind
+        _update_hud()
+        return
+    GameState.boosters[kind] = int(GameState.boosters.get(kind, 0)) - 1
     if kind == "+5 Moves":
         shots_left += 5
     elif kind == "Rainbow":
-        var most_common: Dictionary = {}
+        var counts: Dictionary = {}
         for value in board.values():
-            most_common[str(value)] = int(most_common.get(str(value), 0)) + 1
+            counts[str(value)] = int(counts.get(str(value), 0)) + 1
         var best_color := current_color
-        for key in most_common.keys():
-            if int(most_common[key]) > int(most_common.get(best_color, 0)):
+        for key in counts.keys():
+            if int(counts[key]) > int(counts.get(best_color, 0)):
                 best_color = str(key)
         current_color = best_color
-    elif kind == "Fireball":
-        var column := clampi(roundi((CANNON_POINT.x - GRID_ORIGIN.x) / DIAMETER), 0, COLS - 1)
-        for cell in board.keys().duplicate():
-            if cell.x == column:
-                board.erase(cell)
-        for cell in blockers.keys().duplicate():
-            if cell.x == column:
-                blockers.erase(cell)
-                blocker_hp.erase(cell)
-    elif kind == "Bomb":
-        var target := Vector2i(COLS / 2, 0)
-        if not board.is_empty():
-            target = board.keys()[0]
-        var centre := HexGrid.center(target, GRID_ORIGIN, DIAMETER)
-        for cell in board.keys().duplicate():
-            if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(centre) < DIAMETER * 2.4:
-                board.erase(cell)
-        for cell in blockers.keys().duplicate():
-            if HexGrid.center(cell, GRID_ORIGIN, DIAMETER).distance_to(centre) < DIAMETER * 2.4:
-                blockers.erase(cell)
-                blocker_hp.erase(cell)
     GameState.save_progress()
-    _render_board()
+    _refresh_cannon()
+    _update_hud()
     _check_objectives()
 
-func _show_result(won: bool) -> void:
+func _apply_targeted_booster(point: Vector2) -> void:
+    var cell := HexGrid.cell_from_point(point, GRID_ORIGIN, DIAMETER, COLS, ROWS)
+    if cell.x < 0 or (not board.has(cell) and not blockers.has(cell)):
+        _show_popup("CHOOSE A TARGET", "Tap an occupied bubble or blocker on the board.")
+        return
+    var affected_bubbles: Array = []
+    var affected_blockers: Array = []
+    if armed_booster == "Fireball":
+        for candidate in board.keys():
+            if candidate.x == cell.x:
+                affected_bubbles.append(candidate)
+        for candidate in blockers.keys():
+            if candidate.x == cell.x:
+                affected_blockers.append(candidate)
+    elif armed_booster == "Bomb":
+        var centre := HexGrid.center(cell, GRID_ORIGIN, DIAMETER)
+        for candidate in board.keys():
+            if HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_to(centre) <= DIAMETER * 2.4:
+                affected_bubbles.append(candidate)
+        for candidate in blockers.keys():
+            if HexGrid.center(candidate, GRID_ORIGIN, DIAMETER).distance_to(centre) <= DIAMETER * 2.4:
+                affected_blockers.append(candidate)
+    if affected_bubbles.is_empty() and affected_blockers.is_empty():
+        _show_popup("NO TARGET", "This booster cannot affect that cell.")
+        return
+
+    var used_kind := armed_booster
+    armed_booster = ""
+    GameState.boosters[used_kind] = int(GameState.boosters.get(used_kind, 0)) - 1
+    for bubble_cell in affected_bubbles:
+        _spawn_pop_effect(bubble_cell)
+    total_popped += affected_bubbles.size()
+    score += affected_bubbles.size() * 10
+    _remove_cells(affected_bubbles)
+    for blocker_cell in affected_blockers:
+        blockers.erase(blocker_cell)
+        blocker_hp.erase(blocker_cell)
+        rescued_count += 1
+        _remove_blocker_visual(blocker_cell)
+
+    var floating := HexGrid.find_floating(board, COLS, ROWS)
+    if not floating.is_empty():
+        total_popped += floating.size()
+        score += floating.size() * 20
+        for floating_cell in floating:
+            _spawn_falling_bubble(floating_cell)
+        _remove_cells(floating)
+    GameState.save_progress()
+    _update_hud()
+    _check_objectives()
+
+func _show_result(won: bool, reason: String = "") -> void:
     if popup_layer != null:
         return
     var star_count := 0
@@ -608,9 +710,11 @@ func _show_result(won: bool) -> void:
     GameState.pending_result = {
         "won": won,
         "level": GameState.current_level,
+        "mode": GameState.game_mode,
         "score": score,
         "stars": star_count,
-        "reward": reward
+        "reward": reward,
+        "loss_reason": reason
     }
     GameState.save_progress()
     get_tree().change_scene_to_file("res://scenes/Result.tscn")
@@ -669,6 +773,15 @@ func _show_pause() -> void:
     panel.add_child(map)
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+    if event.is_action_pressed("ui_cancel"):
+        if popup_layer != null and is_instance_valid(popup_layer):
+            popup_layer.queue_free()
+            popup_layer = null
+        else:
+            _show_pause()
+        get_viewport().set_input_as_handled()
+
 func qa_set_stage(stage: String) -> void:
     if stage == "aim":
         aiming = true
@@ -681,11 +794,10 @@ func qa_set_stage(stage: String) -> void:
         if projectile != null:
             projectile.position = Vector2(250, 460)
     elif stage == "booster":
-        if projectile != null:
-            projectile.queue_free()
-            projectile = null
-        shooting = false
-        _activate_booster("Fireball")
+        if not board.is_empty():
+            _on_booster_pressed("Fireball")
+            if not armed_booster.is_empty():
+                _apply_targeted_booster(HexGrid.center(board.keys()[0], GRID_ORIGIN, DIAMETER))
     elif stage == "pop":
         if not board.is_empty():
             _spawn_pop_effect(board.keys()[0])
