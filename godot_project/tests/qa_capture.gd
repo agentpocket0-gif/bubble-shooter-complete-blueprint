@@ -47,6 +47,7 @@ func _capture() -> void:
 
     current = await _replace_scene(root_window, current, "res://scenes/Gameplay.tscn")
     await create_timer(0.12).timeout
+    await _save_frame(output_dir.path_join("11_level_1_gameplay.png"))
     current.call("qa_set_stage", "aim")
     await _save_frame(output_dir.path_join("12_level_1_aim_preview.png"))
 
