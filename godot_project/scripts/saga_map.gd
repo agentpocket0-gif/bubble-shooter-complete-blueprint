@@ -1,8 +1,13 @@
 extends Control
 
+const PathDrawer = preload("res://scripts/map_path_drawer.gd")
+const MODE_NAMES := {"classic": "CLASSIC", "hard": "HARD LEVELS", "challenge": "CHALLENGE"}
+
 var popup_layer: Control
 var coin_label: Label
 var lives_label: Label
+var life_timer: Label
+var scroll: ScrollContainer
 
 func _ready() -> void:
     _build_map()
@@ -15,48 +20,71 @@ func _build_map() -> void:
     bg.stretch_mode = TextureRect.STRETCH_SCALE
     add_child(bg)
 
-    var title := Label.new()
-    title.text = "BUBBLE BAY"
-    title.position = Vector2(18, 24)
-    title.size = Vector2(270, 48)
-    title.add_theme_font_size_override("font_size", 29)
-    title.add_theme_color_override("font_color", Color("#fff0a8"))
-    add_child(title)
+    var header := Panel.new()
+    header.position = Vector2(12, 16)
+    header.size = Vector2(516, 126)
+    var header_style := StyleBoxFlat.new()
+    header_style.bg_color = Color("#0d2855")
+    header_style.border_color = Color("#7fdfff")
+    header_style.set_border_width_all(2)
+    header_style.set_corner_radius_all(22)
+    header.add_theme_stylebox_override("panel", header_style)
+    add_child(header)
 
-    coin_label = _label("COINS  %d" % GameState.coins, Vector2(20, 82), Vector2(190, 36), 17, Color("#ffe28a"))
-    lives_label = _label("LIVES  %d / 5" % GameState.lives, Vector2(310, 82), Vector2(205, 36), 17, Color("#ffb7c7"))
+    var title := _label("BUBBLE BAY", Vector2(20, 18), Vector2(250, 42), 28, Color("#fff0a8"))
+    header.add_child(title)
+    var mode_button := Button.new()
+    mode_button.text = str(MODE_NAMES.get(GameState.game_mode, "CLASSIC")) + "  ▾"
+    mode_button.position = Vector2(280, 17)
+    mode_button.size = Vector2(215, 44)
+    _style_button(mode_button, true)
+    mode_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ModeSelect.tscn"))
+    header.add_child(mode_button)
 
-    var world := _label("WORLD 1  •  CAMPAIGN", Vector2(18, 132), Vector2(500, 30), 16, Color("#b8e7ff"))
-    world.add_theme_font_size_override("font_size", 17)
+    coin_label = _label("COINS  %d" % GameState.coins, Vector2(20, 73), Vector2(178, 30), 16, Color("#ffe28a"))
+    header.add_child(coin_label)
+    lives_label = _label("LIVES  %d / 5" % GameState.lives, Vector2(214, 73), Vector2(145, 30), 16, Color("#ffb7c7"))
+    header.add_child(lives_label)
+    life_timer = _label(_life_timer_text(), Vector2(354, 75), Vector2(145, 26), 12, Color("#c8e7ff"))
+    header.add_child(life_timer)
 
-    var scroll := ScrollContainer.new()
-    scroll.position = Vector2(16, 178)
-    scroll.size = Vector2(508, 655)
+    var current_level := GameState.get_mode_unlocked_level()
+    var world_number := int((current_level - 1) / 100) + 1
+    var world := _label("WORLD %d  •  %s" % [world_number, str(MODE_NAMES.get(GameState.game_mode, "CLASSIC"))],
+        Vector2(20, 151), Vector2(490, 30), 16, Color("#c8edff"))
+    add_child(world)
+
+    scroll = ScrollContainer.new()
+    scroll.position = Vector2(12, 190)
+    scroll.size = Vector2(516, 640)
     scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
     add_child(scroll)
 
-    var grid := GridContainer.new()
-    grid.columns = 5
-    grid.add_theme_constant_override("h_separation", 7)
-    grid.add_theme_constant_override("v_separation", 9)
-    grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    scroll.add_child(grid)
+    var path := PathDrawer.new()
+    path.name = "CampaignPath"
+    path.custom_minimum_size = Vector2(500, 55.0 + 92.0 * GameState.MAX_LEVELS)
+    path.size = path.custom_minimum_size
+    scroll.add_child(path)
 
     for level in range(1, GameState.MAX_LEVELS + 1):
         var button := Button.new()
-        var stars_count := int(GameState.stars.get(str(level), 0))
+        var stars_count := GameState.get_mode_stars(level)
+        var unlocked := level <= GameState.get_mode_unlocked_level()
         button.text = str(level) + ("\n" + "★".repeat(stars_count) if stars_count > 0 else "")
-        button.custom_minimum_size = Vector2(94, 68)
-        button.disabled = level > GameState.unlocked_level
-        button.add_theme_font_size_override("font_size", 15)
-        _style_button(button, level == GameState.unlocked_level, button.disabled)
+        button.position = path.node_position(level) - Vector2(34, 34)
+        button.custom_minimum_size = Vector2(68, 68)
+        button.size = Vector2(68, 68)
+        button.disabled = not unlocked
+        button.add_theme_font_size_override("font_size", 14)
+        _style_node(button, level == GameState.get_mode_unlocked_level(), not unlocked, stars_count)
         button.pressed.connect(_on_level_pressed.bind(level))
-        grid.add_child(button)
+        path.add_child(button)
 
     var bottom := HBoxContainer.new()
-    bottom.position = Vector2(12, 855)
-    bottom.size = Vector2(516, 72)
-    bottom.add_theme_constant_override("separation", 6)
+    bottom.position = Vector2(8, 850)
+    bottom.size = Vector2(524, 82)
+    bottom.add_theme_constant_override("separation", 5)
     add_child(bottom)
     _add_nav_button(bottom, "SPIN", qa_open_spin)
     _add_nav_button(bottom, "PIGGY", qa_open_piggy)
@@ -64,12 +92,29 @@ func _build_map() -> void:
     _add_nav_button(bottom, "SHOP", qa_open_store)
     _add_nav_button(bottom, "SETTINGS", qa_open_settings)
 
-func _add_nav_button(parent: HBoxContainer, text_value: String, action: Callable) -> void:
+    await get_tree().process_frame
+    if scroll != null:
+        var current_node: Vector2 = path.node_position(GameState.get_mode_unlocked_level())
+        scroll.scroll_vertical = maxi(0, int(current_node.y - scroll.size.y * 0.45))
+
+func _process(_delta: float) -> void:
+    if life_timer != null:
+        life_timer.text = _life_timer_text()
+    if lives_label != null:
+        lives_label.text = "LIVES  %d / 5" % GameState.lives
+
+func _life_timer_text() -> String:
+    if GameState.lives >= GameState.MAX_LIVES:
+        return "LIVES FULL"
+    var seconds := GameState.life_seconds_remaining()
+    return "NEXT LIFE  %02d:%02d" % [int(seconds / 60), seconds % 60]
+
+func _add_nav_button(parent: HBoxContainer, title_text: String, action: Callable) -> void:
     var button := Button.new()
-    button.text = text_value
-    button.custom_minimum_size = Vector2(96, 64)
+    button.text = title_text
+    button.custom_minimum_size = Vector2(96, 68)
     button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    _style_button(button, text_value == "SHOP", false)
+    _style_button(button, title_text == "SHOP")
     button.pressed.connect(action)
     parent.add_child(button)
 
@@ -80,23 +125,35 @@ func _label(value: String, position_value: Vector2, size_value: Vector2, font_si
     label.size = size_value
     label.add_theme_font_size_override("font_size", font_size)
     label.add_theme_color_override("font_color", color)
-    add_child(label)
     return label
 
-func _style_button(button: Button, highlighted: bool, locked: bool = false) -> void:
+func _style_button(button: Button, highlighted: bool) -> void:
     var style := StyleBoxFlat.new()
-    style.bg_color = Color("#24395b") if locked else (Color("#2471a7") if highlighted else Color("#16466f"))
-    style.border_color = Color("#9eeaff") if not locked else Color("#50627a")
+    style.bg_color = Color("#2471a7") if highlighted else Color("#16466f")
+    style.border_color = Color("#9eeaff")
     style.set_border_width_all(2)
     style.set_corner_radius_all(16)
     style.shadow_color = Color(0, 0, 0, 0.22)
     style.shadow_size = 3
     button.add_theme_stylebox_override("normal", style)
-    button.add_theme_color_override("font_color", Color("#9eafc0") if locked else Color.WHITE)
+    button.add_theme_color_override("font_color", Color.WHITE)
+
+func _style_node(button: Button, current: bool, locked: bool, stars_count: int) -> void:
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color("#273b54") if locked else (Color("#e4a934") if stars_count >= 3 else (Color("#2487ae") if current else Color("#174c7d"))
+    style.border_color = Color("#697d91") if locked else (Color("#fff2b0") if current else Color("#8ceaff"))
+    style.set_border_width_all(3 if current else 2)
+    style.set_corner_radius_all(34)
+    button.add_theme_stylebox_override("normal", style)
+    button.add_theme_color_override("font_color", Color("#8292a4") if locked else Color.WHITE)
 
 func _on_level_pressed(level: int) -> void:
-    if level > GameState.unlocked_level:
-        _show_popup("LEVEL LOCKED", "Clear the previous level to unlock this one.")
+    var unlocked := GameState.get_mode_unlocked_level()
+    if level > unlocked:
+        _show_popup("LEVEL LOCKED", "Complete level %d to open this node." % (level - 1))
+        return
+    if not GameState.spend_life():
+        _show_popup("OUT OF LIVES", "Your next life arrives in %s. You can return when the timer is ready." % _life_timer_text())
         return
     GameState.current_level = level
     GameState.save_progress()
@@ -111,24 +168,27 @@ func qa_open_store() -> void:
 func qa_open_spin() -> void:
     var remaining := GameState.daily_spin_seconds_remaining()
     if remaining > 0:
-        _show_popup("DAILY SPIN", "Your next free spin is available in %d hours." % int(ceil(float(remaining) / 3600.0)))
+        _show_popup("DAILY SPIN", "Next free spin in %d hours." % int(ceil(float(remaining) / 3600.0)))
     elif GameState.claim_daily_spin():
         _refresh_wallet()
-        _show_popup("DAILY REWARD", "You received 250 coins. Come back tomorrow for another free spin.")
+        _show_popup("DAILY REWARD", "You won %s." % GameState.daily_spin_reward)
     else:
         _show_popup("DAILY SPIN", "The free spin is not ready yet.")
 
 func qa_open_piggy() -> void:
-    _show_popup("PIGGY BANK", "Your coin balance is %d. The bank feature will be enabled after its full reward and purchase flow is tested." % GameState.coins)
+    var body := "Piggy bank: %d / %d coins. It fills by 10 coins on each first level clear." % [GameState.piggy_bank_coins, GameState.PIGGY_CAPACITY]
+    if GameState.piggy_bank_coins >= GameState.PIGGY_CAPACITY:
+        body += "\nThe bank is full. Real-money unlock is not connected in this build."
+    _show_popup("PIGGY BANK", body)
 
 func qa_open_events() -> void:
-    _show_popup("EVENTS", "There is no live event right now. Your campaign progress is saved locally.")
+    _show_popup("EVENTS", "No limited-time event is active. Your campaign remains playable offline.")
 
 func _show_settings() -> void:
     _ensure_popup()
     var content := VBoxContainer.new()
-    content.position = Vector2(42, 350)
-    content.size = Vector2(456, 300)
+    content.position = Vector2(42, 300)
+    content.size = Vector2(456, 390)
     content.add_theme_constant_override("separation", 12)
     popup_layer.add_child(content)
     _popup_title(content, "SETTINGS")
@@ -145,6 +205,11 @@ func _show_settings() -> void:
         toggle.toggled.connect(_on_setting_toggled.bind(setting_name))
         row.add_child(toggle)
         content.add_child(row)
+    var language := Label.new()
+    language.text = "Language: English (Hindi localisation pending)"
+    language.add_theme_font_size_override("font_size", 13)
+    language.add_theme_color_override("font_color", Color("#bdeaff"))
+    content.add_child(language)
     _add_close_to_popup()
 
 func _on_setting_toggled(value: bool, setting_name: String) -> void:
@@ -158,29 +223,24 @@ func _show_store() -> void:
     content.add_theme_constant_override("separation", 10)
     popup_layer.add_child(content)
     _popup_title(content, "BOOSTER SHOP")
-    var offers := [
-        ["Bomb", 300],
-        ["Fireball", 250],
-        ["Rainbow", 350],
-        ["+5 Moves", 150]
-    ]
+    var offers := [["Bomb", 300], ["Fireball", 250], ["Rainbow", 350], ["+5 Moves", 150]]
     for offer in offers:
         var row := HBoxContainer.new()
         var label := Label.new()
-        label.text = "%s  •  %d coins" % [offer[0], offer[1]]
+        label.text = "%s  •  %d coins  •  owned %d" % [offer[0], offer[1], int(GameState.boosters.get(str(offer[0]), 0))]
         label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-        label.add_theme_font_size_override("font_size", 16)
+        label.add_theme_font_size_override("font_size", 15)
         label.add_theme_color_override("font_color", Color.WHITE)
         row.add_child(label)
         var buy := Button.new()
         buy.text = "BUY"
-        buy.custom_minimum_size = Vector2(100, 50)
+        buy.custom_minimum_size = Vector2(88, 50)
         _style_button(buy, true)
         buy.pressed.connect(_buy_offer.bind(str(offer[0]), int(offer[1])))
         row.add_child(buy)
         content.add_child(row)
     var note := Label.new()
-    note.text = "Offline coin shop preview. Real-money billing is not connected."
+    note.text = "Offline coin shop. Google Play Billing and real-money products are not connected."
     note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     note.add_theme_font_size_override("font_size", 13)
     note.add_theme_color_override("font_color", Color("#bdeaff"))
@@ -199,6 +259,8 @@ func _refresh_wallet() -> void:
         coin_label.text = "COINS  %d" % GameState.coins
     if lives_label != null:
         lives_label.text = "LIVES  %d / 5" % GameState.lives
+    if life_timer != null:
+        life_timer.text = _life_timer_text()
 
 func _ensure_popup() -> void:
     if popup_layer != null and is_instance_valid(popup_layer):
@@ -215,7 +277,7 @@ func _popup_title(parent: VBoxContainer, value: String) -> void:
     var title := Label.new()
     title.text = value
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    title.add_theme_font_size_override("font_size", 28)
+    title.add_theme_font_size_override("font_size", 27)
     title.add_theme_color_override("font_color", Color("#ffe49b"))
     parent.add_child(title)
 
@@ -225,12 +287,13 @@ func _add_close_to_popup() -> void:
     close.position = Vector2(160, 780)
     close.size = Vector2(220, 52)
     _style_button(close, true)
-    close.pressed.connect(func():
-        if popup_layer != null:
-            popup_layer.queue_free()
-            popup_layer = null
-    )
+    close.pressed.connect(_close_popup)
     popup_layer.add_child(close)
+
+func _close_popup() -> void:
+    if popup_layer != null:
+        popup_layer.queue_free()
+        popup_layer = null
 
 func _show_popup(title_text: String, body_text: String) -> void:
     _ensure_popup()
@@ -267,10 +330,5 @@ func _show_popup(title_text: String, body_text: String) -> void:
     close.position = Vector2(130, 218)
     close.size = Vector2(204, 50)
     _style_button(close, true)
-    close.pressed.connect(func():
-        if popup_layer != null:
-            popup_layer.queue_free()
-            popup_layer = null
-    )
+    close.pressed.connect(_close_popup)
     panel.add_child(close)
-
