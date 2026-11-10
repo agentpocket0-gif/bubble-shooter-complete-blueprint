@@ -61,25 +61,6 @@ jobs:
         run: godot --headless --path godot_project --script res://tests/test_gameplay.gd
 
 
-      - name: Capture full app-flow screens and run visual integrity checks
-        run: |
-          set -euo pipefail
-          mkdir -p qa_proof
-          export QA_OUTPUT_DIR="$GITHUB_WORKSPACE/qa_proof"
-          xvfb-run -a -s "-screen 0 1080x1920x24" godot --path godot_project --script res://tests/qa_capture.gd
-          python3 tools/replica_vision_qa.py
-
-      - name: Upload screen-flow screenshots and visual QA report
-        uses: actions/upload-artifact@v4
-        with:
-          name: rebuild-screen-flow-visual-qa
-          path: |
-            qa_proof/*.png
-            qa_proof/*.md
-            qa_proof/*.json
-          if-no-files-found: error
-          retention-days: 14
-
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
@@ -146,6 +127,25 @@ jobs:
         with:
           name: BubbleShooterClassicBlast-rebuild-debug-apk
           path: out/BubbleShooterClassicBlast-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Capture full app-flow screens and run visual integrity checks
+        run: |
+          set -euo pipefail
+          mkdir -p qa_proof
+          export QA_OUTPUT_DIR="$GITHUB_WORKSPACE/qa_proof"
+          timeout --signal=TERM --kill-after=15s 240s xvfb-run -a -s "-screen 0 1080x1920x24" godot --path godot_project --script res://tests/qa_capture.gd
+          python3 tools/replica_vision_qa.py
+
+      - name: Upload screen-flow screenshots and visual QA report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebuild-screen-flow-visual-qa
+          path: |
+            qa_proof/*.png
+            qa_proof/*.md
+            qa_proof/*.json
           if-no-files-found: error
           retention-days: 14
 
