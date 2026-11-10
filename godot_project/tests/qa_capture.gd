@@ -1,11 +1,17 @@
 extends SceneTree
 
 const SEQUENCE := [
-    ["01_splash_screen.png", "res://scenes/Splash.tscn", ""],
-    ["02_saga_world_map.png", "res://scenes/SagaMap.tscn", ""],
-    ["03_settings_popup.png", "res://scenes/SagaMap.tscn", "settings"],
-    ["04_booster_shop_popup.png", "res://scenes/SagaMap.tscn", "store"],
-    ["05_level_1_gameplay.png", "res://scenes/Gameplay.tscn", ""]
+    ["01_splash_screen.png", "res://scenes/Splash.tscn", 0.18, ""],
+    ["02_intro_screen.png", "res://scenes/Intro.tscn", 0.0, ""],
+    ["03_loading_screen.png", "res://scenes/Loading.tscn", 0.0, ""],
+    ["04_mode_select_screen.png", "res://scenes/ModeSelect.tscn", 0.08, ""],
+    ["05_saga_world_map.png", "res://scenes/SagaMap.tscn", 0.08, ""],
+    ["06_settings_popup.png", "res://scenes/SagaMap.tscn", 0.08, "settings"],
+    ["07_booster_shop_popup.png", "res://scenes/SagaMap.tscn", 0.08, "store"],
+    ["08_daily_spin_popup.png", "res://scenes/SagaMap.tscn", 0.08, "spin"],
+    ["09_piggy_bank_popup.png", "res://scenes/SagaMap.tscn", 0.08, "piggy"],
+    ["10_events_popup.png", "res://scenes/SagaMap.tscn", 0.08, "events"],
+    ["11_level_1_gameplay.png", "res://scenes/Gameplay.tscn", 0.08, ""]
 ]
 
 func _initialize() -> void:
@@ -16,40 +22,95 @@ func _capture() -> void:
     if output_dir.is_empty():
         output_dir = ProjectSettings.globalize_path("res://../qa_proof")
     DirAccess.make_dir_recursive_absolute(output_dir)
+
     var root_window := get_root()
     root_window.size = Vector2i(1080, 1920)
     var current: Node = null
+
     for item in SEQUENCE:
-        if current != null:
-            current.queue_free()
+        current = await _replace_scene(root_window, current, str(item[1]))
+        var delay := float(item[2])
+        if delay > 0.0:
+            await create_timer(delay).timeout
+        var action := str(item[3])
+        if not action.is_empty():
+            match action:
+                "settings":
+                    current.call("qa_open_settings")
+                "store":
+                    current.call("qa_open_store")
+                "spin":
+                    current.call("qa_open_spin")
+                "piggy":
+                    current.call("qa_open_piggy")
+                "events":
+                    current.call("qa_open_events")
             await process_frame
-        current = load(item[1]).instantiate()
-        root_window.add_child(current)
-        await process_frame
-        await create_timer(0.35).timeout
-        if item[2] == "settings":
-            current.call("qa_open_settings")
-        elif item[2] == "store":
-            current.call("qa_open_store")
-        await _save_frame(output_dir.path_join(item[0]))
-    if current != null:
-        current.queue_free()
-        await process_frame
-    current = load("res://scenes/Gameplay.tscn").instantiate()
-    root_window.add_child(current)
-    await process_frame
-    await create_timer(0.4).timeout
+        await _save_frame(output_dir.path_join(str(item[0])))
+
+    current = await _replace_scene(root_window, current, "res://scenes/Gameplay.tscn")
+    await create_timer(0.12).timeout
     current.call("qa_set_stage", "aim")
-    await _save_frame(output_dir.path_join("06_level_1_aim_preview.png"))
+    await _save_frame(output_dir.path_join("12_level_1_aim_preview.png"))
+
     current.call("qa_set_stage", "shoot")
-    await _save_frame(output_dir.path_join("07_projectile_shot.png"))
+    await _save_frame(output_dir.path_join("13_projectile_shot.png"))
+
     current.call("qa_set_stage", "booster")
     current.call("qa_set_stage", "pop")
-    await _save_frame(output_dir.path_join("08_cluster_pop_effect.png"))
-    current.call("qa_show_result")
-    await _save_frame(output_dir.path_join("09_level_win_result_popup.png"))
-    print("Captured nine full-HD QA screenshots in ", output_dir)
+    await _save_frame(output_dir.path_join("14_booster_and_pop_effects.png"))
+
+    current.call("_show_pause")
+    await _save_frame(output_dir.path_join("15_pause_overlay.png"))
+
+    current = await _replace_scene(root_window, current, "res://scenes/Result.tscn")
+    GameState.pending_result = {
+        "won": true,
+        "level": 1,
+        "mode": "classic",
+        "score": 7420,
+        "stars": 3,
+        "reward": 140,
+        "loss_reason": ""
+    }
+    current.queue_free()
+    await process_frame
+    current = load("res://scenes/Result.tscn").instantiate()
+    root_window.add_child(current)
+    await process_frame
+    await _save_frame(output_dir.path_join("16_level_win_result.png"))
+
+    current.queue_free()
+    await process_frame
+    GameState.pending_result = {
+        "won": false,
+        "level": 1,
+        "mode": "classic",
+        "score": 1180,
+        "stars": 0,
+        "reward": 0,
+        "loss_reason": "Out of shots"
+    }
+    current = load("res://scenes/Result.tscn").instantiate()
+    root_window.add_child(current)
+    await process_frame
+    await _save_frame(output_dir.path_join("17_level_lose_result.png"))
+
+    print("Captured 17 full-HD app-flow screenshots in ", output_dir)
     quit(0)
+
+func _replace_scene(root_window: Window, current: Node, scene_path: String) -> Node:
+    if current != null and is_instance_valid(current):
+        current.queue_free()
+        await process_frame
+    var packed := load(scene_path) as PackedScene
+    if packed == null:
+        push_error("Unable to load QA scene: " + scene_path)
+        return null
+    var instance := packed.instantiate()
+    root_window.add_child(instance)
+    await process_frame
+    return instance
 
 func _save_frame(path: String) -> void:
     await process_frame
