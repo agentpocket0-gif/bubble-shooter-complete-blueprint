@@ -123,7 +123,7 @@ func _capture_result(root_window: Window, current: Node, payload: Dictionary, pa
     if packed == null:
         push_error("Cannot load result scene during visual capture.")
         return null
-    var instance := packed.instantiate()
+    var instance: Node = packed.instantiate()
     root_window.add_child(instance)
     await process_frame
     await _save_frame(path)
@@ -137,7 +137,7 @@ func _replace_scene(root_window: Window, current: Node, scene_path: String) -> N
     if packed == null:
         push_error("Unable to load QA scene: " + scene_path)
         return null
-    var instance := packed.instantiate()
+    var instance: Node = packed.instantiate()
     root_window.add_child(instance)
     await process_frame
     return instance
